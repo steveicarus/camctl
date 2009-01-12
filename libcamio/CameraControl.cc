@@ -62,6 +62,12 @@ void CameraControl::camera_inventory(void)
 {
       load_usb_map();
 
+      while (! camera_list.empty()) {
+	    CameraControl*cur = camera_list.front();
+	    camera_list.pop_front();
+	    delete cur;
+      }
+
       MacICACameraControl::camera_inventory();
 }
 
