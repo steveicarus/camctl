@@ -1,6 +1,7 @@
 
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
+# include  <QFileDialog>
 # include  <CameraControl.h>
 # include  <iostream>
 
@@ -18,6 +19,10 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.grab_check_box,
 	      SIGNAL(stateChanged(int)),
 	      SLOT(grab_camera_slot_(int)));
+
+      connect(ui.select_logfile_button,
+	      SIGNAL(clicked()),
+	      SLOT(select_logfile_slot_()));
 }
 
 CamtoolMain::~CamtoolMain()
@@ -75,4 +80,17 @@ void CamtoolMain::grab_camera_slot_(int state)
 	    ui.rescan_button->setEnabled(true);
 	    ui.camera_list_box->setEnabled(true);
       }
+}
+
+void CamtoolMain::select_logfile_slot_(void)
+{
+      QString filename = QFileDialog::getSaveFileName(this, tr("Log File"));
+      if (debug_.is_open())
+	    debug_.close();
+
+      ui.logfile_path->setText(filename);
+
+      debug_.open(filename.toAscii());
+      debug_ << "Open log file " << filename.toAscii().data() << endl;
+      debug_ << flush;
 }
