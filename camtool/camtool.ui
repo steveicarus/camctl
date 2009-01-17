@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>515</width>
-    <height>384</height>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -249,6 +249,16 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QLineEdit" name="dump_generic_entry" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="dump_generic_button" >
+               <property name="text" >
+                <string>...generic...</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -281,6 +291,17 @@
          </spacer>
         </item>
        </layout>
+       <zorder>log_enable_flag</zorder>
+       <zorder>select_logfile_button</zorder>
+       <zorder>pushButton_2</zorder>
+       <zorder>pushButton_3</zorder>
+       <zorder>buttonBox</zorder>
+       <zorder>logfile_path</zorder>
+       <zorder>groupBox_2</zorder>
+       <zorder>groupBox</zorder>
+       <zorder>horizontalSpacer_2</zorder>
+       <zorder>verticalSpacer_4</zorder>
+       <zorder></zorder>
       </widget>
      </widget>
     </item>

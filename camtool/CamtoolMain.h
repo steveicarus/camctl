@@ -1,6 +1,7 @@
 
 # include  <qapplication.h>
 # include  "ui_camtool.h"
+# include  <CameraControl.h>
 # include  <fstream>
 
 class CamtoolMain : public QMainWindow {
@@ -12,6 +13,7 @@ class CamtoolMain : public QMainWindow {
       ~CamtoolMain();
 
     private:
+      CameraControl*selected_camera_;
       std::ofstream debug_;
 
       void detect_cameras_(void);
@@ -23,7 +25,10 @@ class CamtoolMain : public QMainWindow {
 
 	// Slots for the (debug) page
       void select_logfile_slot_(void);
-	//void debug_device_slot_(void);
+      void dump_device_slot_(void);
+      void dump_capabilities_slot_(void);
+      void dump_data_slot_(void);
+      void dump_generic_slot_(void);
 
     private:
       Ui::CamtoolMainWidget ui;

@@ -2,14 +2,17 @@
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
 # include  <QFileDialog>
-# include  <CameraControl.h>
 # include  <iostream>
 
 using namespace std;
 
+Q_DECLARE_METATYPE(CameraControl*)
+
 CamtoolMain::CamtoolMain(QWidget*parent)
 : QMainWindow(parent)
 {
+      selected_camera_ = 0;
+
       ui.setupUi(this);
       detect_cameras_();
 
@@ -23,6 +26,18 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.select_logfile_button,
 	      SIGNAL(clicked()),
 	      SLOT(select_logfile_slot_()));
+      connect(ui.dump_device_button,
+	      SIGNAL(clicked()),
+	      SLOT(dump_device_slot_()));
+      connect(ui.dump_capabilities_button,
+	      SIGNAL(clicked()),
+	      SLOT(dump_capabilities_slot_()));
+      connect(ui.dump_data_button,
+	      SIGNAL(clicked()),
+	      SLOT(dump_data_slot_()));
+      connect(ui.dump_generic_button,
+	      SIGNAL(clicked()),
+	      SLOT(dump_generic_slot_()));
 }
 
 CamtoolMain::~CamtoolMain()
@@ -54,7 +69,7 @@ void CamtoolMain::detect_cameras_(void)
 	    item_str.append(" ");
 	    item_str.append(item->camera_model().c_str());
 
-	    ui.camera_list_box->addItem(item_str);
+	    ui.camera_list_box->addItem(item_str, qVariantFromValue(item));
       }
 
       ui.camera_list_box->setEnabled(true);
@@ -74,11 +89,19 @@ void CamtoolMain::rescan_cameras_slot_(void)
 void CamtoolMain::grab_camera_slot_(int state)
 {
       if (state) {
+	    int cur_idx = ui.camera_list_box->currentIndex();
+	    if (cur_idx >= 0) {
+		  QVariant item_ptr = ui.camera_list_box->itemData(cur_idx);
+		  selected_camera_ = item_ptr.value<CameraControl*>();
+	    } else {
+		  selected_camera_ = 0;
+	    }
 	    ui.rescan_button->setEnabled(false);
 	    ui.camera_list_box->setEnabled(false);
       } else {
 	    ui.rescan_button->setEnabled(true);
 	    ui.camera_list_box->setEnabled(true);
+	    selected_camera_ = 0;
       }
 }
 
@@ -93,4 +116,37 @@ void CamtoolMain::select_logfile_slot_(void)
       debug_.open(filename.toAscii());
       debug_ << "Open log file " << filename.toAscii().data() << endl;
       debug_ << flush;
+}
+
+void CamtoolMain::dump_device_slot_(void)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->debug_dump(debug_, "device");
+      debug_ << flush;
+}
+
+void CamtoolMain::dump_capabilities_slot_(void)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->debug_dump(debug_, "capabilities");
+      debug_ << flush;
+}
+
+void CamtoolMain::dump_data_slot_(void)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->debug_dump(debug_, "data");
+      debug_ << flush;
+}
+
+void CamtoolMain::dump_generic_slot_(void)
+{
+      if (selected_camera_ == 0)
+	    return;
 }
