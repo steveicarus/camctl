@@ -82,12 +82,14 @@ void MacICACameraControl::camera_inventory(void)
       load_usb_map();
 
 	// Get the list of all the ICA devices.
-      ICAGetDeviceListPB dev_list_pb = { };
+      ICAGetDeviceListPB dev_list_pb;
+      memset(&dev_list_pb, 0, sizeof dev_list_pb);
       ICAGetDeviceList(&dev_list_pb, 0);
       ICAObject dev_list = dev_list_pb.object;
 
 	// Count the devices...
-      ICAGetChildCountPB count_pb = { };
+      ICAGetChildCountPB count_pb;
+      memset(&count_pb, 0, sizeof count_pb);
       count_pb.object = dev_list;
       OSErr err = ICAGetChildCount(&count_pb, NULL);
       assert(err == noErr);
@@ -109,7 +111,8 @@ void MacICACameraControl::camera_inventory(void)
 
 		  ICAObject obj = child_pb.childObject;
 		  CFDictionaryRef dev_dict;
-		  ICACopyObjectPropertyDictionaryPB dev_dict_pb = { };
+		  ICACopyObjectPropertyDictionaryPB dev_dict_pb;
+		  memset(&dev_dict_pb, 0, sizeof(dev_dict_pb));
 		  dev_dict_pb.object = obj;
 		  dev_dict_pb.theDict = &dev_dict;
 		  ICACopyObjectPropertyDictionary(&dev_dict_pb, 0);

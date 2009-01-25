@@ -41,7 +41,7 @@ void MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataSize = buf_len;
       msg.message.dataType = kICATypeData;
 
-      ICAError err = ICAObjectSendMessage(&msg, 0);
+      /* ICAError err =*/ ICAObjectSendMessage(&msg, 0);
 }
 
 uint16_t MacPTPCameraControl::ptp_get_property_u16_(unsigned prop_code,

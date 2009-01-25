@@ -116,7 +116,7 @@ const list<CameraControl::file_key_t>&CameraControl::image_list()
       return image_list_;
 }
 
-void CameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
+void CameraControl::get_image_data(long, char*&buf, size_t&buf_len)
 {
       buf = 0;
       buf_len = 0;
@@ -128,10 +128,12 @@ void CameraControl::debug_dump(std::ostream&out, const std::string&detail) const
       out << "CameraControl::debug_dump(" << detail << ")" << endl;
 }
 
-int CameraControl::debug_property_get(unsigned prop, unsigned dtype, unsigned long&value)
+int CameraControl::debug_property_get(unsigned, unsigned, unsigned long&)
 {
+      return -1;
 }
 
-int CameraControl::debug_property_set(unsigned prop, unsigned dtype, unsigned long value)
+int CameraControl::debug_property_set(unsigned, unsigned, unsigned long)
 {
+      return -1;
 }

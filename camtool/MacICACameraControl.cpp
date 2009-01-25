@@ -62,7 +62,8 @@ MacICACameraControl::MacICACameraControl(ICAObject dev)
 {
       dev_ = dev;
 
-      ICACopyObjectPropertyDictionaryPB dev_dict_pb = { };
+      ICACopyObjectPropertyDictionaryPB dev_dict_pb ;
+      memset(&dev_dict_pb, 0, sizeof dev_dict_pb);
       dev_dict_pb.object = dev_;
       dev_dict_pb.theDict = &dev_dict_;
       ICACopyObjectPropertyDictionary(&dev_dict_pb, 0);
@@ -96,17 +97,21 @@ string MacICACameraControl::camera_model(void) const
 
 int MacICACameraControl::open_session(void)
 {
-      ICAOpenSessionPB pb = { };
+      ICAOpenSessionPB pb;
+      memset(&pb, 0, sizeof pb);
       pb.deviceObject = dev_;
       ICAOpenSession(&pb, 0);
       session_id_ = pb.sessionID;
+      return 0;
 }
 
 int MacICACameraControl::close_session(void)
 {
-      ICACloseSessionPB pb = { };
+      ICACloseSessionPB pb;
+      memset(&pb, 0, sizeof pb);
       pb.sessionID = session_id_;
       ICACloseSession(&pb, 0);
+      return 0;
 }
 
 float MacICACameraControl::battery_level(void) const
@@ -125,7 +130,8 @@ string MacICACameraControl::exposure_program_mode(void) const
 
 void MacICACameraControl::capture_image(void)
 {
-      ICAObjectSendMessagePB send_pb = { };
+      ICAObjectSendMessagePB send_pb;
+      memset(&send_pb, 0, sizeof send_pb);
       send_pb.object = dev_;
       send_pb.message.messageType = kICAMessageCameraCaptureNewImage;
       send_pb.message.dataPtr = 0;
@@ -176,7 +182,8 @@ void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
       ICAObject image;
       CFNumberGetValue(icao, kCFNumberLongType, &image);
 
-      ICAGetPropertyByTypePB image_data_pb = { };
+      ICAGetPropertyByTypePB image_data_pb;
+      memset(&image_data_pb, 0, sizeof image_data_pb);
       image_data_pb.object = image;
       image_data_pb.propertyType = kICAPropertyImageData;
       ICAGetPropertyByType(&image_data_pb, 0);
@@ -185,7 +192,8 @@ void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
       buf = new char[buf_len];
       assert(buf);
 
-      ICAGetPropertyDataPB data_pb = { };
+      ICAGetPropertyDataPB data_pb;
+      memset(&data_pb, 0, sizeof data_pb);
       data_pb.property = image_data_pb.property;
       data_pb.startByte = 0;
       data_pb.requestedSize = buf_len;
