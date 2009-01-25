@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
-    <height>396</height>
+    <width>537</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -136,35 +136,103 @@
        <attribute name="title" >
         <string>Camera Settings</string>
        </attribute>
-       <widget class="QLabel" name="label" >
-        <property name="geometry" >
-         <rect>
-          <x>30</x>
-          <y>20</y>
-          <width>96</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Exposure Mode</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="comboBox" >
-        <property name="geometry" >
-         <rect>
-          <x>160</x>
-          <y>30</y>
-          <width>111</width>
-          <height>26</height>
-         </rect>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_5" >
+        <item>
+         <widget class="QToolBox" name="toolBox" >
+          <property name="currentIndex" >
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="page" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>483</width>
+             <height>235</height>
+            </rect>
+           </property>
+           <attribute name="label" >
+            <string>Exposure</string>
+           </attribute>
+           <layout class="QFormLayout" name="formLayout" >
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label" >
+              <property name="text" >
+               <string>ISO</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QComboBox" name="set_iso_box" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_3" >
+              <property name="text" >
+               <string>Aperture (f-number)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="QComboBox" name="set_aperture_box" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_4" >
+              <property name="text" >
+               <string>Exposure time</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QDoubleSpinBox" name="set_exposure_time_box" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="suffix" >
+               <string>ms</string>
+              </property>
+              <property name="decimals" >
+               <number>3</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_2" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>100</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <attribute name="label" >
+            <string>Other</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_3" >
        <attribute name="title" >
         <string>Actions</string>
        </attribute>
-       <widget class="QPushButton" name="pushButton" >
+       <widget class="QPushButton" name="action_capture_button" >
         <property name="geometry" >
          <rect>
           <x>30</x>
@@ -263,17 +331,128 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_2" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
+           <widget class="QGroupBox" name="groupBox_2" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>138</width>
-              <height>17</height>
-             </size>
+            <property name="title" >
+             <string>PTP Property</string>
             </property>
-           </spacer>
+            <layout class="QVBoxLayout" name="verticalLayout_6" >
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_4" >
+               <item>
+                <widget class="QPushButton" name="debug_ptp_get_button" >
+                 <property name="text" >
+                  <string>get</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="debug_ptp_set_button" >
+                 <property name="text" >
+                  <string>set</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_5" >
+               <item>
+                <widget class="QLineEdit" name="debug_ptp_code_entry" >
+                 <property name="sizePolicy" >
+                  <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="toolTip" >
+                  <string>Code for property to get/set.</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="debug_ptp_type_box" >
+                 <property name="toolTip" >
+                  <string>Type of property to get/set.</string>
+                 </property>
+                 <item>
+                  <property name="text" >
+                   <string>INT8</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>UINT8</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>INT16</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>UINT16</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>INT32</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>UINT32</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>INT64</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>UINT64</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>INT128</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text" >
+                   <string>UINT128</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="debug_ptp_value_entry" >
+               <property name="toolTip" >
+                <string>Literal value of the property.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="debug_ptp_rc_entry" >
+               <property name="toolTip" >
+                <string>Return code from get/set.</string>
+               </property>
+               <property name="readOnly" >
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </item>
@@ -291,15 +470,6 @@
          </spacer>
         </item>
        </layout>
-       <zorder>log_enable_flag</zorder>
-       <zorder>select_logfile_button</zorder>
-       <zorder>pushButton_2</zorder>
-       <zorder>pushButton_3</zorder>
-       <zorder>buttonBox</zorder>
-       <zorder>logfile_path</zorder>
-       <zorder>groupBox_2</zorder>
-       <zorder>groupBox</zorder>
-       <zorder>horizontalSpacer_2</zorder>
        <zorder>verticalSpacer_4</zorder>
        <zorder></zorder>
       </widget>

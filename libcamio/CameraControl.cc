@@ -19,49 +19,13 @@
 
 # include  "CameraControl.h"
 # include  "MacICACameraControl.h"
-# include  <map>
 # include  <iostream>
 # include  <iomanip>
-# include  <sstream>
 
 using namespace std;
 
-typedef map <CameraControl::usb_id_t,CameraControl::usb_name_t>::iterator usb_map_ref;
-static map <CameraControl::usb_id_t,CameraControl::usb_name_t> usb_map;
-
-static void load_usb_map(void)
-{
-      usb_map[CameraControl::usb_id_t(0x04b0,0x0412)] = CameraControl::usb_name_t("Nikon","D80");
-}
-
-const CameraControl::usb_name_t& CameraControl::id_to_name(const CameraControl::usb_id_t&id)
-{
-      usb_map_ref cur = usb_map.find(id);
-
-      if (cur != usb_map.end())
-	    return cur->second;
-
-      string vendor_str;
-      string device_str;
-
-      { ostringstream tmp;
-	tmp << "Vendor(" << setw(4) << hex << id.first << ")" << ends;
-	vendor_str = tmp.str();
-      }
-
-      { ostringstream tmp;
-	tmp << "Device(" << setw(4) << hex << id.second << ")" << ends;
-	device_str = tmp.str();
-      }
-
-      usb_map[id] = usb_name_t(vendor_str,device_str);
-      return usb_map[id];
-}
-
 void CameraControl::camera_inventory(void)
 {
-      load_usb_map();
-
       while (! camera_list.empty()) {
 	    CameraControl*cur = camera_list.front();
 	    camera_list.pop_front();
@@ -91,7 +55,17 @@ string CameraControl::camera_model(void) const
       return "NONE";
 }
 
-int CameraControl::battery_level(void) const
+int CameraControl::open_session(void)
+{
+      return 0;
+}
+
+int CameraControl::close_session(void)
+{
+      return 0;
+}
+
+float CameraControl::battery_level(void) const
 {
       return -1;
 }
@@ -99,6 +73,40 @@ int CameraControl::battery_level(void) const
 std::string CameraControl::exposure_program_mode(void) const
 {
       return "";
+}
+
+void CameraControl::get_exposure_time(int32_t&min, int32_t&max, int32_t&step)
+{
+      min  = 0;
+      max  = 0;
+      step = 0;
+}
+
+int32_t CameraControl::get_exposure_time()
+{
+      return -1;
+}
+
+void CameraControl::set_exposure_time(int32_t)
+{
+}
+
+int CameraControl::get_aperture()
+{
+      return -1;
+}
+
+int CameraControl::get_exposure_index()
+{
+      return -1;
+}
+
+void CameraControl::set_aperture(int)
+{
+}
+
+void CameraControl::set_exposure_index(int)
+{
 }
 
 const list<CameraControl::file_key_t>&CameraControl::image_list()
@@ -118,4 +126,12 @@ void CameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
 void CameraControl::debug_dump(std::ostream&out, const std::string&detail) const
 {
       out << "CameraControl::debug_dump(" << detail << ")" << endl;
+}
+
+int CameraControl::debug_property_get(unsigned prop, unsigned dtype, unsigned long&value)
+{
+}
+
+int CameraControl::debug_property_set(unsigned prop, unsigned dtype, unsigned long value)
+{
 }

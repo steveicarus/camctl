@@ -23,6 +23,7 @@
 # include  <string>
 # include  <utility>
 # include  <ostream>
+# include  <inttypes.h>
 
 class CameraControl {
 
@@ -57,10 +58,30 @@ class CameraControl {
       virtual std::string camera_make(void) const;
       virtual std::string camera_model(void) const;
 
+      virtual int open_session(void);
+      virtual int close_session(void);
+
 	// Return the battery level 0-100, or -1 if unavailable or N/A
-      virtual int battery_level(void) const;
+      virtual float battery_level(void) const;
 	// Program mode, or "" if N/A
       virtual std::string exposure_program_mode(void) const;
+
+	// The exposure time is the time that the sensor is exposed to
+	// light during a capture. The units used by this method are
+	// micro-seconds, which the derived class converts to whatever
+	// the device suports. The exposure setting has an available
+	// range, which include a minimum value, a maximum value, and
+	// a set increment that the device can support. If step==0,
+	// then the exposure time cannot be controlled by the user.
+      virtual void    get_exposure_time(int32_t&min,int32_t&max,int32_t&step);
+      virtual int32_t get_exposure_time();
+      virtual void    set_exposure_time(int32_t);
+
+      virtual int    get_aperture();       // aka f-number
+      virtual int    get_exposure_index(); // aka ISO
+
+      virtual void set_aperture(int);
+      virtual void set_exposure_index(int);
 
     public: // Camera control methods.
 
@@ -89,17 +110,12 @@ class CameraControl {
 	// Debug dump informatin about this camera.
       virtual void debug_dump(std::ostream&, const std::string&) const;
 
-    public: // These are methods that are intended for use by the
-	    // derived class. They help interface with the base class,
-	    // or with the CameraControl infrastructure in general.
+      virtual int debug_property_get(unsigned prop, unsigned dtype,
+				     unsigned long&value);
+      virtual int debug_property_set(unsigned prop, unsigned dtype,
+				     unsigned long value);
 
-	// This is a convenience function to map a USB vendor/device
-	// number pair to a Vendor/Device string pair.
-      typedef std::pair<uint16_t,uint16_t> usb_id_t;
-      typedef std::pair<std::string,std::string> usb_name_t;
     protected:
-      static const usb_name_t&id_to_name(const usb_id_t&id);
-
 	// The derived class implements this method to fill in the
 	// image file list. The method is passed a reference to the
 	// list to fill with the files of the image. The CameraControl

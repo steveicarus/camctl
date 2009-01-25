@@ -4,7 +4,7 @@ FRAMEWORKS_FLAGS=-F/System/Library/Frameworks/Carbon.framework/Frameworks
 
 RANLIB = ranlib
 
-L = CameraControl.o MacICACameraControl.o MacICA_inventory.o MacICA_debug.o
+L = CameraControl.o MacICACameraControl.o MacICA_inventory.o MacPTPCameraControl.o MacICA_debug.o
 libcamio.a: $L
 	@rm -f libcamio.a
 	ar cqv libcamio.a $L
@@ -23,11 +23,14 @@ CameraControl.o: CameraControl.cc CameraControl.h
 	$(CXX) $(FRAMEWORKS_FLAGS) -c  CameraControl.cc
 
 MacICACameraControl.o: MacICACameraControl.cc MacICACameraControl.h CameraControl.h
-	$(CXX) $(FRAMEWORKS_FLAGS) -c  MacICACameraControl.cc
+	$(CXX) $(FRAMEWORKS_FLAGS) -Wno-deprecated -c  MacICACameraControl.cc
 
 MacICA_inventory.o: MacICA_inventory.cc MacICACameraControl.h CameraControl.h
-	$(CXX) $(FRAMEWORKS_FLAGS) -c  MacICA_inventory.cc
+	$(CXX) $(FRAMEWORKS_FLAGS) -Wno-deprecated -c  MacICA_inventory.cc
+
+MacPTPCameraControl.o: MacPTPCameraControl.cc MacICACameraControl.h CameraControl.h
+	$(CXX) $(FRAMEWORKS_FLAGS) -c  MacPTPCameraControl.cc
 
 MacICA_debug.o: MacICA_debug.cc MacICACameraControl.h CameraControl.h
-	$(CXX) $(FRAMEWORKS_FLAGS) -c  MacICA_debug.cc
+	$(CXX) $(FRAMEWORKS_FLAGS) -Wno-deprecated -c  MacICA_debug.cc
 

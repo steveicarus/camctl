@@ -25,7 +25,7 @@
 
 using namespace std;
 
-static long get_dict_long_value(CFDictionaryRef dict, const char*key)
+long MacICACameraControl::get_dict_long_value(CFDictionaryRef dict, const char*key)
 {
       CFStringRef key_ref = CFStringCreateWithCString(0, key, kCFStringEncodingASCII);
       CFNumberRef ref = (CFNumberRef)CFDictionaryGetValue(dict, key_ref);
@@ -37,7 +37,7 @@ static long get_dict_long_value(CFDictionaryRef dict, const char*key)
       return val;
 }
 
-static string get_dict_string_value(CFDictionaryRef dict, const char*key)
+string MacICACameraControl::get_dict_string_value(CFDictionaryRef dict, const char*key)
 {
       CFStringRef key_ref = CFStringCreateWithCString(0, key, kCFStringEncodingASCII);
       CFStringRef ref = (CFStringRef)CFDictionaryGetValue(dict, key_ref);
@@ -51,6 +51,11 @@ static string get_dict_string_value(CFDictionaryRef dict, const char*key)
       delete[]buf;
 
       return val;
+}
+
+long MacICACameraControl::get_dev_prop_long_value_(const char*key)
+{
+      return get_dict_long_value(dev_prop_dict_, key);
 }
 
 MacICACameraControl::MacICACameraControl(ICAObject dev)
@@ -89,7 +94,22 @@ string MacICACameraControl::camera_model(void) const
       return make_model_.second;
 }
 
-int MacICACameraControl::battery_level(void) const
+int MacICACameraControl::open_session(void)
+{
+      ICAOpenSessionPB pb = { };
+      pb.deviceObject = dev_;
+      ICAOpenSession(&pb, 0);
+      session_id_ = pb.sessionID;
+}
+
+int MacICACameraControl::close_session(void)
+{
+      ICACloseSessionPB pb = { };
+      pb.sessionID = session_id_;
+      ICACloseSession(&pb, 0);
+}
+
+float MacICACameraControl::battery_level(void) const
 {
       assert(dev_prop_dict_);
       long val = get_dict_long_value(dev_prop_dict_, "ICADevicePropBatteryLevel");
@@ -101,6 +121,7 @@ string MacICACameraControl::exposure_program_mode(void) const
       assert(dev_prop_dict_);
       return get_dict_string_value(dev_prop_dict_, "ICADevicePropExposureProgramMode");
 }
+
 
 void MacICACameraControl::capture_image(void)
 {

@@ -21,9 +21,56 @@
 # include  "MacICACameraControl.h"
 # include  <ImageCapture/ImageCapture.h>
 # include  <iostream>
+# include  <iomanip>
+# include  <sstream>
 # include  <assert.h>
 
 using namespace std;
+
+map<MacICACameraControl::usb_id_t,MacICACameraControl::dev_name_t> MacICACameraControl::usb_map_names;
+
+map<MacICACameraControl::usb_id_t,MacICACameraControl::dev_class_t> MacICACameraControl::usb_map_classes;
+
+void MacICACameraControl::load_usb_map(void)
+{
+      usb_map_names[usb_id_t(0x04b0,0x0412)] = dev_name_t("Nikon","D80");
+      usb_map_classes[usb_id_t(0x04b0,0x0412)] = MacPTP;
+}
+
+const MacICACameraControl::dev_name_t& MacICACameraControl::id_to_name(const MacICACameraControl::usb_id_t&id)
+{
+      map<usb_id_t,dev_name_t>::iterator cur = usb_map_names.find(id);
+
+      if (cur != usb_map_names.end())
+	    return cur->second;
+
+      string vendor_str;
+      string device_str;
+
+      { ostringstream tmp;
+	tmp << "Vendor(" << setw(4) << hex << id.first << ")" << ends;
+	vendor_str = tmp.str();
+      }
+
+      { ostringstream tmp;
+	tmp << "Device(" << setw(4) << hex << id.second << ")" << ends;
+	device_str = tmp.str();
+      }
+
+      usb_map_names[id] = dev_name_t(vendor_str,device_str);
+      return usb_map_names[id];
+}
+
+const MacICACameraControl::dev_class_t MacICACameraControl::id_to_class(const MacICACameraControl::usb_id_t&id)
+{
+      map<usb_id_t,dev_class_t>::iterator cur = usb_map_classes.find(id);
+
+      if (cur != usb_map_classes.end())
+	    return cur->second;
+
+      usb_map_classes[id] = MacGeneric;
+      return usb_map_classes[id];
+}
 
 /*
  * The camera_inventory function gets the device list and scans it
@@ -32,6 +79,8 @@ using namespace std;
  */
 void MacICACameraControl::camera_inventory(void)
 {
+      load_usb_map();
+
 	// Get the list of all the ICA devices.
       ICAGetDeviceListPB dev_list_pb = { };
       ICAGetDeviceList(&dev_list_pb, 0);
@@ -58,8 +107,26 @@ void MacICACameraControl::camera_inventory(void)
 	    if (child_pb.childInfo.objectType == kICADevice
 		&& child_pb.childInfo.objectSubtype == kICADeviceCamera) {
 
-		    // Definitely a device, and a camera at that.
-		  CameraControl*dev = new MacICACameraControl(child_pb.childObject);
+		  ICAObject obj = child_pb.childObject;
+		  CFDictionaryRef dev_dict;
+		  ICACopyObjectPropertyDictionaryPB dev_dict_pb = { };
+		  dev_dict_pb.object = obj;
+		  dev_dict_pb.theDict = &dev_dict;
+		  ICACopyObjectPropertyDictionary(&dev_dict_pb, 0);
+		  long idVendor  = get_dict_long_value(dev_dict, "idVendor");
+		  long idProduct = get_dict_long_value(dev_dict, "idProduct");
+
+		  CameraControl*dev = 0;
+		  switch (id_to_class(usb_id_t(idVendor,idProduct))) {
+
+		      case MacPTP:
+			dev = new MacPTPCameraControl(obj);
+			break;
+		      case MacGeneric:
+			dev = new MacICACameraControl(obj);
+			break;
+		  }
+
 		  CameraControl::camera_list.push_back(dev);
 
 	    } else {
