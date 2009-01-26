@@ -20,6 +20,7 @@
  */
 
 # include  <list>
+# include  <vector>
 # include  <string>
 # include  <utility>
 # include  <ostream>
@@ -58,6 +59,9 @@ class CameraControl {
       virtual std::string camera_make(void) const;
       virtual std::string camera_model(void) const;
 
+	// The open_session() method needs to be called to start a
+	// session with this camera. The various camera controls
+	// unless the session is opened. Close the session when done.
       virtual int open_session(void);
       virtual int close_session(void);
 
@@ -67,25 +71,22 @@ class CameraControl {
       virtual std::string exposure_program_mode(void) const;
 
 	// The exposure time is the time that the sensor is exposed to
-	// light during a capture. The units used by this method are
-	// micro-seconds, which the derived class converts to whatever
-	// the device suports. The exposure setting has an available
-	// range, which include a minimum value, a maximum value, and
-	// a set increment that the device can support. If step==0,
-	// then the exposure time cannot be controlled by the user.
-      virtual void    get_exposure_time(int32_t&min,int32_t&max,int32_t&step);
-      virtual int32_t get_exposure_time();
-      virtual void    set_exposure_time(int32_t);
-
-      virtual int    get_aperture();       // aka f-number
-      virtual int    get_exposure_index(); // aka ISO
-
-      virtual void set_aperture(int);
-      virtual void set_exposure_index(int);
+	// light during a capture. The device knows what settings it
+	// is capable of supporting, so first call the
+	// get_exposure_time_index with a values array. The derived
+	// class will fill in the array with display strings for the
+	// supported settings. The other set_ and
+	// set_exposure_time_index methods work with indices into that
+	// vector.
+      virtual void get_exposure_time_index(std::vector<std::string>&values);
+      virtual int  get_exposure_time_index();
+      virtual void set_exposure_time_index(int);
 
     public: // Camera control methods.
 
-	// Capture an image.
+	// Capture an image. This activates the shutter and captures
+	// the image using the current settings. The image is left on
+	// the camera.
       virtual void capture_image() =0;
 
     public: // Image file manipulation methods.
@@ -114,6 +115,8 @@ class CameraControl {
 				     unsigned long&value);
       virtual int debug_property_set(unsigned prop, unsigned dtype,
 				     unsigned long value);
+
+      virtual std::string debug_property_describe(unsigned prop);
 
     protected:
 	// The derived class implements this method to fill in the

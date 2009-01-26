@@ -75,37 +75,17 @@ std::string CameraControl::exposure_program_mode(void) const
       return "";
 }
 
-void CameraControl::get_exposure_time(int32_t&min, int32_t&max, int32_t&step)
+void CameraControl::get_exposure_time_index(vector<string>&values)
 {
-      min  = 0;
-      max  = 0;
-      step = 0;
+      values.clear();
 }
 
-int32_t CameraControl::get_exposure_time()
+int32_t CameraControl::get_exposure_time_index()
 {
       return -1;
 }
 
-void CameraControl::set_exposure_time(int32_t)
-{
-}
-
-int CameraControl::get_aperture()
-{
-      return -1;
-}
-
-int CameraControl::get_exposure_index()
-{
-      return -1;
-}
-
-void CameraControl::set_aperture(int)
-{
-}
-
-void CameraControl::set_exposure_index(int)
+void CameraControl::set_exposure_time_index(int)
 {
 }
 
@@ -136,4 +116,9 @@ int CameraControl::debug_property_get(unsigned, unsigned, unsigned long&)
 int CameraControl::debug_property_set(unsigned, unsigned, unsigned long)
 {
       return -1;
+}
+
+string CameraControl::debug_property_describe(unsigned)
+{
+      return "N/A";
 }

@@ -30,7 +30,7 @@ class CamtoolMain : public QMainWindow {
       void grab_camera_slot_(int state);
 
 	// Slots for the Camera Settings page.
-      void set_exposure_time_slot_(double);
+      void set_exposure_time_slot_(int state);
 
 	// Slots for the Actions page
       void action_capture_slot_(void);
@@ -44,6 +44,7 @@ class CamtoolMain : public QMainWindow {
 
       void debug_ptp_set_slot_(void);
       void debug_ptp_get_slot_(void);
+      void debug_ptp_describe_slot_(void);
 
     private:
       Ui::CamtoolMainWidget ui;

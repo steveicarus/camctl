@@ -121,13 +121,6 @@ float MacICACameraControl::battery_level(void) const
       return val;
 }
 
-string MacICACameraControl::exposure_program_mode(void) const
-{
-      assert(dev_prop_dict_);
-      return get_dict_string_value(dev_prop_dict_, "ICADevicePropExposureProgramMode");
-}
-
-
 void MacICACameraControl::capture_image(void)
 {
       ICAObjectSendMessagePB send_pb;

@@ -191,21 +191,9 @@
              </widget>
             </item>
             <item row="2" column="1" >
-             <widget class="QDoubleSpinBox" name="set_exposure_time_box" >
+             <widget class="QComboBox" name="set_exposure_time_box" >
               <property name="enabled" >
                <bool>false</bool>
-              </property>
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix" >
-               <string>ms</string>
-              </property>
-              <property name="decimals" >
-               <number>3</number>
               </property>
              </widget>
             </item>
@@ -355,6 +343,13 @@
                 <widget class="QPushButton" name="debug_ptp_set_button" >
                  <property name="text" >
                   <string>set</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="debug_ptp_describe_button" >
+                 <property name="text" >
+                  <string>describe</string>
                  </property>
                 </widget>
                </item>

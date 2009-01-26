@@ -43,6 +43,11 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(stateChanged(int)),
 	      SLOT(grab_camera_slot_(int)));
 
+	// Settings
+      connect(ui.set_exposure_time_box,
+	      SIGNAL(currentIndexChanges(int)),
+	      SLOT(set_exposure_time_slot_(int)));
+
 	// Actions
       connect(ui.action_capture_button,
 	      SIGNAL(clicked()),
@@ -71,6 +76,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.debug_ptp_get_button,
 	      SIGNAL(clicked()),
 	      SLOT(debug_ptp_get_slot_()));
+      connect(ui.debug_ptp_describe_button,
+	      SIGNAL(clicked()),
+	      SLOT(debug_ptp_describe_slot_()));
 }
 
 CamtoolMain::~CamtoolMain()
@@ -149,12 +157,12 @@ void CamtoolMain::grab_camera_slot_(int state)
       }
 }
 
-void CamtoolMain::set_exposure_time_slot_(double exposure_time)
+void CamtoolMain::set_exposure_time_slot_(int index)
 {
       if (selected_camera_ == 0)
 	    return;
 
-      selected_camera_->set_exposure_time(exposure_time * 1000.0);
+      selected_camera_->set_exposure_time_index(index);
 }
 
 void CamtoolMain::action_capture_slot_(void)
@@ -258,5 +266,37 @@ void CamtoolMain::debug_ptp_set_slot_(void)
 
       QString rc_text;
       rc_text.setNum(rc, 16);
+      switch (rc) {
+	  case 0x2001:
+	    rc_text.append(" (OK)");
+	    break;
+	  case 0x2002:
+	    rc_text.append(" (General Error)");
+	    break;
+	  case 0x2003:
+	    rc_text.append(" (Session Not Open)");
+	    break;
+	  case 0x2005:
+	    rc_text.append(" (Operation Not Supported)");
+	    break;
+	  default:
+	    break;
+      }
+
       ui.debug_ptp_rc_entry->setText(rc_text);
+}
+
+void CamtoolMain::debug_ptp_describe_slot_(void)
+{
+      if (selected_camera_ == 0) {
+	    no_camera_selected_();
+	    return;
+      }
+
+      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
+
+      string desc = selected_camera_->debug_property_describe(prop_code);
+
+      debug_ << "**** Describe 0x" << hex << prop_code << " ****" << endl
+	     << dec << desc << endl;
 }

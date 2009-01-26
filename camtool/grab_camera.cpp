@@ -21,18 +21,22 @@
 # include  "CamtoolMain.h"
 # include  <QMessageBox>
 
+using namespace std;
+
 void CamtoolMain::grab_camera_(void)
 {
       selected_camera_->open_session();
 
-      int32_t ext_min, ext_max, ext_step, ext_cur;
-      selected_camera_->get_exposure_time(ext_min, ext_max, ext_step);
-      ext_cur = selected_camera_->get_exposure_time();
+      vector<string> exposure_time_enum;
+      selected_camera_->get_exposure_time_index(exposure_time_enum);
+      int ext_cur = selected_camera_->get_exposure_time_index();
 
-      ui.set_exposure_time_box->setRange(ext_min/1000.0, ext_max/1000.0);
-      ui.set_exposure_time_box->setSingleStep(ext_step/1000.0);
-      ui.set_exposure_time_box->setValue(selected_camera_->get_exposure_time()/1000.0);
-      ui.set_exposure_time_box->setEnabled(ext_step != 0);
+      ui.set_exposure_time_box->clear();
+      for (size_t idx = 0 ; idx < exposure_time_enum.size() ; idx += 1) {
+	    ui.set_exposure_time_box->addItem(exposure_time_enum[idx].c_str());
+      }
+      ui.set_exposure_time_box->setCurrentIndex(ext_cur);
+      ui.set_exposure_time_box->setEnabled(exposure_time_enum.size() > 0);
 }
 
 void CamtoolMain::ungrab_camera_(void)

@@ -50,7 +50,6 @@ class MacICACameraControl : public CameraControl {
 
       std::string camera_model(void) const;
       float battery_level(void) const;
-      std::string exposure_program_mode(void) const;
 
     public:
       void capture_image(void);
@@ -125,15 +124,9 @@ class MacPTPCameraControl  : public MacICACameraControl {
       ~MacPTPCameraControl();
 
     public:
-      virtual void    get_exposure_time(int32_t&min,int32_t&max,int32_t&step);
-      virtual int32_t get_exposure_time();
-      virtual void    set_exposure_time(int32_t);
-
-      virtual int    get_aperture();       // aka f-number
-      virtual int    get_exposure_index(); // aka ISO
-
-      virtual void set_aperture(int);
-      virtual void set_exposure_index(int);
+      virtual void get_exposure_time_index(std::vector<std::string>&values);
+      virtual int  get_exposure_time_index();
+      virtual void set_exposure_time_index(int);
 
     public:
 	// Debug aids
@@ -141,19 +134,13 @@ class MacPTPCameraControl  : public MacICACameraControl {
 				     unsigned long&value);
       virtual int debug_property_set(unsigned prop, unsigned dtype,
 				     unsigned long value);
+      virtual std::string debug_property_describe(unsigned prop);
 
     private:
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
       void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
       uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
       uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
-
-      enum {
-	    kPTPPassThruSend     = 0,
-	    kPTPPassThruReceive	= 1,
-	    kPTPPassThruNotUsed	= 2
-      };
-
 
 };
 
