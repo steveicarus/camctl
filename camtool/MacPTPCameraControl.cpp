@@ -615,7 +615,7 @@ void MacPTPCameraControl::set_fnumber_index(int use_index)
 {
       if (use_index < 0)
 	    return;
-      if (use_index <= fnumber_.get_enum_count())
+      if (use_index >= fnumber_.get_enum_count())
 	    use_index = 0;
 
       uint32_t rc;
@@ -653,7 +653,7 @@ void MacPTPCameraControl::set_iso_index(int use_index)
 {
       if (use_index < 0)
 	    return;
-      if (use_index <= iso_.get_enum_count())
+      if (use_index >= iso_.get_enum_count())
 	    use_index = 0;
 
       uint32_t rc;
