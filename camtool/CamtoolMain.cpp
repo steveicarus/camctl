@@ -45,13 +45,13 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 
 	// Settings
       connect(ui.set_aperture_box,
-	      SIGNAL(currentIndexChanges(int)),
+	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_iso_slot_(int)));
       connect(ui.set_iso_box,
-	      SIGNAL(currentIndexChanges(int)),
+	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_aperture_slot_(int)));
       connect(ui.set_exposure_time_box,
-	      SIGNAL(currentIndexChanges(int)),
+	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_exposure_time_slot_(int)));
 
 	// Actions
@@ -200,14 +200,14 @@ void CamtoolMain::action_capture_slot_(void)
 void CamtoolMain::select_logfile_slot_(void)
 {
       QString filename = QFileDialog::getSaveFileName(this, tr("Log File"));
-      if (debug_.is_open())
-	    debug_.close();
+      if (CameraControl::debug_log.is_open())
+	    CameraControl::debug_log.close();
 
       ui.logfile_path->setText(filename);
 
-      debug_.open(filename.toAscii());
-      debug_ << "Open log file " << filename.toAscii().data() << endl;
-      debug_ << flush;
+      CameraControl::debug_log.open(filename.toAscii());
+      CameraControl::debug_log << "Open log file " << filename.toAscii().data() << endl;
+      CameraControl::debug_log << flush;
 }
 
 void CamtoolMain::dump_device_slot_(void)
@@ -217,8 +217,8 @@ void CamtoolMain::dump_device_slot_(void)
 	    return;
       }
 
-      selected_camera_->debug_dump(debug_, "device");
-      debug_ << flush;
+      selected_camera_->debug_dump(CameraControl::debug_log, "device");
+      CameraControl::debug_log << flush;
 }
 
 void CamtoolMain::dump_capabilities_slot_(void)
@@ -228,8 +228,8 @@ void CamtoolMain::dump_capabilities_slot_(void)
 	    return;
       }
 
-      selected_camera_->debug_dump(debug_, "capabilities");
-      debug_ << flush;
+      selected_camera_->debug_dump(CameraControl::debug_log, "capabilities");
+      CameraControl::debug_log << flush;
 }
 
 void CamtoolMain::dump_data_slot_(void)
@@ -239,8 +239,8 @@ void CamtoolMain::dump_data_slot_(void)
 	    return;
       }
 
-      selected_camera_->debug_dump(debug_, "data");
-      debug_ << flush;
+      selected_camera_->debug_dump(CameraControl::debug_log, "data");
+      CameraControl::debug_log << flush;
 }
 
 void CamtoolMain::dump_generic_slot_(void)
@@ -319,6 +319,6 @@ void CamtoolMain::debug_ptp_describe_slot_(void)
 
       string desc = selected_camera_->debug_property_describe(prop_code);
 
-      debug_ << "**** Describe 0x" << hex << prop_code << " ****" << endl
-	     << dec << desc << endl;
+      CameraControl::debug_log << "**** Describe 0x" << hex << prop_code << " ****" << endl
+			       << dec << desc << endl;
 }

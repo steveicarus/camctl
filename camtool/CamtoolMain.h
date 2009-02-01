@@ -14,7 +14,6 @@ class CamtoolMain : public QMainWindow {
 
     private:
       CameraControl*selected_camera_;
-      std::ofstream debug_;
 
     private:
 	// Helper methods.

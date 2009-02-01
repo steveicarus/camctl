@@ -24,6 +24,7 @@
 # include  <string>
 # include  <utility>
 # include  <ostream>
+# include  <fstream>
 # include  <inttypes.h>
 
 class CameraControl {
@@ -40,6 +41,10 @@ class CameraControl {
 	// classes fill in this list. The user may use this list to
 	// display/select the camera to use.
       static std::list<CameraControl*>camera_list;
+
+	// Use this as a debug log for directing debug output from the
+	// entire library.
+      static std::ofstream debug_log;
 
     public:
       CameraControl();

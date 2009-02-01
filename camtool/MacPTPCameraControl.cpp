@@ -19,6 +19,7 @@
 
 # include  "MacICACameraControl.h"
 # include  <sstream>
+# include  <iomanip>
 # include  <stdlib.h>
 
 using namespace std;
@@ -119,6 +120,14 @@ void MacPTPCameraControl::ptp_set_property_u16_(unsigned prop_code,
       ptp_buf->data[0] = (val >> 0) & 0xff;
       ptp_buf->data[1] = (val >> 8) & 0xff;
 
+      debug_log << "ptp_set_property_u16_: commandCode=" << ptp_buf->commandCode
+		<< " params[0]=" << ptp_buf->params[0]
+		<< " dataSize=" << ptp_buf->dataSize
+		<< " data=" << hex
+		<< setw(2) << ptp_buf->data[0]
+		<< setw(2) << ptp_buf->data[1]
+		<< endl << flush;
+	    
       ica_send_message_(ptp_buf, sizeof buf);
       result_code = ptp_buf->resultCode;
 }
@@ -140,6 +149,16 @@ void MacPTPCameraControl::ptp_set_property_u32_(unsigned prop_code,
       ptp_buf->data[1] = (val >> 8) & 0xff;
       ptp_buf->data[2] = (val >>16) & 0xff;
       ptp_buf->data[3] = (val >>24) & 0xff;
+
+      debug_log << "ptp_set_property_u32_: commandCode=" << ptp_buf->commandCode
+		<< " params[0]=" << ptp_buf->params[0]
+		<< " dataSize=" << ptp_buf->dataSize
+		<< " data=" << hex
+		<< setw(2) << ptp_buf->data[0]
+		<< setw(2) << ptp_buf->data[1]
+		<< setw(2) << ptp_buf->data[2]
+		<< setw(2) << ptp_buf->data[3]
+		<< dec << endl << flush;
 
       ICAError err = ica_send_message_(ptp_buf, sizeof buf);
       result_code = ptp_buf->resultCode;
@@ -555,6 +574,7 @@ int MacPTPCameraControl::get_exposure_time_index()
 
 void MacPTPCameraControl::set_exposure_time_index(int use_index)
 {
+      debug_log << "set_exposure_time_index: use_index=" << use_index << endl << flush;
       if (use_index < 0)
 	    return;
       if (use_index >= (int)nikon_exposure_list_cnt)

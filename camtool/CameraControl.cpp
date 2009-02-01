@@ -37,6 +37,8 @@ void CameraControl::camera_inventory(void)
 
 std::list<CameraControl*> CameraControl::camera_list;
 
+std::ofstream CameraControl::debug_log;
+
 CameraControl::CameraControl()
 {
 }
