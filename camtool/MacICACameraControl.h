@@ -78,7 +78,7 @@ class MacICACameraControl : public CameraControl {
 
       long get_dev_prop_long_value_(const char*key);
 
-      void ica_send_message_(void*buf, size_t buf_len);
+      ICAError ica_send_message_(void*buf, size_t buf_len);
 
     private:
 	// The id_to_* functions use maps of device ids to the desired
@@ -128,6 +128,14 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual int  get_exposure_time_index();
       virtual void set_exposure_time_index(int);
 
+      virtual void get_fnumber_index(std::vector<std::string>&values);
+      virtual int  get_fnumber_index();
+      virtual void set_fnumber_index(int);
+
+      virtual void get_iso_index(std::vector<std::string>&values);
+      virtual int  get_iso_index();
+      virtual void set_iso_index(int);
+
     public:
 	// Debug aids
       virtual int debug_property_get(unsigned prop, unsigned dtype,
@@ -142,6 +150,72 @@ class MacPTPCameraControl  : public MacICACameraControl {
       uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
       uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
 
+    private:
+	// The PTP standard defines a canonical way to describe
+	// properties. The prop_desc_t class encapsulates those
+	// descriptions and allows me to work with them in a more
+	// donvenient form. The ptp_get_property_desc_() method is a
+	// convenient way to refresh a property description from the
+	// device.
+      class prop_desc_t {
+	  public:
+	    prop_desc_t(uint16_t prop_code);
+	    ~prop_desc_t();
+
+	    uint16_t get_property_code() const { return prop_code_; }
+
+	      // Set the PTP defined type code.
+	    void set_type_code(uint16_t val);
+	    uint16_t get_type_code() const { return type_code_; }
+
+	      // Set the flag indicating whether this property is can
+	      // be set. TRUE means it can be set, and FALSE means not.
+	    void set_flag(bool flag);
+
+	      // properties generally have a factory default value.
+	      //template <class T> T get_factory_default();
+
+	      // Properties may come as enum values. In that case, the
+	      // get_enum_count returns a value >0 that is the number
+	      // of enum values that the property supports. The
+	      // get_enum_index() gets specific enum values.
+	    int get_enum_count() const;
+	    template <class T> T get_enum_index(int idx);
+
+	  public:
+	      // These are some methods for filling in the property description.
+	    template <class T> void set_factory_default(T val);
+	    template <class T> void set_enum_vector(const std::vector<T>&vec);
+
+	  private:
+	    uint16_t prop_code_;
+	    uint16_t type_code_;
+	    bool set_flag_;
+	    union {
+		  int8_t fact_int8_;
+		  uint8_t fact_uint8_;
+		  int16_t fact_int16_;
+		  uint16_t fact_uint16_;
+		  int32_t fact_int32_;
+		  uint32_t fact_uint32_;
+	    };
+
+	    union {
+		  std::vector<int8_t>* enum_int8_;
+		  std::vector<uint8_t>* enum_uint8_;
+		  std::vector<int16_t>* enum_int16_;
+		  std::vector<uint16_t>* enum_uint16_;
+		  std::vector<int32_t>* enum_int32_;
+		  std::vector<uint32_t>* enum_uint32_;
+	    };
+      };
+      void ptp_get_property_desc_(prop_desc_t&, uint32_t&result_code);
+
+
+    private:
+	// Standard camera properties
+      prop_desc_t fnumber_;
+      prop_desc_t iso_;
 };
 
 #endif

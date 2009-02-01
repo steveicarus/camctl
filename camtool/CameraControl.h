@@ -82,6 +82,14 @@ class CameraControl {
       virtual int  get_exposure_time_index();
       virtual void set_exposure_time_index(int);
 
+      virtual void get_fnumber_index(std::vector<std::string>&values);
+      virtual int  get_fnumber_index();
+      virtual void set_fnumber_index(int);
+
+      virtual void get_iso_index(std::vector<std::string>&values);
+      virtual int  get_iso_index();
+      virtual void set_iso_index(int);
+
     public: // Camera control methods.
 
 	// Capture an image. This activates the shutter and captures

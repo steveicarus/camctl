@@ -89,6 +89,34 @@ void CameraControl::set_exposure_time_index(int)
 {
 }
 
+void CameraControl::get_fnumber_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int32_t CameraControl::get_fnumber_index()
+{
+      return -1;
+}
+
+void CameraControl::set_fnumber_index(int)
+{
+}
+
+void CameraControl::get_iso_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int32_t CameraControl::get_iso_index()
+{
+      return -1;
+}
+
+void CameraControl::set_iso_index(int)
+{
+}
+
 const list<CameraControl::file_key_t>&CameraControl::image_list()
 {
       image_list_.clear();

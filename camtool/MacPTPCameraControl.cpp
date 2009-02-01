@@ -24,15 +24,21 @@
 using namespace std;
 
 MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
-: MacICACameraControl(dev)
+: MacICACameraControl(dev),
+    fnumber_(0x5007 /* PTP FNumber */),
+    iso_    (0x500f /* PTP ExposureIndex */)
 {
+      uint32_t result_code;
+
+      ptp_get_property_desc_(fnumber_, result_code);
+      ptp_get_property_desc_(iso_,     result_code);
 }
 
 MacPTPCameraControl::~MacPTPCameraControl()
 {
 }
 
-void MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
+ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
 {
       ICAObjectSendMessagePB msg;
       memset(&msg, 0, sizeof(msg));
@@ -44,7 +50,7 @@ void MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataSize = buf_len;
       msg.message.dataType = kICATypeData;
 
-      /* ICAError err =*/ ICAObjectSendMessage(&msg, 0);
+      return ICAObjectSendMessage(&msg, 0);
 }
 
 uint16_t MacPTPCameraControl::ptp_get_property_u16_(unsigned prop_code,
@@ -135,8 +141,337 @@ void MacPTPCameraControl::ptp_set_property_u32_(unsigned prop_code,
       ptp_buf->data[2] = (val >>16) & 0xff;
       ptp_buf->data[3] = (val >>24) & 0xff;
 
+      ICAError err = ica_send_message_(ptp_buf, sizeof buf);
+      result_code = ptp_buf->resultCode;
+      if (err != 0) result_code = -1;
+}
+
+MacPTPCameraControl::prop_desc_t::prop_desc_t(uint16_t prop_code)
+{
+      prop_code_ = prop_code;
+      type_code_ = 0;
+      set_flag_ = false;
+}
+
+MacPTPCameraControl::prop_desc_t::~prop_desc_t()
+{
+      switch (type_code_) {
+	  case 1:
+	    if (enum_int8_) delete enum_int8_;
+	    break;
+	  case 2:
+	    if (enum_uint8_) delete enum_uint8_;
+	    break;
+	  case 3:
+	    if (enum_int16_) delete enum_int16_;
+	    break;
+	  case 4:
+	    if (enum_uint16_) delete enum_uint16_;
+	    break;
+	  case 5:
+	    if (enum_int32_) delete enum_int32_;
+	    break;
+	  case 6:
+	    if (enum_uint32_) delete enum_uint32_;
+	    break;
+	  default:
+	    break;
+      }
+}
+
+int MacPTPCameraControl::prop_desc_t::get_enum_count() const
+{
+      switch (type_code_) {
+	  case 4:
+	    if (enum_uint16_) return enum_uint16_->size();
+	    else return 0;
+	  default:
+	    return 0;
+      }
+      return -1;
+}
+
+template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index(int idx)
+{
+      assert(type_code_ == 4);
+      assert(enum_uint16_ != 0);
+      assert((int)enum_uint16_->size() > idx);
+      return (*enum_uint16_)[idx];
+}
+
+void MacPTPCameraControl::prop_desc_t::set_type_code(uint16_t code)
+{
+      assert(type_code_ == 0);
+      type_code_ = code;
+}
+
+void MacPTPCameraControl::prop_desc_t::set_flag(bool flag)
+{
+      set_flag_ = flag;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<int8_t>(int8_t val)
+{
+      assert(type_code_ == 1);
+      fact_int8_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint8_t>(uint8_t val)
+{
+      assert(type_code_ == 2);
+      fact_uint8_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<int16_t>(int16_t val)
+{
+      assert(type_code_ == 3);
+      fact_int16_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint16_t>(uint16_t val)
+{
+      assert(type_code_ == 4);
+      fact_uint16_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<int32_t>(int32_t val)
+{
+      assert(type_code_ == 5);
+      fact_int32_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint32_t>(uint32_t val)
+{
+      assert(type_code_ == 6);
+      fact_uint32_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int8_t>(const std::vector<int8_t>&ref)
+{
+      assert(type_code_ == 1);
+      enum_int8_ = new std::vector<int8_t> (ref);
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint8_t>(const std::vector<uint8_t>&ref)
+{
+      assert(type_code_ == 2);
+      enum_uint8_ = new std::vector<uint8_t> (ref);
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int16_t>(const std::vector<int16_t>&ref)
+{
+      assert(type_code_ == 3);
+      enum_int16_ = new std::vector<int16_t> (ref);
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint16_t>(const std::vector<uint16_t>&ref)
+{
+      assert(type_code_ == 4);
+      enum_uint16_ = new std::vector<uint16_t> (ref);
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int32_t>(const std::vector<int32_t>&ref)
+{
+      assert(type_code_ == 5);
+      enum_int32_ = new std::vector<int32_t> (ref);
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint32_t>(const std::vector<uint32_t>&ref)
+{
+      assert(type_code_ == 6);
+      enum_uint32_ = new std::vector<uint32_t> (ref);
+}
+
+template <class T> static T val_from_bytes(UInt8*&buf);
+
+template <> static int8_t val_from_bytes<int8_t>(UInt8*&buf)
+{
+      int8_t val = (int8_t) buf[0];
+      buf += 1;
+      return val;
+}
+
+template <> static uint8_t val_from_bytes<uint8_t>(UInt8*&buf)
+{
+      uint8_t val = (uint8_t) buf[0];
+      buf += 1;
+      return val;
+}
+
+template <> static int16_t val_from_bytes<int16_t>(UInt8*&buf)
+{
+      uint16_t val = (uint16_t) buf[1];
+      val <<= 8;
+      val |= (uint16_t) buf[0];
+      buf += 2;
+      return (int16_t)val;
+}
+
+template <> static uint16_t val_from_bytes<uint16_t>(UInt8*&buf)
+{
+      uint16_t val = (uint16_t) buf[1];
+      val <<= 8;
+      val |= (uint16_t) buf[0];
+      buf += 2;
+      return val;
+}
+
+template <> static int32_t val_from_bytes<int32_t>(UInt8*&buf)
+{
+      uint32_t val = (uint32_t) buf[3];
+      val <<= 8;
+      val |= (uint32_t) buf[2];
+      val <<= 8;
+      val |= (uint32_t) buf[1];
+      val <<= 8;
+      val |= (uint32_t) buf[0];
+      buf += 4;
+      return (int32_t)val;
+}
+
+template <> static uint32_t val_from_bytes<uint32_t>(UInt8*&buf)
+{
+      uint16_t val = (uint16_t) buf[3];
+      val <<= 8;
+      val |= (uint16_t) buf[2];
+      val <<= 8;
+      val |= (uint16_t) buf[1];
+      val <<= 8;
+      val |= (uint16_t) buf[0];
+      buf += 4;
+      return val;
+}
+
+void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
+						 uint32_t&result_code)
+{
+      const size_t data_buf_size = 1024;
+      unsigned char buf[sizeof(ICAPTPPassThroughPB) + data_buf_size-1];
+      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
+
+      ptp_buf->commandCode = 0x1014; // GetDevicePropDesc
+      ptp_buf->numOfInputParams = 1;
+      ptp_buf->params[0] = desc.get_property_code();
+      ptp_buf->numOfOutputParams = 0;
+      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
+      ptp_buf->dataSize = 1024;
+
       ica_send_message_(ptp_buf, sizeof buf);
       result_code = ptp_buf->resultCode;
+
+      UInt8*dptr = ptp_buf->data;
+
+	// data[0]
+	// data[1] -- Property code back
+      uint16_t prop = val_from_bytes<uint16_t>(dptr);
+      assert(prop == desc.get_property_code());
+
+	// data[2]
+	// data[3] -- data type code
+      uint16_t dtype = val_from_bytes<uint16_t>(dptr);
+      desc.set_type_code(dtype);
+
+	// data[4] -- GetSet flag
+      uint8_t get_set_flag = val_from_bytes<uint8_t>(dptr);
+      desc.set_flag(get_set_flag);
+
+	// Starting at data[5]...
+	//   -- Factory Default value
+	//   -- Current value  (we ignore the current value here)
+      switch (dtype) {
+	  case 0:  // UNDEFINED
+	  case 1:  // INT8
+	    desc.set_factory_default(val_from_bytes<int8_t>(dptr));
+	    val_from_bytes<int8_t>(dptr);
+	    break;
+	  case 2:  // UINT8
+	    desc.set_factory_default(val_from_bytes<uint8_t>(dptr));
+	    val_from_bytes<uint8_t>(dptr);
+	    break;
+	  case 3:  // INT16
+	    desc.set_factory_default(val_from_bytes<int16_t>(dptr));
+	    val_from_bytes<int16_t>(dptr);
+	    break;
+	  case 4:  // UINT16
+	    desc.set_factory_default(val_from_bytes<uint16_t>(dptr));
+	    val_from_bytes<uint16_t>(dptr);
+	    break;
+	  case 5:  // INT32
+	    desc.set_factory_default(val_from_bytes<int32_t>(dptr));
+	    val_from_bytes<int32_t>(dptr);
+	    break;
+	  case 6:  // UINT32
+	    desc.set_factory_default(val_from_bytes<uint32_t>(dptr));
+	    val_from_bytes<uint32_t>(dptr);
+	    break;
+	  case 7:  // INT64
+	  case 8:  // UINT64
+	  case 9:  // INT128;
+	  case 10: // UINT128;
+	  default:
+	    break;
+      }
+
+	// The form flag (2==ENUM)
+      uint8_t form_flag = *dptr++;
+
+      if (form_flag == 2) { // ENUM
+	    uint16_t count = val_from_bytes<uint16_t>(dptr);
+
+	    switch (dtype) {
+		case 1: { // INT8
+		      vector<int8_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<int8_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		case 2: { // UINT8
+		      vector<uint8_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<uint8_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		case 3: { // INT16
+		      vector<int16_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<int16_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		case 4: { // UINT16
+		      vector<uint16_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<uint16_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		case 5: { // INT32
+		      vector<int32_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<int32_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		case 6: { // UINT32
+		      vector<uint32_t> enum_array (count);
+		      for (unsigned idx = 0 ; idx < count ; idx += 1)
+			    enum_array[idx] = val_from_bytes<uint32_t>(dptr);
+
+		      desc.set_enum_vector(enum_array);
+		      break;
+		}
+		default:
+		  break;
+	    }
+      } else {
+      }
 }
 
 static const unsigned nikon_exposure_list_cnt = 53;
@@ -231,6 +566,82 @@ void MacPTPCameraControl::set_exposure_time_index(int use_index)
 			    rc);
 }
 
+void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
+{
+      values.resize(fnumber_.get_enum_count());
+	// The FNumber is by definition (PTP) a UINT16.
+      assert(fnumber_.get_type_code() == 4);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    tmp << "f/" << (fnumber_.get_enum_index<uint16_t>(idx) / 100.0) << ends;
+	    values[idx] = tmp.str();
+      }
+}
+
+int MacPTPCameraControl::get_fnumber_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(fnumber_.get_property_code(), rc);
+      for (int idx = 0 ; idx < fnumber_.get_enum_count() ; idx += 1) {
+	    if (val == fnumber_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_fnumber_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index <= fnumber_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(fnumber_.get_property_code(),
+			    fnumber_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
+void MacPTPCameraControl::get_iso_index(vector<string>&values)
+{
+      values.resize(iso_.get_enum_count());
+	// The FNumber is by definition (PTP) a UINT16.
+      assert(fnumber_.get_type_code() == 4);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    tmp << iso_.get_enum_index<uint16_t>(idx) << ends;
+	    values[idx] = tmp.str();
+      }
+}
+
+int MacPTPCameraControl::get_iso_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(iso_.get_property_code(), rc);
+      for (int idx = 0 ; idx < iso_.get_enum_count() ; idx += 1) {
+	    if (val == iso_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_iso_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index <= iso_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(iso_.get_property_code(),
+			    iso_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
 int MacPTPCameraControl::debug_property_get(unsigned prop,
 					    unsigned dtype,
 					    unsigned long&value)
@@ -238,7 +649,7 @@ int MacPTPCameraControl::debug_property_get(unsigned prop,
       uint32_t rc = 0;
       switch (dtype) {
 	  case 0x0004: // UINT16
-	    value = ptp_get_property_u32_(prop, rc);
+	    value = ptp_get_property_u16_(prop, rc);
 	    break;
 	  case 0x0006: // UINT32
 	    value = ptp_get_property_u32_(prop, rc);

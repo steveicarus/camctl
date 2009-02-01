@@ -44,6 +44,12 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SLOT(grab_camera_slot_(int)));
 
 	// Settings
+      connect(ui.set_aperture_box,
+	      SIGNAL(currentIndexChanges(int)),
+	      SLOT(set_iso_slot_(int)));
+      connect(ui.set_iso_box,
+	      SIGNAL(currentIndexChanges(int)),
+	      SLOT(set_aperture_slot_(int)));
       connect(ui.set_exposure_time_box,
 	      SIGNAL(currentIndexChanges(int)),
 	      SLOT(set_exposure_time_slot_(int)));
@@ -157,12 +163,28 @@ void CamtoolMain::grab_camera_slot_(int state)
       }
 }
 
+void CamtoolMain::set_aperture_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_fnumber_index(index);
+}
+
 void CamtoolMain::set_exposure_time_slot_(int index)
 {
       if (selected_camera_ == 0)
 	    return;
 
       selected_camera_->set_exposure_time_index(index);
+}
+
+void CamtoolMain::set_iso_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_iso_index(index);
 }
 
 void CamtoolMain::action_capture_slot_(void)
