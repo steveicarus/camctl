@@ -46,10 +46,10 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	// Settings
       connect(ui.set_aperture_box,
 	      SIGNAL(currentIndexChanged(int)),
-	      SLOT(set_iso_slot_(int)));
+	      SLOT(set_aperture_slot_(int)));
       connect(ui.set_iso_box,
 	      SIGNAL(currentIndexChanged(int)),
-	      SLOT(set_aperture_slot_(int)));
+	      SLOT(set_iso_slot_(int)));
       connect(ui.set_exposure_time_box,
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_exposure_time_slot_(int)));
