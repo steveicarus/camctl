@@ -224,6 +224,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
     private:
 	// Standard camera properties
       prop_desc_t exposure_program_;
+      prop_desc_t exposure_time_;
       prop_desc_t fnumber_;
       prop_desc_t iso_;
 };

@@ -27,12 +27,14 @@ using namespace std;
 MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 : MacICACameraControl(dev),
     exposure_program_(0x500e /* PTP ExposureProgramMode */),
+    exposure_time_(0x500d /* PTP ExposureTime */),
     fnumber_(0x5007 /* PTP FNumber */),
     iso_    (0x500f /* PTP ExposureIndex */)
 {
       uint32_t result_code;
 
       ptp_get_property_desc_(exposure_program_, result_code);
+      ptp_get_property_desc_(exposure_time_, result_code);
       ptp_get_property_desc_(fnumber_, result_code);
       ptp_get_property_desc_(iso_, result_code);
 }
@@ -156,10 +158,10 @@ void MacPTPCameraControl::ptp_set_property_u32_(unsigned prop_code,
 		<< " params[0]=" << ptp_buf->params[0]
 		<< " dataSize=" << ptp_buf->dataSize
 		<< " data=" << hex
-		<< setw(2) << ptp_buf->data[0]
-		<< setw(2) << ptp_buf->data[1]
-		<< setw(2) << ptp_buf->data[2]
-		<< setw(2) << ptp_buf->data[3]
+		<< setw(2) << (unsigned)ptp_buf->data[0]
+		<< setw(2) << (unsigned)ptp_buf->data[1]
+		<< setw(2) << (unsigned)ptp_buf->data[2]
+		<< setw(2) << (unsigned)ptp_buf->data[3]
 		<< dec << endl << flush;
 
       ICAError err = ica_send_message_(ptp_buf, sizeof buf);
@@ -206,18 +208,29 @@ int MacPTPCameraControl::prop_desc_t::get_enum_count() const
 	  case 4:
 	    if (enum_uint16_) return enum_uint16_->size();
 	    else return 0;
+	  case 6:
+	    if (enum_uint32_) return enum_uint32_->size();
+	    else return 0;
 	  default:
 	    return 0;
       }
       return -1;
 }
 
-template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index(int idx)
+template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint16_t>(int idx)
 {
       assert(type_code_ == 4);
       assert(enum_uint16_ != 0);
       assert((int)enum_uint16_->size() > idx);
       return (*enum_uint16_)[idx];
+}
+
+template<> uint32_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint32_t>(int idx)
+{
+      assert(type_code_ == 6);
+      assert(enum_uint32_ != 0);
+      assert((int)enum_uint32_->size() > idx);
+      return (*enum_uint32_)[idx];
 }
 
 void MacPTPCameraControl::prop_desc_t::set_type_code(uint16_t code)
@@ -352,13 +365,13 @@ template <> static int32_t val_from_bytes<int32_t>(UInt8*&buf)
 
 template <> static uint32_t val_from_bytes<uint32_t>(UInt8*&buf)
 {
-      uint16_t val = (uint16_t) buf[3];
+      uint32_t val = (uint32_t) buf[3];
       val <<= 8;
-      val |= (uint16_t) buf[2];
+      val |= (uint32_t) buf[2];
       val <<= 8;
-      val |= (uint16_t) buf[1];
+      val |= (uint32_t) buf[1];
       val <<= 8;
-      val |= (uint16_t) buf[0];
+      val |= (uint32_t) buf[0];
       buf += 4;
       return val;
 }
@@ -568,79 +581,32 @@ bool MacPTPCameraControl::set_exposure_program_ok()
       return exposure_program_.set_ok();
 }
 
-static const unsigned nikon_exposure_list_cnt = 53;
-static const struct {
-      const char*text;
-      uint32_t code;
-} nikon_exposure_list[nikon_exposure_list_cnt] = {
-      { "1/4000", 0x00010f0a },
-      { "1/3200", 0x00010c80 },
-      { "1/2500", 0x000109c4 },
-      { "1/2000", 0x000107d0 },
-      { "1/1600", 0x00010640 },
-      { "1/1250", 0x000104e2 },
-      { "1/1000", 0x000103e8 },
-      { "1/800",  0x00010320 },
-      { "1/640",  0x00010280 },
-      { "1/500",  0x000101f4 },
-      { "1/400",  0x00010190 },
-      { "1/320",  0x000100fa },
-      { "1/250",  0x000100fa },
-      { "1/200",  0x000100c8 },
-      { "1/160",  0x000100a0 },
-      { "1/125",  0x0001007d },
-      { "1/100",  0x00010064 },
-      { "1/80",   0x00010050 },
-      { "1/60",   0x0001003c },
-      { "1/50",   0x00010032 },
-      { "1/40",   0x00010028 },
-      { "1/30",   0x0001001e },
-      { "1/25",   0x00010019 },
-      { "1/20",   0x00010014 },
-      { "1/15",   0x0001000f },
-      { "1/13",   0x0001000d },
-      { "1/10",   0x0001000a },
-      { "1/8",    0x00010008 },
-      { "1/6",    0x00010006 },
-      { "1/5",    0x00010005 },
-      { "1/4",    0x00010004 },
-      { "1/3",    0x00010003 },
-      { "1/2.5",  0x000a0019 },
-      { "1/2",    0x00010002 },
-      { "1/1.6",  0x000a0010 },
-      { "1/1.3",  0x000a000d },
-      { "1s",     0x00010001 },
-      { "1.3s",   0x000d000a },
-      { "1.6s",   0x0010000a },
-      { "2s",     0x00020001 },
-      { "2.5s",   0x0019000a },
-      { "3s",     0x00030001 },
-      { "4s",     0x00040001 },
-      { "5s",     0x00050001 },
-      { "6s",     0x00060001 },
-      { "8s",     0x00080001 },
-      { "10s",    0x000a0001 },
-      { "13s",    0x000d0001 },
-      { "15s",    0x000f0001 },
-      { "20s",    0x00140001 },
-      { "25s",    0x00190001 },
-      { "30s",    0x001e0001 },
-      { "Bulb",   0xffffffff }
-};
-
 void MacPTPCameraControl::get_exposure_time_index(vector<string>&values)
 {
-      values.resize(nikon_exposure_list_cnt);
-      for (unsigned idx = 0 ; idx < nikon_exposure_list_cnt ; idx += 1)
-	    values[idx] = nikon_exposure_list[idx].text;
+      values.resize(exposure_time_.get_enum_count());
+	// The ExposureTime is by definition (PTP) a UINT32.
+      assert(exposure_time_.get_type_code() == 6);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    tmp.setf(ios_base::fixed);
+	    uint32_t val = exposure_time_.get_enum_index<uint32_t>(idx);
+	    if (val == 0xffffffff) {
+		  tmp << "Bulb" << ends;
+	    } else {
+		  tmp << setprecision(1) << setw(10)
+		      << (val / 10.0) << "ms" << ends;
+	    }
+	    values[idx] = tmp.str();
+      }
 }
 
 int MacPTPCameraControl::get_exposure_time_index()
 {
       uint32_t rc;
-      uint32_t val = ptp_get_property_u32_(0xd100 /* NIKON ExposureTime */, rc);
-      for (unsigned idx = 0 ; idx < nikon_exposure_list_cnt ; idx += 1) {
-	    if (val == nikon_exposure_list[idx].code)
+      uint32_t val = ptp_get_property_u32_(exposure_time_.get_property_code(), rc);
+      for (int idx = 0 ; idx < exposure_time_.get_enum_count() ; idx += 1) {
+	    if (val == exposure_time_.get_enum_index<uint32_t>(idx))
 		  return (int)idx;
       }
 
@@ -649,21 +615,24 @@ int MacPTPCameraControl::get_exposure_time_index()
 
 void MacPTPCameraControl::set_exposure_time_index(int use_index)
 {
-      debug_log << "set_exposure_time_index: use_index=" << use_index << endl << flush;
       if (use_index < 0)
 	    return;
-      if (use_index >= (int)nikon_exposure_list_cnt)
+      if (use_index >= exposure_time_.get_enum_count())
 	    use_index = 0;
 
+      uint32_t val = exposure_time_.get_enum_index<uint32_t>(use_index);
       uint32_t rc;
-      ptp_set_property_u32_(0xd100 /* NIKON ExposureTime */,
-			    nikon_exposure_list[use_index].code,
-			    rc);
+      ptp_set_property_u32_(exposure_time_.get_property_code(), val, rc);
+
+      debug_log << "set_exposure_Time_index: index=" << use_index
+		<< ", val=" << hex << val
+		<< ", rc=" << rc
+		<< dec << endl;
 }
 
 bool MacPTPCameraControl::set_exposure_time_ok()
 {
-      return true;
+      return exposure_time_.set_ok();
 }
 
 void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
