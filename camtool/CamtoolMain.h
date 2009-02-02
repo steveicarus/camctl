@@ -29,6 +29,7 @@ class CamtoolMain : public QMainWindow {
       void grab_camera_slot_(int state);
 
 	// Slots for the Camera Settings page.
+      void exposure_program_slot_(int state);
       void set_aperture_slot_(int state);
       void set_iso_slot_(int state);
       void set_exposure_time_slot_(int state);

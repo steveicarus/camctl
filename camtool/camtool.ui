@@ -148,7 +148,7 @@
              <x>0</x>
              <y>0</y>
              <width>483</width>
-             <height>235</height>
+             <height>165</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -156,41 +156,55 @@
            </attribute>
            <layout class="QFormLayout" name="formLayout" >
             <item row="0" column="0" >
-             <widget class="QLabel" name="label" >
+             <widget class="QLabel" name="label_5" >
               <property name="text" >
-               <string>ISO</string>
+               <string>Exposure Program Mode</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1" >
-             <widget class="QComboBox" name="set_iso_box" >
+             <widget class="QComboBox" name="exposure_program_box" >
               <property name="enabled" >
                <bool>false</bool>
               </property>
              </widget>
             </item>
             <item row="1" column="0" >
-             <widget class="QLabel" name="label_3" >
+             <widget class="QLabel" name="label" >
               <property name="text" >
-               <string>Aperture (f-number)</string>
+               <string>ISO</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1" >
-             <widget class="QComboBox" name="set_aperture_box" >
+             <widget class="QComboBox" name="set_iso_box" >
               <property name="enabled" >
                <bool>false</bool>
               </property>
              </widget>
             </item>
             <item row="2" column="0" >
+             <widget class="QLabel" name="label_3" >
+              <property name="text" >
+               <string>Aperture (f-number)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QComboBox" name="set_aperture_box" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
              <widget class="QLabel" name="label_4" >
               <property name="text" >
                <string>Exposure time</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1" >
+            <item row="3" column="1" >
              <widget class="QComboBox" name="set_exposure_time_box" >
               <property name="enabled" >
                <bool>false</bool>
@@ -199,13 +213,39 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="page_3" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>96</width>
+             <height>26</height>
+            </rect>
+           </property>
+           <attribute name="label" >
+            <string>Flash</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="page_4" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>96</width>
+             <height>26</height>
+            </rect>
+           </property>
+           <attribute name="label" >
+            <string>Focus</string>
+           </attribute>
+          </widget>
           <widget class="QWidget" name="page_2" >
            <property name="geometry" >
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>30</height>
+             <width>96</width>
+             <height>26</height>
             </rect>
            </property>
            <attribute name="label" >

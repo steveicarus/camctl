@@ -72,9 +72,23 @@ float CameraControl::battery_level(void) const
       return -1;
 }
 
-std::string CameraControl::exposure_program_mode(void) const
+void CameraControl::get_exposure_program_index(vector<string>&values)
 {
-      return "";
+      values.clear();
+}
+
+int32_t CameraControl::get_exposure_program_index()
+{
+      return -1;
+}
+
+void CameraControl::set_exposure_program_index(int)
+{
+}
+
+bool CameraControl::set_exposure_program_ok()
+{
+      return false;
 }
 
 void CameraControl::get_exposure_time_index(vector<string>&values)
@@ -91,6 +105,11 @@ void CameraControl::set_exposure_time_index(int)
 {
 }
 
+bool CameraControl::set_exposure_time_ok()
+{
+      return false;
+}
+
 void CameraControl::get_fnumber_index(vector<string>&values)
 {
       values.clear();
@@ -105,6 +124,11 @@ void CameraControl::set_fnumber_index(int)
 {
 }
 
+bool CameraControl::set_fnumber_ok()
+{
+      return false;
+}
+
 void CameraControl::get_iso_index(vector<string>&values)
 {
       values.clear();
@@ -117,6 +141,11 @@ int32_t CameraControl::get_iso_index()
 
 void CameraControl::set_iso_index(int)
 {
+}
+
+bool CameraControl::set_iso_ok()
+{
+      return false;
 }
 
 const list<CameraControl::file_key_t>&CameraControl::image_list()

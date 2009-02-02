@@ -72,8 +72,11 @@ class CameraControl {
 
 	// Return the battery level 0-100, or -1 if unavailable or N/A
       virtual float battery_level(void) const;
-	// Program mode, or "" if N/A
-      virtual std::string exposure_program_mode(void) const;
+
+      virtual void get_exposure_program_index(std::vector<std::string>&values);
+      virtual int  get_exposure_program_index();
+      virtual void set_exposure_program_index(int);
+      virtual bool set_exposure_program_ok();
 
 	// The exposure time is the time that the sensor is exposed to
 	// light during a capture. The device knows what settings it
@@ -86,14 +89,17 @@ class CameraControl {
       virtual void get_exposure_time_index(std::vector<std::string>&values);
       virtual int  get_exposure_time_index();
       virtual void set_exposure_time_index(int);
+      virtual bool set_exposure_time_ok();
 
       virtual void get_fnumber_index(std::vector<std::string>&values);
       virtual int  get_fnumber_index();
       virtual void set_fnumber_index(int);
+      virtual bool set_fnumber_ok();
 
       virtual void get_iso_index(std::vector<std::string>&values);
       virtual int  get_iso_index();
       virtual void set_iso_index(int);
+      virtual bool set_iso_ok();
 
     public: // Camera control methods.
 

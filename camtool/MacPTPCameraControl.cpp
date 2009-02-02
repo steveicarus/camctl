@@ -26,13 +26,15 @@ using namespace std;
 
 MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 : MacICACameraControl(dev),
+    exposure_program_(0x500e /* PTP ExposureProgramMode */),
     fnumber_(0x5007 /* PTP FNumber */),
     iso_    (0x500f /* PTP ExposureIndex */)
 {
       uint32_t result_code;
 
+      ptp_get_property_desc_(exposure_program_, result_code);
       ptp_get_property_desc_(fnumber_, result_code);
-      ptp_get_property_desc_(iso_,     result_code);
+      ptp_get_property_desc_(iso_, result_code);
 }
 
 MacPTPCameraControl::~MacPTPCameraControl()
@@ -493,6 +495,79 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
       }
 }
 
+void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
+{
+      values.resize(exposure_program_.get_enum_count());
+	// The ExposureProgramMode is by definition (PTP) a UINT16.
+      assert(exposure_program_.get_type_code() == 4);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    uint16_t value = exposure_program_.get_enum_index<uint16_t>(idx);
+	    switch (value) {
+		case 0x0000: // UNDEFINED
+		  tmp << "NONE" << ends;
+		  break;
+		case 0x0001: // Manual
+		  tmp << "Manual" << ends;
+		  break;
+		case 0x0002: // Automatic
+		  tmp << "Automatic" << ends;
+		  break;
+		case 0x0003: // Aperture Priority
+		  tmp << "Aperture Priority" << ends;
+		  break;
+		case 0x0004: // Shutter Priority
+		  tmp << "Shutter Priority" << ends;
+		  break;
+		case 0x0005: // Program Creative (greater depth of field)
+		  tmp << "Program Creative" << ends;
+		  break;
+		case 0x0006: // Program Action (faster shutter)
+		  tmp << "Program Action" << ends;
+		  break;
+		case 0x0007: // Portrait
+		  tmp << "Portrait" << ends;
+		  break;
+		default:
+		  tmp << "Vendor program: 0x"
+		      << setw(4) << hex << value << ends;
+		  break;
+	    }
+	    values[idx] = tmp.str();
+      }
+}
+
+int MacPTPCameraControl::get_exposure_program_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(exposure_program_.get_property_code(), rc);
+      for (int idx = 0 ; idx < exposure_program_.get_enum_count() ; idx += 1) {
+	    if (val == exposure_program_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_exposure_program_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index >= exposure_program_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(exposure_program_.get_property_code(),
+			    exposure_program_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
+bool MacPTPCameraControl::set_exposure_program_ok()
+{
+      return exposure_program_.set_ok();
+}
+
 static const unsigned nikon_exposure_list_cnt = 53;
 static const struct {
       const char*text;
@@ -586,6 +661,11 @@ void MacPTPCameraControl::set_exposure_time_index(int use_index)
 			    rc);
 }
 
+bool MacPTPCameraControl::set_exposure_time_ok()
+{
+      return true;
+}
+
 void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
 {
       values.resize(fnumber_.get_enum_count());
@@ -624,6 +704,11 @@ void MacPTPCameraControl::set_fnumber_index(int use_index)
 			    rc);
 }
 
+bool MacPTPCameraControl::set_fnumber_ok()
+{
+      return fnumber_.set_ok();
+}
+
 void MacPTPCameraControl::get_iso_index(vector<string>&values)
 {
       values.resize(iso_.get_enum_count());
@@ -660,6 +745,11 @@ void MacPTPCameraControl::set_iso_index(int use_index)
       ptp_set_property_u16_(iso_.get_property_code(),
 			    iso_.get_enum_index<uint16_t>(use_index),
 			    rc);
+}
+
+bool MacPTPCameraControl::set_iso_ok()
+{
+      return iso_.set_ok();
 }
 
 int MacPTPCameraControl::debug_property_get(unsigned prop,

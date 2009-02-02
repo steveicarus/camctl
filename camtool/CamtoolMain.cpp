@@ -44,6 +44,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SLOT(grab_camera_slot_(int)));
 
 	// Settings
+      connect(ui.exposure_program_box,
+	      SIGNAL(currentIndexChanged(int)),
+	      SLOT(exposure_program_slot_(int)));
       connect(ui.set_aperture_box,
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_aperture_slot_(int)));
@@ -161,6 +164,14 @@ void CamtoolMain::grab_camera_slot_(int state)
 	    ui.camera_list_box->setEnabled(true);
 	    selected_camera_ = 0;
       }
+}
+
+void CamtoolMain::exposure_program_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_exposure_program_index(index);
 }
 
 void CamtoolMain::set_aperture_slot_(int index)

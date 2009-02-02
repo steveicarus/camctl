@@ -28,16 +28,29 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->open_session();
 
       vector<string> val_enum;
-      selected_camera_->get_exposure_time_index(val_enum);
-      int ext_cur = selected_camera_->get_exposure_time_index();
+      int ext_cur;
+
+	// Get ExposureProgram
+      selected_camera_->get_exposure_program_index(val_enum);
+      ext_cur = selected_camera_->get_exposure_program_index();
+
+      ui.exposure_program_box->clear();
+      for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
+	    ui.exposure_program_box->addItem(val_enum[idx].c_str());
+      }
+      ui.exposure_program_box->setCurrentIndex(ext_cur);
+      ui.exposure_program_box->setEnabled(selected_camera_->set_exposure_program_ok());
 
 	// Get ExposureTime
+      selected_camera_->get_exposure_time_index(val_enum);
+      ext_cur = selected_camera_->get_exposure_time_index();
+
       ui.set_exposure_time_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.set_exposure_time_box->addItem(val_enum[idx].c_str());
       }
       ui.set_exposure_time_box->setCurrentIndex(ext_cur);
-      ui.set_exposure_time_box->setEnabled(val_enum.size() > 0);
+      ui.set_exposure_time_box->setEnabled(selected_camera_->set_exposure_time_ok());
 
 	// Get FNumber
       selected_camera_->get_fnumber_index(val_enum);
@@ -48,7 +61,7 @@ void CamtoolMain::grab_camera_(void)
 	    ui.set_aperture_box->addItem(val_enum[idx].c_str());
       }
       ui.set_aperture_box->setCurrentIndex(ext_cur);
-      ui.set_aperture_box->setEnabled(val_enum.size() > 0);
+      ui.set_aperture_box->setEnabled(selected_camera_->set_fnumber_ok());
 
 	// Get ISO (ExposureIndex)
       selected_camera_->get_iso_index(val_enum);
@@ -59,7 +72,7 @@ void CamtoolMain::grab_camera_(void)
 	    ui.set_iso_box->addItem(val_enum[idx].c_str());
       }
       ui.set_iso_box->setCurrentIndex(ext_cur);
-      ui.set_iso_box->setEnabled(val_enum.size() > 0);
+      ui.set_iso_box->setEnabled(selected_camera_->set_iso_ok());
 }
 
 void CamtoolMain::ungrab_camera_(void)
