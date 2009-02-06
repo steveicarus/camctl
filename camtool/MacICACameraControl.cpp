@@ -102,16 +102,47 @@ int MacICACameraControl::open_session(void)
       pb.deviceObject = dev_;
       ICAOpenSession(&pb, 0);
       session_id_ = pb.sessionID;
+
+      CFMutableArrayRef events_array = CFArrayCreateMutable(0, 0, 0);
+      CFArrayAppendValue(events_array, kICANotificationTypeCaptureComplete);
+      CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
+      CFArrayAppendValue(events_array, kICANotificationTypeObjectRemoved);
+
+      ICARegisterForEventNotificationPB register_pb;
+      memset(&register_pb, 0, sizeof register_pb);
+      register_pb.objectOfInterest = dev_;
+      register_pb.eventsOfInterest = events_array;
+      register_pb.notificationProc = ica_notification;
+      register_pb.options = 0;
+      ICARegisterForEventNotification(&register_pb, 0);
+
       return 0;
 }
 
 int MacICACameraControl::close_session(void)
 {
+      ICARegisterForEventNotificationPB register_pb;
+      memset(&register_pb, 0, sizeof register_pb);
+      register_pb.objectOfInterest = dev_;
+      register_pb.eventsOfInterest = 0;
+      register_pb.notificationProc = ica_notification;
+      register_pb.options = 0;
+
       ICACloseSessionPB pb;
       memset(&pb, 0, sizeof pb);
       pb.sessionID = session_id_;
       ICACloseSession(&pb, 0);
       return 0;
+}
+
+void MacICACameraControl::ica_notification(CFStringRef notification_type,
+					   CFDictionaryRef notification_dict)
+{
+      char type_buf[1024];
+      CFStringGetCString(notification_type, type_buf, sizeof type_buf, kCFStringEncodingASCII);
+      debug_log << "**** ica_notification: type="
+		<< type_buf
+		<< endl << flush;
 }
 
 float MacICACameraControl::battery_level(void) const

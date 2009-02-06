@@ -34,6 +34,9 @@ class CamtoolMain : public QMainWindow {
       void set_iso_slot_(int state);
       void set_exposure_time_slot_(int state);
 
+      void flash_mode_slot_(int state);
+      void focus_mode_slot_(int state);
+
 	// Slots for the Actions page
       void action_capture_slot_(void);
 

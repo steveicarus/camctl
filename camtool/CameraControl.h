@@ -101,6 +101,16 @@ class CameraControl {
       virtual void set_iso_index(int);
       virtual bool set_iso_ok();
 
+      virtual void get_flash_mode_index(std::vector<std::string>&values);
+      virtual int  get_flash_mode_index();
+      virtual void set_flash_mode_index(int);
+      virtual bool set_flash_mode_ok();
+
+      virtual void get_focus_mode_index(std::vector<std::string>&values);
+      virtual int  get_focus_mode_index();
+      virtual void set_focus_mode_index(int);
+      virtual bool set_focus_mode_ok();
+
     public: // Camera control methods.
 
 	// Capture an image. This activates the shutter and captures

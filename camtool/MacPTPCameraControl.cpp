@@ -29,7 +29,9 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
     exposure_program_(0x500e /* PTP ExposureProgramMode */),
     exposure_time_(0x500d /* PTP ExposureTime */),
     fnumber_(0x5007 /* PTP FNumber */),
-    iso_    (0x500f /* PTP ExposureIndex */)
+    iso_    (0x500f /* PTP ExposureIndex */),
+    flash_mode_(0x500c /* PTP FlashMode */),
+    focus_mode_(0x500a /* PTP FocusMode */)
 {
       uint32_t result_code;
 
@@ -37,6 +39,8 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
       ptp_get_property_desc_(exposure_time_, result_code);
       ptp_get_property_desc_(fnumber_, result_code);
       ptp_get_property_desc_(iso_, result_code);
+      ptp_get_property_desc_(flash_mode_, result_code);
+      ptp_get_property_desc_(focus_mode_, result_code);
 }
 
 MacPTPCameraControl::~MacPTPCameraControl()
@@ -682,7 +686,7 @@ void MacPTPCameraControl::get_iso_index(vector<string>&values)
 {
       values.resize(iso_.get_enum_count());
 	// The FNumber is by definition (PTP) a UINT16.
-      assert(fnumber_.get_type_code() == 4);
+      assert(iso_.get_type_code() == 4);
 
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
 	    ostringstream tmp;
@@ -719,6 +723,142 @@ void MacPTPCameraControl::set_iso_index(int use_index)
 bool MacPTPCameraControl::set_iso_ok()
 {
       return iso_.set_ok();
+}
+
+void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
+{
+      values.resize(flash_mode_.get_enum_count());
+	// The FlashMode is by definition (PTP) a UINT16.
+      assert(flash_mode_.get_type_code() == 4);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    uint16_t val_code = flash_mode_.get_enum_index<uint16_t>(idx);
+	    switch (val_code) {
+		case 0x0000:
+		  tmp << "Undefined" << ends;
+		  break;
+		case 0x0001:
+		  tmp << "Auto" << ends;
+		  break;
+		case 0x0002:
+		  tmp << "Flash Off" << ends;
+		  break;
+		case 0x0003:
+		  tmp << "Fill Flash" << ends;
+		  break;
+		case 0x0004:
+		  tmp << "Red-eye Auto" << ends;
+		  break;
+		case 0x0005:
+		  tmp << "Red-eye Fill" << ends;
+		  break;
+		case 0x0006:
+		  tmp << "External Sync" << ends;
+		  break;
+		default:
+		  if (val_code < 0x8000)
+			tmp << "Reserved-" << hex << val_code << ends;
+		  else
+			tmp << "Vendor-" << hex << val_code << ends;
+		  break;
+	    }
+	    values[idx] = tmp.str();
+      }
+}
+
+int MacPTPCameraControl::get_flash_mode_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(flash_mode_.get_property_code(), rc);
+      for (int idx = 0 ; idx < flash_mode_.get_enum_count() ; idx += 1) {
+	    if (val == flash_mode_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_flash_mode_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index >= flash_mode_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(flash_mode_.get_property_code(),
+			    flash_mode_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
+bool MacPTPCameraControl::set_flash_mode_ok()
+{
+      return flash_mode_.set_ok();
+}
+
+
+void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
+{
+      values.resize(focus_mode_.get_enum_count());
+	// The FocusMode is by definition (PTP) a UINT16.
+      assert(focus_mode_.get_type_code() == 4);
+
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    ostringstream tmp;
+	    uint16_t val_code = focus_mode_.get_enum_index<uint16_t>(idx);
+	    switch (val_code) {
+		case 0x0000:
+		  tmp << "Undefined" << ends;
+		  break;
+		case 0x0001:
+		  tmp << "Manual" << ends;
+		  break;
+		case 0x0002:
+		  tmp << "Automatic" << ends;
+		  break;
+		case 0x0003:
+		  tmp << "Automatic/Macro" << ends;
+		  break;
+		default:
+		  if (val_code < 0x8000)
+			tmp << "Reserved-" << hex << val_code << ends;
+		  else
+			tmp << "Vendor-" << hex << val_code << ends;
+		  break;
+	    }
+	    values[idx] = tmp.str();
+      }
+}
+
+int MacPTPCameraControl::get_focus_mode_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(focus_mode_.get_property_code(), rc);
+      for (int idx = 0 ; idx < focus_mode_.get_enum_count() ; idx += 1) {
+	    if (val == focus_mode_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_focus_mode_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index >= focus_mode_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(focus_mode_.get_property_code(),
+			    focus_mode_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
+bool MacPTPCameraControl::set_focus_mode_ok()
+{
+      return focus_mode_.set_ok();
 }
 
 int MacPTPCameraControl::debug_property_get(unsigned prop,

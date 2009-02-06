@@ -57,6 +57,14 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(set_exposure_time_slot_(int)));
 
+      connect(ui.flash_mode_box,
+	      SIGNAL(currentIndexChanged(int)),
+	      SLOT(flash_mode_slot_(int)));
+
+      connect(ui.focus_mode_box,
+	      SIGNAL(currentIndexChanged(int)),
+	      SLOT(focus_mode_slot_(int)));
+
 	// Actions
       connect(ui.action_capture_button,
 	      SIGNAL(clicked()),
@@ -196,6 +204,22 @@ void CamtoolMain::set_iso_slot_(int index)
 	    return;
 
       selected_camera_->set_iso_index(index);
+}
+
+void CamtoolMain::flash_mode_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_flash_mode_index(index);
+}
+
+void CamtoolMain::focus_mode_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_focus_mode_index(index);
 }
 
 void CamtoolMain::action_capture_slot_(void)

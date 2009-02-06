@@ -73,6 +73,28 @@ void CamtoolMain::grab_camera_(void)
       }
       ui.set_iso_box->setCurrentIndex(ext_cur);
       ui.set_iso_box->setEnabled(selected_camera_->set_iso_ok());
+
+	// Get Flash Mode
+      selected_camera_->get_flash_mode_index(val_enum);
+      ext_cur = selected_camera_->get_flash_mode_index();
+
+      ui.flash_mode_box->clear();
+      for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
+	    ui.flash_mode_box->addItem(val_enum[idx].c_str());
+      }
+      ui.flash_mode_box->setCurrentIndex(ext_cur);
+      ui.flash_mode_box->setEnabled(selected_camera_->set_flash_mode_ok());
+
+	// Get Focus Mode
+      selected_camera_->get_focus_mode_index(val_enum);
+      ext_cur = selected_camera_->get_focus_mode_index();
+
+      ui.focus_mode_box->clear();
+      for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
+	    ui.focus_mode_box->addItem(val_enum[idx].c_str());
+      }
+      ui.focus_mode_box->setCurrentIndex(ext_cur);
+      ui.focus_mode_box->setEnabled(selected_camera_->set_focus_mode_ok());
 }
 
 void CamtoolMain::ungrab_camera_(void)

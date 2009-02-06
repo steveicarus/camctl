@@ -98,6 +98,9 @@ class MacICACameraControl : public CameraControl {
       dev_name_t make_model_;
 
     private:
+      static void ica_notification(CFStringRef notification_type,
+				   CFDictionaryRef notification_dict);
+    private:
       void scan_images(std::list<file_key_t>&);
 
       void debug_dump_default_(std::ostream&) const;
@@ -143,6 +146,16 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual int  get_iso_index();
       virtual void set_iso_index(int);
       virtual bool set_iso_ok();
+
+      virtual void get_flash_mode_index(std::vector<std::string>&values);
+      virtual int  get_flash_mode_index();
+      virtual void set_flash_mode_index(int);
+      virtual bool set_flash_mode_ok();
+
+      virtual void get_focus_mode_index(std::vector<std::string>&values);
+      virtual int  get_focus_mode_index();
+      virtual void set_focus_mode_index(int);
+      virtual bool set_focus_mode_ok();
 
     public:
 	// Debug aids
@@ -227,6 +240,10 @@ class MacPTPCameraControl  : public MacICACameraControl {
       prop_desc_t exposure_time_;
       prop_desc_t fnumber_;
       prop_desc_t iso_;
+	// Flash properties
+      prop_desc_t flash_mode_;
+	// Focus properties
+      prop_desc_t focus_mode_;
 };
 
 #endif

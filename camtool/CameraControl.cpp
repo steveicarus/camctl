@@ -148,6 +148,44 @@ bool CameraControl::set_iso_ok()
       return false;
 }
 
+void CameraControl::get_flash_mode_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int32_t CameraControl::get_flash_mode_index()
+{
+      return -1;
+}
+
+void CameraControl::set_flash_mode_index(int)
+{
+}
+
+bool CameraControl::set_flash_mode_ok()
+{
+      return false;
+}
+
+void CameraControl::get_focus_mode_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int32_t CameraControl::get_focus_mode_index()
+{
+      return -1;
+}
+
+void CameraControl::set_focus_mode_index(int)
+{
+}
+
+bool CameraControl::set_focus_mode_ok()
+{
+      return false;
+}
+
 const list<CameraControl::file_key_t>&CameraControl::image_list()
 {
       image_list_.clear();
