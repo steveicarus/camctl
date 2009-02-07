@@ -147,8 +147,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>483</width>
-             <height>235</height>
+             <width>288</width>
+             <height>134</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -218,8 +218,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>483</width>
-             <height>235</height>
+             <width>347</width>
+             <height>74</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -521,7 +521,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="label_2" >
+     <widget class="QLabel" name="camera_label" >
       <property name="sizePolicy" >
        <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
         <horstretch>0</horstretch>
@@ -534,7 +534,7 @@
      </widget>
     </item>
    </layout>
-   <zorder>label_2</zorder>
+   <zorder>camera_label</zorder>
    <zorder>tabWidget</zorder>
   </widget>
  </widget>

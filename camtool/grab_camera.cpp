@@ -27,6 +27,12 @@ void CamtoolMain::grab_camera_(void)
 {
       selected_camera_->open_session();
 
+      QString cam_label;
+      cam_label.append(selected_camera_->camera_make().c_str());
+      cam_label.append("  ");
+      cam_label.append(selected_camera_->camera_model().c_str());
+      ui.camera_label->setText(cam_label);
+
       vector<string> val_enum;
       int ext_cur;
 
@@ -101,4 +107,5 @@ void CamtoolMain::ungrab_camera_(void)
 {
       selected_camera_->close_session();
       ui.set_exposure_time_box->setEnabled(false);
+      ui.camera_label->setText("<select camera>");
 }
