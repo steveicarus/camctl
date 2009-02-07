@@ -102,7 +102,7 @@ int MacICACameraControl::open_session(void)
       pb.deviceObject = dev_;
       ICAOpenSession(&pb, 0);
       session_id_ = pb.sessionID;
-
+#if 0
       CFMutableArrayRef events_array = CFArrayCreateMutable(0, 0, 0);
       CFArrayAppendValue(events_array, kICANotificationTypeCaptureComplete);
       CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
@@ -115,19 +115,20 @@ int MacICACameraControl::open_session(void)
       register_pb.notificationProc = ica_notification;
       register_pb.options = 0;
       ICARegisterForEventNotification(&register_pb, 0);
-
+#endif
       return 0;
 }
 
 int MacICACameraControl::close_session(void)
 {
+#if 0
       ICARegisterForEventNotificationPB register_pb;
       memset(&register_pb, 0, sizeof register_pb);
       register_pb.objectOfInterest = dev_;
       register_pb.eventsOfInterest = 0;
       register_pb.notificationProc = ica_notification;
       register_pb.options = 0;
-
+#endif
       ICACloseSessionPB pb;
       memset(&pb, 0, sizeof pb);
       pb.sessionID = session_id_;
@@ -135,15 +136,30 @@ int MacICACameraControl::close_session(void)
       return 0;
 }
 
+#if 0
 void MacICACameraControl::ica_notification(CFStringRef notification_type,
 					   CFDictionaryRef notification_dict)
 {
       char type_buf[1024];
       CFStringGetCString(notification_type, type_buf, sizeof type_buf, kCFStringEncodingASCII);
       debug_log << "**** ica_notification: type="
-		<< type_buf
-		<< endl << flush;
+		<< type_buf << endl;
+      dump_value(debug_log, notification_dict);
+      debug_log << "****" << endl << flush;
+
+      if (CFStringCompare(notification_type,kICANotificationTypeObjectAdded,0) == kCFCompareEqualTo) {
+	    CFNumberRef tmp = (CFNumberRef)CFDictionaryGetValue(notification_dict,
+					    kICANotificationICAObjectKey);
+	    debug_log << "**** Object added ****" << endl;
+	    ICACopyObjectPropertyDictionaryPB pb;
+	    memset(&pb, 0, sizeof pb);
+	    CFNumberGetValue(tmp, kCFNumberSInt32Type, &pb.object);
+	    ICACopyObjectPropertyDictionary(&pb, 0);
+	    dump_value(debug_log, pb.theDict);
+	    debug_log << "****" << endl << flush;
+      }
 }
+#endif
 
 float MacICACameraControl::battery_level(void) const
 {
