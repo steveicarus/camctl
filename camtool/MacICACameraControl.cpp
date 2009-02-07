@@ -25,6 +25,15 @@
 
 using namespace std;
 
+// XXXX HACK!
+// ICA Notifications don't have a private data pointer, so when I open
+// a session, I save the camera object here. In the long run, the
+// proper thing for me to do is to create a map of camera objects here.
+static MacICACameraControl*notification_camera_ = 0;
+
+/*
+ * Convenience function to get a C-long value from a dictionary.
+ */
 long MacICACameraControl::get_dict_long_value(CFDictionaryRef dict, const char*key)
 {
       CFStringRef key_ref = CFStringCreateWithCString(0, key, kCFStringEncodingASCII);
@@ -53,31 +62,42 @@ string MacICACameraControl::get_dict_string_value(CFDictionaryRef dict, const ch
       return val;
 }
 
-long MacICACameraControl::get_dev_prop_long_value_(const char*key)
-{
-      return get_dict_long_value(dev_prop_dict_, key);
-}
-
+/*
+ * Create a Mac ICA camera from an ICAObject. That object should
+ * already be known to be a camera. (The inventory method assure me of
+ * that.) Get the vendor and product, and use that to generate the
+ * make and model strings.
+ */
 MacICACameraControl::MacICACameraControl(ICAObject dev)
 {
       dev_ = dev;
+      dev_dict_ = 0;
+      refresh_dev_dict_();
+
+      long idVendor  = get_dict_long_value(dev_dict_, "idVendor");
+      long idProduct = get_dict_long_value(dev_dict_, "idProduct");
+
+      make_model_ = id_to_name(usb_id_t(idVendor,idProduct));
+}
+
+MacICACameraControl::~MacICACameraControl()
+{
+      CFRelease(dev_dict_);
+}
+
+/*
+ * Sometimes we have to reread the property dictionary from the
+ * device.
+ */
+void MacICACameraControl::refresh_dev_dict_(void)
+{
+      if (dev_dict_ != 0) CFRelease(dev_dict_);
 
       ICACopyObjectPropertyDictionaryPB dev_dict_pb ;
       memset(&dev_dict_pb, 0, sizeof dev_dict_pb);
       dev_dict_pb.object = dev_;
       dev_dict_pb.theDict = &dev_dict_;
       ICACopyObjectPropertyDictionary(&dev_dict_pb, 0);
-
-      long idVendor  = get_dict_long_value(dev_dict_, "idVendor");
-      long idProduct = get_dict_long_value(dev_dict_, "idProduct");
-
-      make_model_ = id_to_name(usb_id_t(idVendor,idProduct));
-
-      dev_prop_dict_ = (CFDictionaryRef)CFDictionaryGetValue(dev_dict_, CFSTR("device properties"));
-}
-
-MacICACameraControl::~MacICACameraControl()
-{
 }
 
 string MacICACameraControl::control_class(void) const
@@ -102,7 +122,9 @@ int MacICACameraControl::open_session(void)
       pb.deviceObject = dev_;
       ICAOpenSession(&pb, 0);
       session_id_ = pb.sessionID;
-#if 0
+
+	// Enable some interesting notifications.
+      notification_camera_ = this;
       CFMutableArrayRef events_array = CFArrayCreateMutable(0, 0, 0);
       CFArrayAppendValue(events_array, kICANotificationTypeCaptureComplete);
       CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
@@ -115,20 +137,21 @@ int MacICACameraControl::open_session(void)
       register_pb.notificationProc = ica_notification;
       register_pb.options = 0;
       ICARegisterForEventNotification(&register_pb, 0);
-#endif
+
       return 0;
 }
 
 int MacICACameraControl::close_session(void)
 {
-#if 0
       ICARegisterForEventNotificationPB register_pb;
       memset(&register_pb, 0, sizeof register_pb);
       register_pb.objectOfInterest = dev_;
       register_pb.eventsOfInterest = 0;
       register_pb.notificationProc = ica_notification;
       register_pb.options = 0;
-#endif
+      ICARegisterForEventNotification(&register_pb, 0);
+      notification_camera_ = 0;
+
       ICACloseSessionPB pb;
       memset(&pb, 0, sizeof pb);
       pb.sessionID = session_id_;
@@ -136,36 +159,42 @@ int MacICACameraControl::close_session(void)
       return 0;
 }
 
-#if 0
+/*
+ * This is the callback function for camera notifications.
+ */
 void MacICACameraControl::ica_notification(CFStringRef notification_type,
 					   CFDictionaryRef notification_dict)
 {
+	// Start out by getting a description of the notification and
+	// writing it to the debug log.
       char type_buf[1024];
-      CFStringGetCString(notification_type, type_buf, sizeof type_buf, kCFStringEncodingASCII);
+      CFStringGetCString(notification_type, type_buf, sizeof type_buf,
+			 kCFStringEncodingASCII);
       debug_log << "**** ica_notification: type="
 		<< type_buf << endl;
       dump_value(debug_log, notification_dict);
       debug_log << "****" << endl << flush;
 
+	// What kind of notification?
       if (CFStringCompare(notification_type,kICANotificationTypeObjectAdded,0) == kCFCompareEqualTo) {
-	    CFNumberRef tmp = (CFNumberRef)CFDictionaryGetValue(notification_dict,
-					    kICANotificationICAObjectKey);
+
+	      // This is an ObjectAdded notification. This usually
+	      // means that an image file was added. Refresh the image
+	      // list from the camera and debug the new files list.
 	    debug_log << "**** Object added ****" << endl;
-	    ICACopyObjectPropertyDictionaryPB pb;
-	    memset(&pb, 0, sizeof pb);
-	    CFNumberGetValue(tmp, kCFNumberSInt32Type, &pb.object);
-	    ICACopyObjectPropertyDictionary(&pb, 0);
-	    dump_value(debug_log, pb.theDict);
+
+	    assert(notification_camera_);
+	    notification_camera_->refresh_dev_dict_();
+	    std::list<file_key_t> files = notification_camera_->image_list();
+
+	    for (list<file_key_t>::iterator cur = files.begin()
+		       ; cur != files.end() ; cur ++) {
+
+		  debug_log << "  " << cur->first << " " << cur->second << endl;
+	    }
+
 	    debug_log << "****" << endl << flush;
       }
-}
-#endif
-
-float MacICACameraControl::battery_level(void) const
-{
-      assert(dev_prop_dict_);
-      long val = get_dict_long_value(dev_prop_dict_, "ICADevicePropBatteryLevel");
-      return val;
 }
 
 void MacICACameraControl::capture_image(void)
@@ -180,6 +209,11 @@ void MacICACameraControl::capture_image(void)
       ICAObjectSendMessage(&send_pb, 0);
 }
 
+/*
+ * Scan the images on the camera by refreshing the device dictionary
+ * and getting the "data" array from the device. This is an array of
+ * images that I format into the file list for the caller.
+ */
 void MacICACameraControl::scan_images(std::list<file_key_t>&dst)
 {
       CFArrayRef aref = (CFArrayRef)CFDictionaryGetValue(dev_dict_, CFSTR("data"));

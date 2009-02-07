@@ -49,7 +49,6 @@ class MacICACameraControl : public CameraControl {
       int close_session(void);
 
       std::string camera_model(void) const;
-      float battery_level(void) const;
 
     public:
       void capture_image(void);
@@ -76,8 +75,6 @@ class MacICACameraControl : public CameraControl {
       static long get_dict_long_value(CFDictionaryRef, const char*key);
       static std::string get_dict_string_value(CFDictionaryRef, const char*key);
 
-      long get_dev_prop_long_value_(const char*key);
-
       ICAError ica_send_message_(void*buf, size_t buf_len);
 
     private:
@@ -91,13 +88,14 @@ class MacICACameraControl : public CameraControl {
     private:
       ICAObject dev_;
       CFDictionaryRef dev_dict_;
-      CFDictionaryRef dev_prop_dict_;
 
       ICASessionID session_id_;
 
       dev_name_t make_model_;
 
     private:
+      void refresh_dev_dict_(void);
+
       static void ica_notification(CFStringRef notification_type,
 				   CFDictionaryRef notification_dict);
     private:

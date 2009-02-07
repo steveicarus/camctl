@@ -164,7 +164,9 @@ void MacICACameraControl::debug_dump_data_(std::ostream&out) const
 
 void MacICACameraControl::debug_dump_device_(std::ostream&out) const
 {
-      CFStringRef desc = CFCopyDescription(dev_prop_dict_);
+      CFDictionaryRef dev_props = (CFDictionaryRef)CFDictionaryGetValue(dev_dict_, CFSTR("device properties"));
+
+      CFStringRef desc = CFCopyDescription(dev_props);
       size_t len = CFStringGetLength(desc);
       char*bbuf = new char[len+1];
       CFStringGetCString(desc, bbuf, len+1, kCFStringEncodingASCII);
