@@ -44,7 +44,7 @@ static string get_string(CFStringRef val)
  * Given a CFTypeRef, briefly dump the referenced value. Numbers are
  * displayed as numbers, strings as quoted strings, etc.
  */
-static ostream& dump_value(ostream&out, CFTypeRef ref)
+ostream& MacICACameraControl::dump_value(ostream&out, CFTypeRef ref)
 {
       assert(ref);
 
@@ -62,6 +62,28 @@ static ostream& dump_value(ostream&out, CFTypeRef ref)
 	    buf[len] = 0;
 	    out << "\"" << buf << "\"";
 
+      } else if (ref_type == CFDictionaryGetTypeID()) {
+	    CFDictionaryRef dref = (CFDictionaryRef)ref;
+	    CFIndex dict_size = CFDictionaryGetCount(dref);
+	    out << "**** Dictionary w/ "
+		<< dec << dict_size
+		<< " entries ****" << endl;
+
+	    CFStringRef*keys = new CFStringRef[dict_size];
+	    CFTypeRef*values = new CFTypeRef[dict_size];
+
+	    CFDictionaryGetKeysAndValues(dref, (const void**)keys,
+					 (const void**)values);
+
+	    for (int idx = 0 ; idx < dict_size ; idx += 1) {
+		  string key_str = get_string(keys[idx]);
+		  out << setw(36) << key_str << "  value: ";
+		  dump_value(out, values[idx]) << endl;
+	    }
+
+	    delete[]keys;
+	    delete[]values;
+
       } else {
 	    CFStringRef type_str = CFCopyTypeIDDescription(ref_type);
 	    char buf[128];
@@ -70,6 +92,15 @@ static ostream& dump_value(ostream&out, CFTypeRef ref)
 	    CFStringGetCString(type_str, buf, sizeof buf, kCFStringEncodingASCII);
 	    buf[len] = 0;
 	    out << "<typeid=" << buf << ">";
+	    CFRelease(type_str);
+
+	    type_str = CFCopyDescription(ref);
+	    len = CFStringGetLength(type_str);
+	    char*msg = new char[len+1];
+	    CFStringGetCString(type_str, msg, len+1, kCFStringEncodingASCII);
+	    msg[len] = 0;
+	    out << msg << endl;
+	    delete[]msg;
 	    CFRelease(type_str);
       }
 

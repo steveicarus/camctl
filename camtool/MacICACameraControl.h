@@ -107,6 +107,8 @@ class MacICACameraControl : public CameraControl {
       void debug_dump_capabilities_(std::ostream&) const;
       void debug_dump_data_(std::ostream&) const;
       void debug_dump_device_(std::ostream&) const;
+
+      static std::ostream& dump_value(std::ostream&out, CFTypeRef ref);
 };
 
 /*
