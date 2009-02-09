@@ -135,6 +135,29 @@ class CameraControl {
 	// to free the buffer when it is done.
       virtual void get_image_data(long key, char*&buf, size_t&buf_len);
 
+    public: // Notifications
+
+	// Support some notifications from the camera device. The
+	// Notificaion class is a base class for receiving
+	// notifications from the device. The client derives from this
+	// class types to handle specific needs. The
+	// set_notification_* methods then provide a way to enable
+	// desired notifications.
+      class Notification {
+	  public:
+	    Notification();
+	    virtual ~Notification() =0;
+	    virtual void camera_images(CameraControl*);
+      };
+
+	// Notify when images are added.
+      void set_image_notification(Notification*);
+
+    protected:
+	// These are used by derived classes to announce events that
+	// trigger notifications.
+      void mark_image_notification();
+
     public: // Debug helper methods
 
 	// Debug dump informatin about this camera.
@@ -156,6 +179,7 @@ class CameraControl {
 
     private:
       std::list<file_key_t> image_list_;
+      Notification*images_notification_;
 
     private: // Not implemented
       CameraControl(const CameraControl&);

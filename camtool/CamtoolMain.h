@@ -4,7 +4,7 @@
 # include  <CameraControl.h>
 # include  <fstream>
 
-class CamtoolMain : public QMainWindow {
+class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
       Q_OBJECT
 
@@ -50,6 +50,10 @@ class CamtoolMain : public QMainWindow {
       void debug_ptp_set_slot_(void);
       void debug_ptp_get_slot_(void);
       void debug_ptp_describe_slot_(void);
+
+    private:
+	// Callbacks
+      void camera_images(CameraControl*);
 
     private:
       Ui::CamtoolMainWidget ui;

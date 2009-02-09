@@ -101,10 +101,15 @@ void CamtoolMain::grab_camera_(void)
       }
       ui.focus_mode_box->setCurrentIndex(ext_cur);
       ui.focus_mode_box->setEnabled(selected_camera_->set_focus_mode_ok());
+
+	// Get the initial image list, and register for new images.
+      camera_images(selected_camera_);
+      selected_camera_->set_image_notification(this);
 }
 
 void CamtoolMain::ungrab_camera_(void)
 {
+      selected_camera_->set_image_notification(0);
       selected_camera_->close_session();
       ui.set_exposure_time_box->setEnabled(false);
       ui.camera_label->setText("<select camera>");

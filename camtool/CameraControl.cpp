@@ -219,3 +219,29 @@ string CameraControl::debug_property_describe(unsigned)
 {
       return "N/A";
 }
+
+CameraControl::Notification::Notification()
+{
+}
+
+CameraControl::Notification::~Notification()
+{
+}
+
+void CameraControl::Notification::camera_images(CameraControl*)
+{
+      debug_log << "**** CameraControl: unimplemented camera_images notification"
+		<< endl << flush;
+}
+
+void CameraControl::set_image_notification(CameraControl::Notification*that)
+{
+      assert(images_notification_ == 0 || that==0);
+      images_notification_ = that;
+}
+
+void CameraControl::mark_image_notification(void)
+{
+      if (images_notification_)
+	    images_notification_->camera_images(this);
+}

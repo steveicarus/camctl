@@ -185,15 +185,7 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
 
 	    assert(notification_camera_);
 	    notification_camera_->refresh_dev_dict_();
-	    std::list<file_key_t> files = notification_camera_->image_list();
-
-	    for (list<file_key_t>::iterator cur = files.begin()
-		       ; cur != files.end() ; cur ++) {
-
-		  debug_log << "  " << cur->first << " " << cur->second << endl;
-	    }
-
-	    debug_log << "****" << endl << flush;
+	    notification_camera_->mark_image_notification();
       }
 }
 
