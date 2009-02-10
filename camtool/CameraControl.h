@@ -134,6 +134,7 @@ class CameraControl {
 	// allocates the memory of the buffer, it is up to the caller
 	// to free the buffer when it is done.
       virtual void get_image_data(long key, char*&buf, size_t&buf_len);
+      virtual void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
 
     public: // Notifications
 

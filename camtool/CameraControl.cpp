@@ -200,6 +200,13 @@ void CameraControl::get_image_data(long, char*&buf, size_t&buf_len)
       cerr << "CameraControl::get_image_data: Not implemented" << endl;
 }
 
+void CameraControl::get_image_thumbnail(long, char*&buf, size_t&buf_len)
+{
+      buf = 0;
+      buf_len = 0;
+      cerr << "CameraControl::get_image_thumbnail: Not implemented" << endl;
+}
+
 void CameraControl::debug_dump(std::ostream&out, const std::string&detail) const
 {
       out << "CameraControl::debug_dump(" << detail << ")" << endl;

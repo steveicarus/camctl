@@ -227,8 +227,11 @@ void MacICACameraControl::scan_images(std::list<file_key_t>&dst)
       }
 }
 
-void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
+void MacICACameraControl::get_image_property_data_(long key, OSType property,
+						   char*&buf, size_t&buf_len)
 {
+	// The images are listed as an array in the dev_dict_
+	// dictionary. Get a ref to that array.
       CFArrayRef aref = (CFArrayRef)CFDictionaryGetValue(dev_dict_, CFSTR("data"));
       assert(aref);
       CFIndex asiz = CFArrayGetCount(aref);
@@ -239,19 +242,27 @@ void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
 	    return;
       }
 
+	// The file we are after is itself another dictionary within
+	// the "data" array.
       CFDictionaryRef cur = (CFDictionaryRef)CFArrayGetValueAtIndex(aref,key);
       assert(cur);
 
+	// The "icao" key gets for us the image object. It is a
+	// NumberRef that I can convert into an ICAObject.
       CFNumberRef icao = (CFNumberRef) CFDictionaryGetValue(cur,CFSTR("icao"));
       assert(icao);
 
       ICAObject image;
       CFNumberGetValue(icao, kCFNumberLongType, &image);
 
+	// Given the image object, we can get the image data itself by
+	// getting the kICAPropertyImageData property. That will have
+	// the size of the image data, that I can in turn retrieve
+	// with the ICAGetPropertyData function.
       ICAGetPropertyByTypePB image_data_pb;
       memset(&image_data_pb, 0, sizeof image_data_pb);
       image_data_pb.object = image;
-      image_data_pb.propertyType = kICAPropertyImageData;
+      image_data_pb.propertyType = property;
       ICAGetPropertyByType(&image_data_pb, 0);
 
       buf_len = image_data_pb.propertyInfo.dataSize;
@@ -265,4 +276,14 @@ void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
       data_pb.requestedSize = buf_len;
       data_pb.dataPtr = buf;
       ICAGetPropertyData(&data_pb, 0);
+}
+
+void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len)
+{
+      get_image_property_data_(key, kICAPropertyImageData, buf, buf_len);
+}
+
+void MacICACameraControl::get_image_thumbnail(long key, char*&buf, size_t&buf_len)
+{
+      get_image_property_data_(key, kICAPropertyImageThumbnail, buf, buf_len);
 }

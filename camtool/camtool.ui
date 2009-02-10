@@ -290,7 +290,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7" >
         <item>
-         <widget class="QListWidget" name="images_list" />
+         <widget class="QListWidget" name="images_list" >
+          <property name="contextMenuPolicy" >
+           <enum>Qt::DefaultContextMenu</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6" >
@@ -309,6 +313,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="refresh_button" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
             <property name="text" >
              <string>Refresh</string>
             </property>

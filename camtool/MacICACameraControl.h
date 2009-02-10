@@ -53,6 +53,7 @@ class MacICACameraControl : public CameraControl {
     public:
       void capture_image(void);
       void get_image_data(long key, char*&buf, size_t&buf_len);
+      void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
 
       void debug_dump(std::ostream&, const std::string&) const;
 
@@ -95,6 +96,9 @@ class MacICACameraControl : public CameraControl {
 
     private:
       void refresh_dev_dict_(void);
+
+      void get_image_property_data_(long key, OSType property,
+				    char*&buf, size_t&buf_len);
 
       static void ica_notification(CFStringRef notification_type,
 				   CFDictionaryRef notification_dict);

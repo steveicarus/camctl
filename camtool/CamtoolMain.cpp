@@ -70,6 +70,11 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(clicked()),
 	      SLOT(action_capture_slot_()));
 
+	// Images
+      connect(ui.images_list,
+	      SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+	      SLOT(images_list_slot_(QListWidgetItem*)));
+
 	// (debug)
       connect(ui.select_logfile_button,
 	      SIGNAL(clicked()),

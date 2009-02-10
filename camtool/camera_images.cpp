@@ -32,10 +32,49 @@ void CamtoolMain::camera_images(CameraControl*camera)
 
       ui.images_list->clear();
 
+      long last_key = -1;
       for (list<CameraControl::file_key_t>::iterator cur = files.begin()
 		 ; cur != files.end() ; cur ++) {
 
-	    CameraControl::debug_log << "  " << cur->first << " " << cur->second << endl;
-	    ui.images_list->addItem(cur->second.c_str());
+	    last_key = cur->first;
+	    CameraControl::debug_log << "  " << last_key << " " << cur->second << endl;
+
+	    QString file_name (cur->second.c_str());
+	    QVariant file_index ((int)last_key);
+
+	    QListWidgetItem*item = new QListWidgetItem(file_name);
+	    item->setData(Qt::UserRole, file_index);
+	    ui.images_list->addItem(item);
       }
+#if 0
+      char*buf;
+      size_t buf_len;
+      camera->get_image_thumbnail(last_key, buf, buf_len);
+      QString thumb_path = QFileDialog::getSaveFileName(0, QString("(debug) Where to write a thumbnail?"));
+      FILE*thumb_fd = fopen(thumb_path.toAscii(), "wb");
+      assert(thumb_fd);
+      fwrite(buf, 1, buf_len, thumb_fd);
+      fclose(thumb_fd);
+      delete[]buf;
+#endif
+}
+
+void CamtoolMain::images_list_slot_(QListWidgetItem*item)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      QString file_name = item->text();
+      QVariant file_index = item->data(Qt::UserRole);
+
+      char*buf;
+      size_t buf_len;
+      selected_camera_->get_image_data(file_index.toInt(), buf, buf_len);
+
+      QString path = QFileDialog::getSaveFileName(0, tr("Save Image"), file_name);
+      FILE*fd = fopen(path.toAscii(), "wb");
+      assert(fd);
+      fwrite(buf, 1, buf_len, fd);
+      fclose(fd);
+      delete[]buf;
 }

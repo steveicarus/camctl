@@ -40,6 +40,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Slots for the Actions page
       void action_capture_slot_(void);
 
+	// Slots for the Images page
+      void images_list_slot_(QListWidgetItem*);
+
 	// Slots for the (debug) page
       void select_logfile_slot_(void);
       void dump_device_slot_(void);
