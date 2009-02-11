@@ -46,17 +46,18 @@ void CamtoolMain::camera_images(CameraControl*camera)
 	    item->setData(Qt::UserRole, file_index);
 	    ui.images_list->addItem(item);
       }
-#if 0
+
+	// Get the thumbnail of the last image and write it into the
+	// image thumbnail display.
       char*buf;
       size_t buf_len;
       camera->get_image_thumbnail(last_key, buf, buf_len);
-      QString thumb_path = QFileDialog::getSaveFileName(0, QString("(debug) Where to write a thumbnail?"));
-      FILE*thumb_fd = fopen(thumb_path.toAscii(), "wb");
-      assert(thumb_fd);
-      fwrite(buf, 1, buf_len, thumb_fd);
-      fclose(thumb_fd);
+
+      QPixmap pix_tmp;
+      pix_tmp.loadFromData((const uchar*)buf, buf_len);
+      action_thumbnail_pixmap_->setPixmap(pix_tmp);
+
       delete[]buf;
-#endif
 }
 
 void CamtoolMain::images_list_slot_(QListWidgetItem*item)

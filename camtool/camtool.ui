@@ -270,19 +270,35 @@
        <attribute name="title" >
         <string>Actions</string>
        </attribute>
-       <widget class="QPushButton" name="action_capture_button" >
-        <property name="geometry" >
-         <rect>
-          <x>30</x>
-          <y>30</y>
-          <width>113</width>
-          <height>32</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Capture</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_8" >
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7" >
+          <item>
+           <widget class="QPushButton" name="action_capture_button" >
+            <property name="text" >
+             <string>Capture</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGraphicsView" name="action_thumbnail_view" />
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_4" >
        <attribute name="title" >

@@ -97,9 +97,6 @@ class MacICACameraControl : public CameraControl {
     private:
       void refresh_dev_dict_(void);
 
-      void get_image_property_data_(long key, OSType property,
-				    char*&buf, size_t&buf_len);
-
       static void ica_notification(CFStringRef notification_type,
 				   CFDictionaryRef notification_dict);
     private:

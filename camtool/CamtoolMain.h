@@ -1,5 +1,7 @@
 
 # include  <qapplication.h>
+# include  <QGraphicsPixmapItem>
+# include  <QGraphicsScene>
 # include  "ui_camtool.h"
 # include  <CameraControl.h>
 # include  <fstream>
@@ -14,6 +16,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
     private:
       CameraControl*selected_camera_;
+
+      QGraphicsScene* action_thumbnail_scene_;
+      QGraphicsPixmapItem*action_thumbnail_pixmap_;
 
     private:
 	// Helper methods.

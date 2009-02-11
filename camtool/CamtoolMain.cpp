@@ -35,6 +35,14 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       ui.setupUi(this);
       detect_cameras_();
 
+	// Set up the thumbnail display widget.
+      action_thumbnail_scene_ = new QGraphicsScene;
+      action_thumbnail_pixmap_ = new QGraphicsPixmapItem;
+
+      action_thumbnail_scene_->addItem(action_thumbnail_pixmap_);
+      ui.action_thumbnail_view->setScene(action_thumbnail_scene_);
+
+
 	// Select Camera
       connect(ui.rescan_button,
 	      SIGNAL(clicked()),
