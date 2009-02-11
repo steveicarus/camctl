@@ -2,6 +2,8 @@
 
 CONFIG += qt
 
+ICON = Nikon_D40.icns
+
 # On the mac, we use the ImageCapture framework. For linking purposes,
 # qmake does the righ thing but we need to add the -F flag to CXX flags
 # so that header include paths are set up properly.
