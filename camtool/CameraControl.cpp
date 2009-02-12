@@ -41,6 +41,7 @@ std::ofstream CameraControl::debug_log;
 
 CameraControl::CameraControl()
 {
+      images_notification_ = 0;
 }
 
 CameraControl::~CameraControl()

@@ -151,7 +151,8 @@ class CameraControl {
 	    virtual void camera_images(CameraControl*);
       };
 
-	// Notify when images are added.
+	// Notify when images are added. Remove the notification by
+	// passing a 0 pointer.
       void set_image_notification(Notification*);
 
     protected:
