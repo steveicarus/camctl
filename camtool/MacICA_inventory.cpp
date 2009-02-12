@@ -27,14 +27,31 @@
 
 using namespace std;
 
+/*
+ * To define a new camera, add an entry in the table below. Order
+ * doesn't matter, as long as the vendor/device pair is unique.
+ */
+MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[] = {
+	// Nikon devices
+      { 0x04b0, 0x0412,  "Nikon", "D80", MacPTP },
+	// Terminate the list
+      { 0x0000, 0x0000,  0, 0, MacGeneric }
+};
+
 map<MacICACameraControl::usb_id_t,MacICACameraControl::dev_name_t> MacICACameraControl::usb_map_names;
 
 map<MacICACameraControl::usb_id_t,MacICACameraControl::dev_class_t> MacICACameraControl::usb_map_classes;
 
 void MacICACameraControl::load_usb_map(void)
 {
-      usb_map_names[usb_id_t(0x04b0,0x0412)] = dev_name_t("Nikon","D80");
-      usb_map_classes[usb_id_t(0x04b0,0x0412)] = MacPTP;
+      for (unsigned idx = 0 ; usb_devices_table[idx].vendor_id ; idx += 1) {
+	    usb_devices_struct&cur = usb_devices_table[idx];
+	    usb_id_t   id (cur.vendor_id, cur.device_id);
+	    dev_name_t name (cur.vendor_name, cur.device_name);
+
+	    usb_map_names[id] = name;
+	    usb_map_classes[id] = cur.device_class;
+      }
 }
 
 const MacICACameraControl::dev_name_t& MacICACameraControl::id_to_name(const MacICACameraControl::usb_id_t&id)

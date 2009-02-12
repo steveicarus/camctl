@@ -86,6 +86,15 @@ class MacICACameraControl : public CameraControl {
       static std::map <usb_id_t,dev_name_t>  usb_map_names;
       static std::map <usb_id_t,dev_class_t> usb_map_classes;
 
+      struct usb_devices_struct {
+	    uint16_t vendor_id;
+	    uint16_t device_id;
+	    const char*vendor_name;
+	    const char*device_name;
+	    dev_class_t device_class;
+      };
+      static struct usb_devices_struct usb_devices_table[];
+
     private:
       ICAObject dev_;
       CFDictionaryRef dev_dict_;
