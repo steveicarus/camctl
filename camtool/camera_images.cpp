@@ -47,6 +47,9 @@ void CamtoolMain::camera_images(CameraControl*camera)
 	    ui.images_list->addItem(item);
       }
 
+      if (last_key == -1)
+	    return;
+
 	// Get the thumbnail of the last image and write it into the
 	// image thumbnail display.
       char*buf;
