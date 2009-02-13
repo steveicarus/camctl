@@ -242,7 +242,24 @@ void CamtoolMain::action_capture_slot_(void)
 	    return;
       }
 
-      selected_camera_->capture_image();
+      CameraControl::capture_resp_t rc = selected_camera_->capture_image();
+      switch (rc) {
+	  case CameraControl::CAP_OK:
+	    break;
+	  case CameraControl::CAP_ERROR:
+	    QMessageBox::information(0, tr("Error"),
+			     tr("Error attempting to initiate a capture"));
+	    break;
+	  case CameraControl::CAP_NOT_SUPPORTED: {
+		QString text ("This camera, a ");
+		text.append (selected_camera_->camera_make().c_str());
+		text.append (" ");
+		text.append (selected_camera_->camera_model().c_str());
+		text.append (", does not support remote control capture.");
+		QMessageBox::information(0, tr("Not supported"), text);
+		break;
+	  }
+      }
 }
 
 void CamtoolMain::select_logfile_slot_(void)

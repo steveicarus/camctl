@@ -116,7 +116,12 @@ class CameraControl {
 	// Capture an image. This activates the shutter and captures
 	// the image using the current settings. The image is left on
 	// the camera.
-      virtual void capture_image() =0;
+      enum capture_resp_t {
+	    CAP_OK,
+	    CAP_NOT_SUPPORTED,
+	    CAP_ERROR
+      };
+      virtual capture_resp_t capture_image() =0;
 
     public: // Image file manipulation methods.
 

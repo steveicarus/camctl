@@ -51,7 +51,7 @@ class MacICACameraControl : public CameraControl {
       std::string camera_model(void) const;
 
     public:
-      void capture_image(void);
+      capture_resp_t capture_image(void);
       void get_image_data(long key, char*&buf, size_t&buf_len);
       void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
 
@@ -62,11 +62,11 @@ class MacICACameraControl : public CameraControl {
       typedef std::pair<uint16_t,uint16_t> usb_id_t;
 	// A Device name is a Vendor/Device string pair
       typedef std::pair<std::string,std::string> dev_name_t;
-	// A device class is the derived class that supports this
-	// device.
+	// A device class is the derived class that supports this device.
       enum dev_class_t {
-	    MacGeneric = 0,
-	    MacPTP
+	    MacGeneric = 0, // Supported by default ICA basics.
+	    MacBlacklist,   // Positively not supported
+	    MacPTP          // Supported through standard PTP
       };
 
       static const dev_name_t&id_to_name(const usb_id_t&id);
@@ -117,6 +117,26 @@ class MacICACameraControl : public CameraControl {
       void debug_dump_device_(std::ostream&) const;
 
       static std::ostream& dump_value(std::ostream&out, CFTypeRef ref);
+};
+
+/*
+ * This class is derived from MacICACameraControl and is for handling
+ * cameras that are known to not have capture capabilities.
+ */
+class MacICABlacklist : public MacICACameraControl {
+
+    private:
+	// The camera_inventory function from MacICACameraControl
+	// actually creates objects of this type.
+      friend void MacICACameraControl::camera_inventory(void);
+      MacICABlacklist(ICAObject dev);
+
+    public:
+      ~MacICABlacklist();
+
+    public:
+      capture_resp_t capture_image(void);
+
 };
 
 /*

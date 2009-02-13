@@ -32,8 +32,11 @@ using namespace std;
  * doesn't matter, as long as the vendor/device pair is unique.
  */
 MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[] = {
+	// Canon
+      { 0x04a9, 0x314d,  "Canon", "Powershot A560", MacBlacklist },
 	// Nikon devices
-      { 0x04b0, 0x0412,  "Nikon", "D80", MacPTP },
+      { 0x04b0, 0x0104,  "Nikon", "Coolpix 995",    MacBlacklist },
+      { 0x04b0, 0x0412,  "Nikon", "D80",            MacPTP },
 	// Terminate the list
       { 0x0000, 0x0000,  0, 0, MacGeneric }
 };
@@ -144,6 +147,9 @@ void MacICACameraControl::camera_inventory(void)
 			break;
 		      case MacGeneric:
 			dev = new MacICACameraControl(obj);
+			break;
+		      case MacBlacklist:
+			dev = new MacICABlacklist(obj);
 			break;
 		  }
 

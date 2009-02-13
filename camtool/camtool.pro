@@ -20,4 +20,4 @@ SOURCES += CameraControl.cpp
 
 # The Mac ICA implementation of CameraControl
 HEADERS += MacICACameraControl.h
-SOURCES += MacICACameraControl.cpp MacICA_inventory.cpp MacICA_debug.cpp MacPTPCameraControl.cpp
+SOURCES += MacICACameraControl.cpp MacICA_inventory.cpp MacICA_debug.cpp MacICABlacklist.cpp MacPTPCameraControl.cpp

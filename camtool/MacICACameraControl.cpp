@@ -189,7 +189,7 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
       }
 }
 
-void MacICACameraControl::capture_image(void)
+CameraControl::capture_resp_t MacICACameraControl::capture_image(void)
 {
       ICAObjectSendMessagePB send_pb;
       memset(&send_pb, 0, sizeof send_pb);
@@ -199,6 +199,8 @@ void MacICACameraControl::capture_image(void)
       send_pb.message.dataSize = 0;
       send_pb.message.dataType = 0;
       ICAObjectSendMessage(&send_pb, 0);
+
+      return CAP_OK;
 }
 
 /*
