@@ -27,6 +27,8 @@
 # include  <CameraControl.h>
 # include  <fstream>
 
+class CamtoolAboutBox;
+
 class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
       Q_OBJECT
@@ -50,6 +52,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void ungrab_camera_(void);
 
     private slots:
+	// Slots for the Menubar
+      void help_about_slot_();
+
 	// Slots for the Select Camera page
       void rescan_cameras_slot_(void);
       void grab_camera_slot_(int state);
@@ -86,5 +91,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
     private:
       Ui::CamtoolMainWidget ui;
+      CamtoolAboutBox*about_;
 };
 #endif

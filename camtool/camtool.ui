@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>476</height>
+    <height>417</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -114,36 +114,7 @@
           </property>
          </spacer>
         </item>
-        <item>
-         <widget class="QLabel" name="label_2" >
-          <property name="font" >
-           <font>
-            <pointsize>7</pointsize>
-            <italic>true</italic>
-           </font>
-          </property>
-          <property name="text" >
-           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'Lucida Grande'; font-size:7pt; font-weight:400; font-style:italic;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:13pt; font-style:normal;">&lt;span style=" font-size:8pt; font-style:italic;">Copyright 2009 Stephen Williams &amp;lt;steve@icarus.com&amp;gt;&lt;/span>&lt;/p>
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">This program is distributed in the hope that it will be useful,&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">but WITHOUT ANY WARRANTY; without even the implied warranty&lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. &lt;/p>
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">See the GNU General Public License for more details.&lt;/p>&lt;/body>&lt;/html></string>
-          </property>
-          <property name="textFormat" >
-           <enum>Qt::AutoText</enum>
-          </property>
-         </widget>
-        </item>
        </layout>
-       <zorder>camera_list_box</zorder>
-       <zorder>grab_check_box</zorder>
-       <zorder>label_2</zorder>
-       <zorder>horizontalSpacer</zorder>
       </widget>
       <widget class="QWidget" name="tab_2" >
        <attribute name="title" >
@@ -161,7 +132,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>482</width>
-             <height>308</height>
+             <height>286</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -602,6 +573,28 @@ p, li { white-space: pre-wrap; }
    <zorder>camera_label</zorder>
    <zorder>tabWidget</zorder>
   </widget>
+  <widget class="QMenuBar" name="menuBar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>536</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>Help</string>
+    </property>
+    <addaction name="help_about_action" />
+   </widget>
+   <addaction name="menuHelp" />
+  </widget>
+  <action name="help_about_action" >
+   <property name="text" >
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

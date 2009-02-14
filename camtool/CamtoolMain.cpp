@@ -19,6 +19,7 @@
 
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
+# include  "CamtoolAboutBox.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
 # include  <iostream>
@@ -30,6 +31,7 @@ Q_DECLARE_METATYPE(CameraControl*)
 CamtoolMain::CamtoolMain(QWidget*parent)
 : QMainWindow(parent)
 {
+      about_ = 0;
       selected_camera_ = 0;
 
       ui.setupUi(this);
@@ -42,6 +44,10 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       action_thumbnail_scene_->addItem(action_thumbnail_pixmap_);
       ui.action_thumbnail_view->setScene(action_thumbnail_scene_);
 
+	// Menu bar
+      connect(ui.help_about_action,
+	      SIGNAL(triggered()),
+	      SLOT(help_about_slot_()));
 
 	// Select Camera
       connect(ui.rescan_button,
@@ -113,6 +119,8 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 
 CamtoolMain::~CamtoolMain()
 {
+      if (about_)
+	    delete about_;
 }
 
 void CamtoolMain::no_camera_selected_(void)
@@ -154,6 +162,16 @@ void CamtoolMain::detect_cameras_(void)
 
       ui.camera_list_box->setEnabled(true);
       ui.grab_check_box->setEnabled(true);
+}
+
+void CamtoolMain::help_about_slot_(void)
+{
+      if (about_ == 0)
+	    about_ = new CamtoolAboutBox(this);
+
+      about_->show();
+      about_->raise();
+      about_->activateWindow();
 }
 
 void CamtoolMain::rescan_cameras_slot_(void)
