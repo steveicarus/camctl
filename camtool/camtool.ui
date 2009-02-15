@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Camera Control</string>
+   <string>Icarus Camera Control</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
    <layout class="QVBoxLayout" name="verticalLayout" >
@@ -131,8 +131,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>482</width>
-             <height>227</height>
+             <width>288</width>
+             <height>134</height>
             </rect>
            </property>
            <attribute name="label" >
