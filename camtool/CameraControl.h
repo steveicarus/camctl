@@ -70,8 +70,11 @@ class CameraControl {
       virtual int open_session(void);
       virtual int close_session(void);
 
+	// The client calls this periodically to check on the camera.
+      virtual void heartbeat();
+
 	// Return the battery level 0-100, or -1 if unavailable or N/A
-      virtual float battery_level(void) const;
+      virtual float battery_level(void);
 
       virtual void get_exposure_program_index(std::vector<std::string>&values);
       virtual int  get_exposure_program_index();

@@ -68,7 +68,11 @@ int CameraControl::close_session(void)
       return 0;
 }
 
-float CameraControl::battery_level(void) const
+void CameraControl::heartbeat()
+{
+}
+
+float CameraControl::battery_level(void)
 {
       return -1;
 }

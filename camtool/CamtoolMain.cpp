@@ -29,7 +29,7 @@ using namespace std;
 Q_DECLARE_METATYPE(CameraControl*)
 
 CamtoolMain::CamtoolMain(QWidget*parent)
-: QMainWindow(parent)
+: QMainWindow(parent), heartbeat_timer_(this)
 {
       about_ = 0;
       selected_camera_ = 0;
@@ -37,12 +37,19 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       ui.setupUi(this);
       detect_cameras_();
 
+      ui.battery_display->display("   ");
+
 	// Set up the thumbnail display widget.
       action_thumbnail_scene_ = new QGraphicsScene;
       action_thumbnail_pixmap_ = new QGraphicsPixmapItem;
 
       action_thumbnail_scene_->addItem(action_thumbnail_pixmap_);
       ui.action_thumbnail_view->setScene(action_thumbnail_scene_);
+
+	// Heartbeat timer
+      connect(&heartbeat_timer_,
+	      SIGNAL(timeout()),
+	      SLOT(heartbeat_slot_()));
 
 	// Menu bar
       connect(ui.help_about_action,
@@ -164,6 +171,36 @@ void CamtoolMain::detect_cameras_(void)
       ui.grab_check_box->setEnabled(true);
 }
 
+void CamtoolMain::display_battery_(void)
+{
+      if (selected_camera_ == 0) {
+	    ui.battery_display->display("   ");
+	    return;
+      }
+
+      float level_f = selected_camera_->battery_level();
+      if (level_f < 0) {
+	    ui.battery_display->display("---");
+      } else {
+	    level_f += 0.5;
+	    int level = (int)level_f;
+	    ui.battery_display->display(level);
+      }
+}
+
+void CamtoolMain::heartbeat_slot_(void)
+{
+	// If the heartbeat timer was somehow left running after the
+	// device has been unselected, then turn it off.
+      if (selected_camera_ == 0) {
+	    heartbeat_timer_.stop();
+	    return;
+      }
+
+      selected_camera_->heartbeat();
+      display_battery_();
+}
+
 void CamtoolMain::help_about_slot_(void)
 {
       if (about_ == 0)
@@ -198,11 +235,18 @@ void CamtoolMain::grab_camera_slot_(int state)
 	    ui.camera_list_box->setEnabled(false);
 	    grab_camera_();
       } else {
+	    heartbeat_timer_.stop();
 	    ungrab_camera_();
 	    ui.rescan_button->setEnabled(true);
 	    ui.camera_list_box->setEnabled(true);
 	    selected_camera_ = 0;
       }
+
+	// Get and display the current battery level, and start the
+	// heartbeat timer for the device.
+      display_battery_();
+      if (selected_camera_)
+	    heartbeat_timer_.start(1000);
 }
 
 void CamtoolMain::exposure_program_slot_(int index)

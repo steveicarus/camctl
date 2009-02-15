@@ -157,6 +157,8 @@ class MacPTPCameraControl  : public MacICACameraControl {
       ~MacPTPCameraControl();
 
     public:
+      virtual float battery_level(void);
+
       virtual void get_exposure_program_index(std::vector<std::string>&values);
       virtual int  get_exposure_program_index();
       virtual void set_exposure_program_index(int);
@@ -198,6 +200,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
     private:
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
       void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
+      uint8_t  ptp_get_property_u8_(unsigned prop_code, uint32_t&rc);
       uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
       uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
 
@@ -234,14 +237,20 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	    int get_enum_count() const;
 	    template <class T> T get_enum_index(int idx);
 
+	    bool is_range() const { return range_flag_; }
+	    template <class T> void get_range(T&val_min, T&val_max, T&step);
+
 	  public:
 	      // These are some methods for filling in the property description.
 	    template <class T> void set_factory_default(T val);
 	    template <class T> void set_enum_vector(const std::vector<T>&vec);
 
+	    template <class T> void set_range(T val_min, T val_max, T step);
+
 	  private:
 	    uint16_t prop_code_;
 	    uint16_t type_code_;
+	    bool range_flag_;
 	    bool set_flag_;
 	    union {
 		  int8_t fact_int8_;
@@ -266,6 +275,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
     private:
 	// Standard camera properties
+      prop_desc_t battery_level_;
       prop_desc_t exposure_program_;
       prop_desc_t exposure_time_;
       prop_desc_t fnumber_;

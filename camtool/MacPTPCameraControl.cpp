@@ -26,6 +26,7 @@ using namespace std;
 
 MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 : MacICACameraControl(dev),
+    battery_level_(0x5001 /* PTP BatteryLevel */),
     exposure_program_(0x500e /* PTP ExposureProgramMode */),
     exposure_time_(0x500d /* PTP ExposureTime */),
     fnumber_(0x5007 /* PTP FNumber */),
@@ -35,6 +36,7 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 {
       uint32_t result_code;
 
+      ptp_get_property_desc_(battery_level_, result_code);
       ptp_get_property_desc_(exposure_program_, result_code);
       ptp_get_property_desc_(exposure_time_, result_code);
       ptp_get_property_desc_(fnumber_, result_code);
@@ -60,6 +62,28 @@ ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataType = kICATypeData;
 
       return ICAObjectSendMessage(&msg, 0);
+}
+
+uint8_t MacPTPCameraControl::ptp_get_property_u8_(unsigned prop_code,
+						  uint32_t&result_code)
+{
+      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 1-1];
+      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
+
+      ptp_buf->commandCode = 0x1015; // GetDevicePropValue
+      ptp_buf->numOfInputParams = 1;
+      ptp_buf->params[0] = prop_code;
+      ptp_buf->numOfOutputParams = 0;
+      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
+      ptp_buf->dataSize = 1;
+      ptp_buf->data[0] = 0;
+      ptp_buf->data[1] = 0;
+
+      ica_send_message_(ptp_buf, sizeof buf);
+      result_code = ptp_buf->resultCode;
+
+      uint8_t val = ptp_buf->data[0];
+      return val;
 }
 
 uint16_t MacPTPCameraControl::ptp_get_property_u16_(unsigned prop_code,
@@ -178,6 +202,7 @@ MacPTPCameraControl::prop_desc_t::prop_desc_t(uint16_t prop_code)
       prop_code_ = prop_code;
       type_code_ = 0;
       set_flag_ = false;
+      range_flag_ = false;
 }
 
 MacPTPCameraControl::prop_desc_t::~prop_desc_t()
@@ -219,6 +244,15 @@ int MacPTPCameraControl::prop_desc_t::get_enum_count() const
 	    return 0;
       }
       return -1;
+}
+
+template<> uint8_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint8_t>(int idx)
+{
+      assert(type_code_ == 2);
+      assert(enum_uint8_ != 0);
+      assert(range_flag_ == false);
+      assert((int)enum_uint8_->size() > idx);
+      return (*enum_uint8_)[idx];
 }
 
 template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint16_t>(int idx)
@@ -282,6 +316,36 @@ template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint32_t>
 {
       assert(type_code_ == 6);
       fact_uint32_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_range<int8_t>(int8_t val_min, int8_t val_max, int8_t step)
+{
+      assert(type_code_ == 1);
+      range_flag_ = true;
+      enum_int8_ = new std::vector<int8_t> (3);
+      (*enum_int8_)[0] = val_min;
+      (*enum_int8_)[1] = val_max;
+      (*enum_int8_)[2] = step;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_range<uint8_t>(uint8_t val_min, uint8_t val_max, uint8_t step)
+{
+      assert(type_code_ == 2);
+      range_flag_ = true;
+      enum_uint8_ = new std::vector<uint8_t> (3);
+      (*enum_uint8_)[0] = val_min;
+      (*enum_uint8_)[1] = val_max;
+      (*enum_uint8_)[2] = step;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::get_range<uint8_t>(uint8_t&val_min, uint8_t&val_max, uint8_t&step)
+{
+      assert(type_code_ == 2);
+      assert(range_flag_);
+      assert(enum_uint8_->size() == 3);
+      val_min = (*enum_uint8_)[0];
+      val_max = (*enum_uint8_)[1];
+      step    = (*enum_uint8_)[2];
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int8_t>(const std::vector<int8_t>&ref)
@@ -453,7 +517,28 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 	// The form flag (2==ENUM)
       uint8_t form_flag = *dptr++;
 
-      if (form_flag == 2) { // ENUM
+      if (form_flag == 1) { // RANGE
+	    switch (dtype) {
+		case 1: { // INT8
+		      int8_t val_min = val_from_bytes<int8_t>(dptr);
+		      int8_t val_max = val_from_bytes<int8_t>(dptr);
+		      int8_t step    = val_from_bytes<int8_t>(dptr);
+		      desc.set_range(val_min, val_max, step);
+		      break;
+		}
+		case 2: { // UINT8
+		      uint8_t val_min = val_from_bytes<uint8_t>(dptr);
+		      uint8_t val_max = val_from_bytes<uint8_t>(dptr);
+		      uint8_t step    = val_from_bytes<uint8_t>(dptr);
+		      desc.set_range(val_min, val_max, step);
+		      break;
+		}
+		default: {
+		      break;
+		}
+	    }
+
+      } else if (form_flag == 2) { // ENUM
 	    uint16_t count = val_from_bytes<uint16_t>(dptr);
 
 	    switch (dtype) {
@@ -510,6 +595,38 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 	    }
       } else {
       }
+}
+
+float MacPTPCameraControl::battery_level(void)
+{
+	// The BatteryLevel is by definition (PTP) a UINT8.
+      assert(battery_level_.get_type_code() == 2);
+
+      uint32_t rc;
+      uint8_t val = ptp_get_property_u8_(battery_level_.get_property_code(),rc);
+      uint8_t val_min, val_max;
+      if (battery_level_.is_range()) {
+	    uint8_t val_stp;
+	    battery_level_.get_range(val_min, val_max, val_stp);
+      } else {
+	    val_min = battery_level_.get_enum_index<uint8_t>(0);
+	    val_max = val_min;
+	    for (int idx = 1; idx < battery_level_.get_enum_count(); idx += 1) {
+		  uint8_t tmp = battery_level_.get_enum_index<uint8_t>(idx);
+		  if (tmp < val_min)
+			val_min = tmp;
+		  if (tmp > val_max)
+			val_max = tmp;
+	    }
+      }
+
+      if (val >= val_max)
+	    return 100.0;
+      if (val <= val_min)
+	    return 0.0;
+      val -= val_min;
+      val_max -= val_min;
+      return (val * 100.0) / (val_max * 1.0);
 }
 
 void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)

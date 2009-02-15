@@ -23,6 +23,7 @@
 # include  <qapplication.h>
 # include  <QGraphicsPixmapItem>
 # include  <QGraphicsScene>
+# include  <QTimer>
 # include  "ui_camtool.h"
 # include  <CameraControl.h>
 # include  <fstream>
@@ -40,6 +41,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
     private:
       CameraControl*selected_camera_;
 
+      QTimer heartbeat_timer_;
       QGraphicsScene* action_thumbnail_scene_;
       QGraphicsPixmapItem*action_thumbnail_pixmap_;
 
@@ -47,11 +49,16 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Helper methods.
       void no_camera_selected_();
 
+      void display_battery_(void);
+
       void detect_cameras_(void);
       void grab_camera_(void);
       void ungrab_camera_(void);
 
     private slots:
+	// Slot for the heartbeat timer.
+      void heartbeat_slot_();
+
 	// Slots for the Menubar
       void help_about_slot_();
 

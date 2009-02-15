@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>417</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -132,7 +132,7 @@
              <x>0</x>
              <y>0</y>
              <width>482</width>
-             <height>286</height>
+             <height>227</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -557,21 +557,47 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="camera_label" >
-      <property name="sizePolicy" >
-       <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text" >
-       <string>&lt;current camera></string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_8" >
+      <item>
+       <widget class="QLabel" name="camera_label" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>&lt;current camera></string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLCDNumber" name="battery_display" >
+        <property name="font" >
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="toolTip" >
+         <string>Battery level (0 to 100%)</string>
+        </property>
+        <property name="smallDecimalPoint" >
+         <bool>true</bool>
+        </property>
+        <property name="numDigits" >
+         <number>3</number>
+        </property>
+        <property name="segmentStyle" >
+         <enum>QLCDNumber::Flat</enum>
+        </property>
+        <property name="intValue" stdset="0" >
+         <number>999</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
-   <zorder>camera_label</zorder>
-   <zorder>tabWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar" >
    <property name="geometry" >
