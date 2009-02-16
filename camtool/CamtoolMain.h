@@ -29,6 +29,7 @@
 # include  <fstream>
 
 class CamtoolAboutBox;
+class CamtoolAboutDevice;
 
 class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
@@ -61,6 +62,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
 	// Slots for the Menubar
       void help_about_slot_();
+      void help_about_camera_slot_();
 
 	// Slots for the Select Camera page
       void rescan_cameras_slot_(void);
@@ -83,9 +85,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
 	// Slots for the (debug) page
       void select_logfile_slot_(void);
-      void dump_device_slot_(void);
-      void dump_capabilities_slot_(void);
-      void dump_data_slot_(void);
       void dump_generic_slot_(void);
 
       void debug_ptp_set_slot_(void);
@@ -99,5 +98,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
     private:
       Ui::CamtoolMainWidget ui;
       CamtoolAboutBox*about_;
+      CamtoolAboutDevice*about_device_;
 };
 #endif

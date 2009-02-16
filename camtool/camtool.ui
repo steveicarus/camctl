@@ -131,8 +131,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>288</width>
-             <height>134</height>
+             <width>482</width>
+             <height>227</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -371,27 +371,6 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3" >
              <item>
-              <widget class="QPushButton" name="dump_device_button" >
-               <property name="text" >
-                <string>Device</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="dump_capabilities_button" >
-               <property name="text" >
-                <string>Capabilities</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="dump_data_button" >
-               <property name="text" >
-                <string>Data</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QLineEdit" name="dump_generic_entry" />
              </item>
              <item>
@@ -613,12 +592,18 @@
      <string>Help</string>
     </property>
     <addaction name="help_about_action" />
+    <addaction name="help_about_camera_action" />
    </widget>
    <addaction name="menuHelp" />
   </widget>
   <action name="help_about_action" >
    <property name="text" >
     <string>About</string>
+   </property>
+  </action>
+  <action name="help_about_camera_action" >
+   <property name="text" >
+    <string>About Camera</string>
    </property>
   </action>
  </widget>

@@ -49,6 +49,66 @@ MacPTPCameraControl::~MacPTPCameraControl()
 {
 }
 
+template <class T> static T val_from_bytes(UInt8*&buf);
+
+template <> static int8_t val_from_bytes<int8_t>(UInt8*&buf)
+{
+      int8_t val = (int8_t) buf[0];
+      buf += 1;
+      return val;
+}
+
+template <> static uint8_t val_from_bytes<uint8_t>(UInt8*&buf)
+{
+      uint8_t val = (uint8_t) buf[0];
+      buf += 1;
+      return val;
+}
+
+template <> static int16_t val_from_bytes<int16_t>(UInt8*&buf)
+{
+      uint16_t val = (uint16_t) buf[1];
+      val <<= 8;
+      val |= (uint16_t) buf[0];
+      buf += 2;
+      return (int16_t)val;
+}
+
+template <> static uint16_t val_from_bytes<uint16_t>(UInt8*&buf)
+{
+      uint16_t val = (uint16_t) buf[1];
+      val <<= 8;
+      val |= (uint16_t) buf[0];
+      buf += 2;
+      return val;
+}
+
+template <> static int32_t val_from_bytes<int32_t>(UInt8*&buf)
+{
+      uint32_t val = (uint32_t) buf[3];
+      val <<= 8;
+      val |= (uint32_t) buf[2];
+      val <<= 8;
+      val |= (uint32_t) buf[1];
+      val <<= 8;
+      val |= (uint32_t) buf[0];
+      buf += 4;
+      return (int32_t)val;
+}
+
+template <> static uint32_t val_from_bytes<uint32_t>(UInt8*&buf)
+{
+      uint32_t val = (uint32_t) buf[3];
+      val <<= 8;
+      val |= (uint32_t) buf[2];
+      val <<= 8;
+      val |= (uint32_t) buf[1];
+      val <<= 8;
+      val |= (uint32_t) buf[0];
+      buf += 4;
+      return val;
+}
+
 ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
 {
       ICAObjectSendMessagePB msg;
@@ -62,6 +122,28 @@ ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataType = kICATypeData;
 
       return ICAObjectSendMessage(&msg, 0);
+}
+
+void MacPTPCameraControl::ptp_get_device_info_(uint32_t&result_code)
+{
+      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 1024-1];
+      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
+
+      ptp_buf->commandCode = 0x1001; // GetDeviceInfo
+      ptp_buf->numOfInputParams = 0;
+      ptp_buf->numOfOutputParams = 0;
+      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
+      ptp_buf->dataSize = 1024;
+
+      ica_send_message_(ptp_buf, sizeof buf);
+      result_code = ptp_buf->resultCode;
+
+	// now the data[] has the DeviceInfo dataset
+      UInt8*dptr = ptp_buf->data;
+
+      /*uint16_t standard_version =*/ val_from_bytes<uint16_t>(dptr);
+      vendor_extension_id_ = val_from_bytes<uint32_t>(dptr);
+      vendor_extension_vers_ = val_from_bytes<uint16_t>(dptr);
 }
 
 uint8_t MacPTPCameraControl::ptp_get_property_u8_(unsigned prop_code,
@@ -382,66 +464,6 @@ template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint32_t>(con
 {
       assert(type_code_ == 6);
       enum_uint32_ = new std::vector<uint32_t> (ref);
-}
-
-template <class T> static T val_from_bytes(UInt8*&buf);
-
-template <> static int8_t val_from_bytes<int8_t>(UInt8*&buf)
-{
-      int8_t val = (int8_t) buf[0];
-      buf += 1;
-      return val;
-}
-
-template <> static uint8_t val_from_bytes<uint8_t>(UInt8*&buf)
-{
-      uint8_t val = (uint8_t) buf[0];
-      buf += 1;
-      return val;
-}
-
-template <> static int16_t val_from_bytes<int16_t>(UInt8*&buf)
-{
-      uint16_t val = (uint16_t) buf[1];
-      val <<= 8;
-      val |= (uint16_t) buf[0];
-      buf += 2;
-      return (int16_t)val;
-}
-
-template <> static uint16_t val_from_bytes<uint16_t>(UInt8*&buf)
-{
-      uint16_t val = (uint16_t) buf[1];
-      val <<= 8;
-      val |= (uint16_t) buf[0];
-      buf += 2;
-      return val;
-}
-
-template <> static int32_t val_from_bytes<int32_t>(UInt8*&buf)
-{
-      uint32_t val = (uint32_t) buf[3];
-      val <<= 8;
-      val |= (uint32_t) buf[2];
-      val <<= 8;
-      val |= (uint32_t) buf[1];
-      val <<= 8;
-      val |= (uint32_t) buf[0];
-      buf += 4;
-      return (int32_t)val;
-}
-
-template <> static uint32_t val_from_bytes<uint32_t>(UInt8*&buf)
-{
-      uint32_t val = (uint32_t) buf[3];
-      val <<= 8;
-      val |= (uint32_t) buf[2];
-      val <<= 8;
-      val |= (uint32_t) buf[1];
-      val <<= 8;
-      val |= (uint32_t) buf[0];
-      buf += 4;
-      return val;
 }
 
 void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,

@@ -20,6 +20,7 @@
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
 # include  "CamtoolAboutBox.h"
+# include  "CamtoolAboutDevice.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
 # include  <iostream>
@@ -32,6 +33,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 : QMainWindow(parent), heartbeat_timer_(this)
 {
       about_ = 0;
+      about_device_ = 0;
       selected_camera_ = 0;
 
       ui.setupUi(this);
@@ -55,6 +57,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.help_about_action,
 	      SIGNAL(triggered()),
 	      SLOT(help_about_slot_()));
+      connect(ui.help_about_camera_action,
+	      SIGNAL(triggered()),
+	      SLOT(help_about_camera_slot_()));
 
 	// Select Camera
       connect(ui.rescan_button,
@@ -100,15 +105,6 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.select_logfile_button,
 	      SIGNAL(clicked()),
 	      SLOT(select_logfile_slot_()));
-      connect(ui.dump_device_button,
-	      SIGNAL(clicked()),
-	      SLOT(dump_device_slot_()));
-      connect(ui.dump_capabilities_button,
-	      SIGNAL(clicked()),
-	      SLOT(dump_capabilities_slot_()));
-      connect(ui.dump_data_button,
-	      SIGNAL(clicked()),
-	      SLOT(dump_data_slot_()));
       connect(ui.dump_generic_button,
 	      SIGNAL(clicked()),
 	      SLOT(dump_generic_slot_()));
@@ -209,6 +205,25 @@ void CamtoolMain::help_about_slot_(void)
       about_->show();
       about_->raise();
       about_->activateWindow();
+}
+
+void CamtoolMain::help_about_camera_slot_(void)
+{
+      if (about_device_ == 0)
+	    about_device_ = new CamtoolAboutDevice(this);
+
+      if (selected_camera_) {
+	    about_device_->set_devicetree(selected_camera_->describe_camera());
+      } else {
+	    QString root_title ("Camera not selected");
+	    QTreeWidgetItem*root = new QTreeWidgetItem;
+	    root->setText(0,root_title);
+	    about_device_->set_devicetree(root);
+      }
+
+      about_device_->show();
+      about_device_->raise();
+      about_device_->activateWindow();
 }
 
 void CamtoolMain::rescan_cameras_slot_(void)
@@ -337,45 +352,15 @@ void CamtoolMain::select_logfile_slot_(void)
       CameraControl::debug_log << flush;
 }
 
-void CamtoolMain::dump_device_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      selected_camera_->debug_dump(CameraControl::debug_log, "device");
-      CameraControl::debug_log << flush;
-}
-
-void CamtoolMain::dump_capabilities_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      selected_camera_->debug_dump(CameraControl::debug_log, "capabilities");
-      CameraControl::debug_log << flush;
-}
-
-void CamtoolMain::dump_data_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      selected_camera_->debug_dump(CameraControl::debug_log, "data");
-      CameraControl::debug_log << flush;
-}
-
 void CamtoolMain::dump_generic_slot_(void)
 {
       if (selected_camera_ == 0) {
 	    no_camera_selected_();
 	    return;
       }
+
+      std::string argument = ui.dump_generic_entry->text().toAscii().data();
+      selected_camera_->debug_dump(CameraControl::debug_log, argument);
 }
 
 void CamtoolMain::debug_ptp_get_slot_(void)

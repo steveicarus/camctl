@@ -19,6 +19,8 @@
 
 # include  "CameraControl.h"
 # include  "MacICACameraControl.h"
+# include  <QTreeWidgetItem>
+# include  <QString>
 # include  <iostream>
 # include  <iomanip>
 
@@ -46,6 +48,29 @@ CameraControl::CameraControl()
 
 CameraControl::~CameraControl()
 {
+}
+
+QTreeWidgetItem*CameraControl::describe_camera()
+{
+      QTreeWidgetItem*root = new QTreeWidgetItem;
+      root->setText(0, "CameraControl");
+
+      QTreeWidgetItem*tmp = new QTreeWidgetItem;
+      tmp->setText(0, "Make");
+      tmp->setText(1, camera_make().c_str());
+      root->addChild(tmp);
+
+      tmp = new QTreeWidgetItem;
+      tmp->setText(0, "Model");
+      tmp->setText(1, camera_model().c_str());
+      root->addChild(tmp);
+
+      tmp = new QTreeWidgetItem;
+      tmp->setText(0, "control_class");
+      tmp->setText(1, control_class().c_str());
+      root->addChild(tmp);
+
+      return root;
 }
 
 string CameraControl::camera_make(void) const

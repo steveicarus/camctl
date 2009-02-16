@@ -42,6 +42,9 @@ class MacICACameraControl : public CameraControl {
     public:
       ~MacICACameraControl();
 
+    public:
+      virtual QTreeWidgetItem*describe_camera();
+
       std::string control_class(void) const;
       std::string camera_make(void) const;
 
@@ -112,10 +115,6 @@ class MacICACameraControl : public CameraControl {
       void scan_images(std::list<file_key_t>&);
 
       void debug_dump_default_(std::ostream&) const;
-      void debug_dump_capabilities_(std::ostream&) const;
-      void debug_dump_data_(std::ostream&) const;
-      void debug_dump_device_(std::ostream&) const;
-
       static std::ostream& dump_value(std::ostream&out, CFTypeRef ref);
 };
 
@@ -198,11 +197,15 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual std::string debug_property_describe(unsigned prop);
 
     private:
+      void ptp_get_device_info_(void);
+
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
       void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
       uint8_t  ptp_get_property_u8_(unsigned prop_code, uint32_t&rc);
       uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
       uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
+
+      void ptp_get_device_info_(uint32_t&rc);
 
     private:
 	// The PTP standard defines a canonical way to describe
@@ -274,6 +277,9 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
 
     private:
+	// These identify the extension protocol that the device supports.
+      uint32_t vendor_extension_id_;
+      uint16_t vendor_extension_vers_;
 	// Standard camera properties
       prop_desc_t battery_level_;
       prop_desc_t exposure_program_;

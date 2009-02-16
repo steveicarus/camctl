@@ -26,6 +26,7 @@
 # include  <ostream>
 # include  <fstream>
 # include  <inttypes.h>
+class QTreeWidgetItem;
 
 class CameraControl {
 
@@ -52,6 +53,13 @@ class CameraControl {
 
     public: // Methods to get at common properties of the camera and
 	    // the camera port.
+
+	// This method makes a QTreeWidgetItem that describes the
+	// device, in as much detail as is reasonably available. This
+	// may include data that is available individually by the
+	// other methods, and it may include details specific to a
+	// derived class.
+      virtual QTreeWidgetItem*describe_camera();
 
 	// This is a short string that the derived class uses to
 	// identify itself. This is for identifying the class

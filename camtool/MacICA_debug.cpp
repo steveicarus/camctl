@@ -20,11 +20,130 @@
 
 # include  "MacICACameraControl.h"
 # include  <ImageCapture/ImageCapture.h>
+# include  <QTreeWidgetItem>
 # include  <iostream>
 # include  <iomanip>
 # include  <assert.h>
 
 using namespace std;
+
+static void describe_in_tree(QTreeWidgetItem*root, CFDictionaryRef dict);
+static void describe_in_tree(QTreeWidgetItem*root, CFArrayRef val);
+
+static void set_item_value(QTreeWidgetItem*item, CFTypeRef val)
+{
+      Boolean rc;
+      CFTypeID val_type = CFGetTypeID(val);
+
+      if (val_type == CFStringGetTypeID()) {
+	    char buf[1024];
+	    CFIndex slen;
+
+	    CFStringRef val_ref = (CFStringRef)val;
+	    slen = CFStringGetLength(val_ref);
+	    assert(slen < (CFIndex)sizeof buf);
+	    rc = CFStringGetCString(val_ref, buf, sizeof buf, kCFStringEncodingASCII);
+	    assert(rc);
+	    buf[slen] = 0;
+
+	    item->setText(1, QString(buf));
+
+      } else if (val_type == CFNumberGetTypeID()) {
+
+	    CFNumberRef val_ref = (CFNumberRef) val;
+	    switch (CFNumberGetType(val_ref)) {
+		case kCFNumberSInt32Type: {
+		      SInt32 tmp;
+		      rc = CFNumberGetValue(val_ref, kCFNumberSInt32Type, &tmp);
+		      item->setText(1, QString("0x%1 (%2)")
+				    .arg(tmp,8,16, QLatin1Char('0'))
+				    .arg(tmp,0,10));
+		      break;
+		}
+		case kCFNumberSInt64Type: {
+		      SInt64 tmp;
+		      rc = CFNumberGetValue(val_ref, kCFNumberSInt64Type, &tmp);
+		      item->setText(1, QString("0x%1 (%2)")
+				    .arg(tmp,16,16,QLatin1Char('0'))
+				    .arg(tmp,0,10));
+		      break;
+		}
+		default:
+		  item->setText(1, QString("Number type=%1").arg(CFNumberGetType(val_ref)));
+		  break;
+	    }
+
+      } else if (val_type == CFDictionaryGetTypeID()) {
+	    item->setText(1, "");
+	    CFDictionaryRef val_ref = (CFDictionaryRef) val;
+	    describe_in_tree(item, val_ref);
+	    
+      } else if (val_type == CFArrayGetTypeID()) {
+	    item->setText(1, "");
+	    CFArrayRef val_ref = (CFArrayRef) val;
+	    describe_in_tree(item, val_ref);
+	    
+      } else {
+	    item->setText(1, QString("TypeID=%1").arg(val_type));
+      }
+}
+
+static void describe_in_tree(QTreeWidgetItem*root, CFDictionaryRef dict)
+{
+
+	// Now scan the dev_dict dictionary to get all the key/value
+	// pairs for the device.
+      CFIndex dict_size = CFDictionaryGetCount(dict);
+      CFStringRef*keys = new CFStringRef[dict_size];
+      CFTypeRef*values = new CFTypeRef[dict_size];
+      CFDictionaryGetKeysAndValues(dict, (const void**)keys, (const void**)values);
+
+      for (int idx = 0 ; idx < dict_size ; idx += 1) {
+	    char buf[1024];
+	    Boolean rc;
+
+	    CFIndex slen = CFStringGetLength(keys[idx]);
+	    assert(slen < (CFIndex)sizeof buf);
+	    rc = CFStringGetCString(keys[idx], buf, sizeof buf, kCFStringEncodingASCII);
+	    assert(rc);
+	    buf[slen] = 0;
+
+	    QTreeWidgetItem*item = new QTreeWidgetItem;
+	    item->setText(0, buf);
+
+	    set_item_value(item, values[idx]);
+
+	    root->addChild(item);
+      }
+
+      delete[]keys;
+      delete[]values;
+}
+
+static void describe_in_tree(QTreeWidgetItem*root, CFArrayRef val)
+{
+      CFIndex array_size = CFArrayGetCount(val);
+
+      for (CFIndex idx = 0 ; idx < array_size ; idx += 1) {
+	    CFTypeRef cur = (CFTypeRef) CFArrayGetValueAtIndex(val, idx);
+	    QTreeWidgetItem*item = new QTreeWidgetItem;
+	    item->setText(0, QString("%1").arg(idx));
+	    set_item_value(item, cur);
+	    root->addChild(item);
+      }
+}
+
+QTreeWidgetItem* MacICACameraControl::describe_camera(void)
+{
+      QTreeWidgetItem*root = new QTreeWidgetItem;
+      root->setText(0, "MacICACameraControl");
+      root->setFirstColumnSpanned(true);
+
+      describe_in_tree(root, dev_dict_);
+      root->addChild(CameraControl::describe_camera());
+
+      return root;
+}
 
 /*
  * Little convenience function to get a string from a CFStringRef.
@@ -48,7 +167,7 @@ ostream& MacICACameraControl::dump_value(ostream&out, CFTypeRef ref)
 {
       assert(ref);
 
-      CFIndex ref_type = CFGetTypeID(ref);
+      CFTypeID ref_type = CFGetTypeID(ref);
       if (ref_type == CFNumberGetTypeID()) {
 	    int value;
 	    CFNumberGetValue((CFNumberRef)ref, kCFNumberIntType, &value);
@@ -57,7 +176,7 @@ ostream& MacICACameraControl::dump_value(ostream&out, CFTypeRef ref)
       } else if (ref_type == CFStringGetTypeID()) {
 	    char buf[1024];
 	    CFIndex len = CFStringGetLength((CFStringRef) ref);
-	    assert(len < sizeof buf);
+	    assert(len < (CFIndex)sizeof buf);
 	    CFStringGetCString((CFStringRef)ref, buf, sizeof buf, kCFStringEncodingASCII);
 	    buf[len] = 0;
 	    out << "\"" << buf << "\"";
@@ -88,7 +207,7 @@ ostream& MacICACameraControl::dump_value(ostream&out, CFTypeRef ref)
 	    CFStringRef type_str = CFCopyTypeIDDescription(ref_type);
 	    char buf[128];
 	    CFIndex len = CFStringGetLength(type_str);
-	    assert(len < sizeof buf);
+	    assert(len < (CFIndex)sizeof buf);
 	    CFStringGetCString(type_str, buf, sizeof buf, kCFStringEncodingASCII);
 	    buf[len] = 0;
 	    out << "<typeid=" << buf << ">";
@@ -126,73 +245,8 @@ void MacICACameraControl::debug_dump_default_(std::ostream&out) const
       delete[]values;
 }
 
-void MacICACameraControl::debug_dump_capabilities_(std::ostream&out) const
-{
-      CFTypeRef val = (CFTypeRef) CFDictionaryGetValue(dev_dict_, CFSTR("capa"));
-      if (val == 0) {
-	    out << "No device properties key?" << endl;
-	    return;
-      }
-
-      CFStringRef desc = CFCopyDescription(val);
-      size_t len = CFStringGetLength(desc);
-      char*bbuf = new char[len+1];
-      CFStringGetCString(desc, bbuf, len+1, kCFStringEncodingASCII);
-      bbuf[len] = 0;
-      out << bbuf << endl;
-      CFRelease(desc);
-      delete[]bbuf;
-}
-
-void MacICACameraControl::debug_dump_data_(std::ostream&out) const
-{
-      CFTypeRef val = (CFTypeRef) CFDictionaryGetValue(dev_dict_, CFSTR("data"));
-      if (val == 0) {
-	    out << "No data key?" << endl;
-	    return;
-      }
-
-      CFStringRef desc = CFCopyDescription(val);
-      size_t len = CFStringGetLength(desc);
-      char*bbuf = new char[len+1];
-      CFStringGetCString(desc, bbuf, len+1, kCFStringEncodingASCII);
-      bbuf[len] = 0;
-      out << bbuf << endl;
-      CFRelease(desc);
-      delete[]bbuf;
-}
-
-void MacICACameraControl::debug_dump_device_(std::ostream&out) const
-{
-      CFDictionaryRef dev_props = (CFDictionaryRef)CFDictionaryGetValue(dev_dict_, CFSTR("device properties"));
-
-      CFStringRef desc = CFCopyDescription(dev_props);
-      size_t len = CFStringGetLength(desc);
-      char*bbuf = new char[len+1];
-      CFStringGetCString(desc, bbuf, len+1, kCFStringEncodingASCII);
-      bbuf[len] = 0;
-      out << bbuf << endl;
-      CFRelease(desc);
-      delete[]bbuf;
-}
-
 void MacICACameraControl::debug_dump(std::ostream&out, const std::string&detail)const
 {
       out << "**** MacICACameraControl dump " << detail << " ****" << endl;
-      if (detail == "capabilities") {
-	    debug_dump_capabilities_(out);
-	    return;
-      }
-
-      if (detail == "data") {
-	    debug_dump_data_(out);
-	    return;
-      }
-
-      if (detail == "device") {
-	    debug_dump_device_(out);
-	    return;
-      }
-
       debug_dump_default_(out);
 }
