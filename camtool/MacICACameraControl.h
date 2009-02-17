@@ -28,7 +28,9 @@
 
 # include  "CameraControl.h"
 # include  <ImageCapture/ICAApplication.h>
+# include  <QString>
 # include  <map>
+# include  <vector>
 # include  <inttypes.h>
 
 class MacICACameraControl : public CameraControl {
@@ -156,6 +158,8 @@ class MacPTPCameraControl  : public MacICACameraControl {
       ~MacPTPCameraControl();
 
     public:
+      virtual QTreeWidgetItem*describe_camera();
+
       virtual float battery_level(void);
 
       virtual void get_exposure_program_index(std::vector<std::string>&values);
@@ -277,9 +281,23 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
 
     private:
-	// These identify the extension protocol that the device supports.
+	// These Are various descriptive details from the
+	// GetDeviceInfo
+      uint16_t standard_version_;
       uint32_t vendor_extension_id_;
       uint16_t vendor_extension_vers_;
+      QString  vendor_extension_desc_;
+      uint16_t functional_mode_;
+      std::vector<uint16_t> operations_supported_;
+      std::vector<uint16_t> events_supported_;
+      std::vector<uint16_t> device_properties_supported_;
+      std::vector<uint16_t> capture_formats_;
+      std::vector<uint16_t> image_formats_;
+      QString ptp_manufacturer_;
+      QString ptp_model_;
+      QString device_version_;
+      QString serial_number_;
+
 	// Standard camera properties
       prop_desc_t battery_level_;
       prop_desc_t exposure_program_;

@@ -18,6 +18,7 @@
  */
 
 # include  "MacICACameraControl.h"
+# include  <QTreeWidgetItem>
 # include  <sstream>
 # include  <iomanip>
 # include  <stdlib.h>
@@ -36,6 +37,8 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 {
       uint32_t result_code;
 
+      ptp_get_device_info_(result_code);
+
       ptp_get_property_desc_(battery_level_, result_code);
       ptp_get_property_desc_(exposure_program_, result_code);
       ptp_get_property_desc_(exposure_time_, result_code);
@@ -47,6 +50,232 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 
 MacPTPCameraControl::~MacPTPCameraControl()
 {
+}
+
+QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
+{
+      QTreeWidgetItem*item;
+      QTreeWidgetItem*root = new QTreeWidgetItem;
+      root->setText(0, "MacPTPCameraControl");
+      root->setFirstColumnSpanned(true);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "StandardVersion");
+      item->setText(1, QString("%1 (0x%2)")
+		    .arg(standard_version_/100.0, 0, 'f', 2)
+		    .arg(standard_version_, 4, 16, QLatin1Char('0')));
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "VendorExtensionID");
+      item->setText(1, QString("0x%1").arg(vendor_extension_id_, 8, 16, QLatin1Char('0')));
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "VendorExtensionVersion");
+      item->setText(1, QString("%1 (0x%2)")
+		    .arg(vendor_extension_vers_/100.0, 0, 'f', 2)
+		    .arg(vendor_extension_vers_, 4, 16, QLatin1Char('0')));
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "VendorExtensionDesc");
+      item->setText(1, vendor_extension_desc_);
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "FunctionalMode");
+      switch (functional_mode_) {
+	  case 0x0000:
+	    item->setText(1, "Standard Mode");
+	    break;
+	  case 0x0001:
+	    item->setText(1, "Sleep Mode");
+	    break;
+	  default:
+	    item->setText(1, QString("0x%1").arg(functional_mode_, 4, 16, QLatin1Char('0')));
+	    break;
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "OperationsSupported");
+      for (unsigned idx = 0 ; idx < operations_supported_.size() ; idx += 1) {
+	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
+	    switch (operations_supported_[idx]) {
+		case 0x1001:
+		  tmp->setText(1, "GetDeviceInfo");
+		  break;
+		case 0x1002:
+		  tmp->setText(1, "OpenSession");
+		  break;
+		case 0x1003:
+		  tmp->setText(1, "CloseSession");
+		  break;
+		case 0x1009:
+		  tmp->setText(1, "GetObject");
+		  break;
+		case 0x100a:
+		  tmp->setText(1, "GetThumb");
+		  break;
+		case 0x100e:
+		  tmp->setText(1, "InitiateCapture");
+		  break;
+		case 0x1014:
+		  tmp->setText(1, "GetDevicePropDesc");
+		  break;
+		case 0x1015:
+		  tmp->setText(1, "GetDevicePropValue");
+		  break;
+		case 0x1016:
+		  tmp->setText(1, "SetDevicePropvalue");
+		  break;
+		case 0x101c:
+		  tmp->setText(1, "InitiateOpenCapture");
+		  break;
+		default:
+		  tmp->setText(1, QString("0x%1")
+			       .arg(operations_supported_[idx],4,16));
+		  break;
+	    }
+	    item->addChild(tmp);
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "EventsSupported");
+      for (unsigned idx = 0 ; idx < events_supported_.size() ; idx += 1) {
+	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
+	    switch (events_supported_[idx]) {
+		case 0x4002:
+		  tmp->setText(1, "ObjectAdded");
+		  break;
+		case 0x4006:
+		  tmp->setText(1, "DevicePropChanged");
+		  break;
+		case 0x4008:
+		  tmp->setText(1, "DeviceInfoChanged");
+		  break;
+		case 0x400d:
+		  tmp->setText(1, "CaptureComplete");
+		  break;
+		default:
+		  tmp->setText(1, QString("0x%1")
+			       .arg(events_supported_[idx],4,16));
+		  break;
+	    }
+	    item->addChild(tmp);
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "DevicePropertiesSupported");
+      for (size_t idx = 0 ; idx < device_properties_supported_.size() ; idx += 1) {
+	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
+	    tmp->setText(1, QString("0x%1").arg(device_properties_supported_[idx],4,16));
+	    item->addChild(tmp);
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "CaptureFormats");
+      for (size_t idx = 0 ; idx < capture_formats_.size() ; idx += 1) {
+	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
+	    switch (image_formats_[idx]) {
+		case 0x3000:
+		  tmp->setText(1, "Undefined non-image object");
+		  break;
+		case 0x3001:
+		  tmp->setText(1, "Association (e.g. directory)");
+		  break;
+		case 0x3002:
+		  tmp->setText(1, "Script (device-model specific)");
+		  break;
+		case 0x3006:
+		  tmp->setText(1, "Digital Print Order Format (text)");
+		  break;
+		case 0x3800:
+		  tmp->setText(1, "Unknown image object");
+		  break;
+		case 0x3801:
+		  tmp->setText(1, "EXIF/JPEG");
+		  break;
+		case 0x3808:
+		  tmp->setText(1, "JFIF");
+		  break;
+		case 0x380d:
+		  tmp->setText(1, "TIFF");
+		  break;
+		default:
+		  tmp->setText(1, QString("0x%1")
+			       .arg(image_formats_[idx],4,16));
+		  break;
+	    }
+	    item->addChild(tmp);
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "ImageFormats");
+      for (size_t idx = 0 ; idx < image_formats_.size() ; idx += 1) {
+	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
+	    switch (image_formats_[idx]) {
+		case 0x3000:
+		  tmp->setText(1, "Undefined non-image object");
+		  break;
+		case 0x3001:
+		  tmp->setText(1, "Association (e.g. directory)");
+		  break;
+		case 0x3002:
+		  tmp->setText(1, "Script (device-model specific)");
+		  break;
+		case 0x3006:
+		  tmp->setText(1, "Digital Print Order Format (text)");
+		  break;
+		case 0x3800:
+		  tmp->setText(1, "Unknown image object");
+		  break;
+		case 0x3801:
+		  tmp->setText(1, "EXIF/JPEG");
+		  break;
+		case 0x3808:
+		  tmp->setText(1, "JFIF");
+		  break;
+		case 0x380d:
+		  tmp->setText(1, "TIFF");
+		  break;
+		default:
+		  tmp->setText(1, QString("0x%1")
+			       .arg(image_formats_[idx],4,16));
+		  break;
+	    }
+	    item->addChild(tmp);
+      }
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "Manufacturer");
+      item->setText(1, ptp_manufacturer_);
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "Model");
+      item->setText(1, ptp_model_);
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "DeviceVersion");
+      item->setText(1, device_version_);
+      root->addChild(item);
+
+      item = new QTreeWidgetItem;
+      item->setText(0, "SerialNumber");
+      item->setText(1, serial_number_);
+      root->addChild(item);
+
+      root->addChild(MacICACameraControl::describe_camera());
+
+      return root;
 }
 
 template <class T> static T val_from_bytes(UInt8*&buf);
@@ -109,6 +338,30 @@ template <> static uint32_t val_from_bytes<uint32_t>(UInt8*&buf)
       return val;
 }
 
+template <> static vector<uint16_t> val_from_bytes< vector<uint16_t> >(UInt8*&buf)
+{
+      uint32_t size = val_from_bytes<uint32_t>(buf);
+      vector<uint16_t> val (size);
+      for (size_t idx = 0 ; idx < val.size() ; idx += 1)
+	    val[idx] = val_from_bytes<uint16_t>(buf);
+
+      return val;
+}
+
+template<> static QString val_from_bytes<QString>(UInt8*&buf)
+{
+      QString result;
+      uint8_t slen = val_from_bytes<uint8_t>(buf);
+      if (slen > 0) {
+	    unsigned short*str = new unsigned short[slen];
+	    for (uint8_t idx = 0 ; idx < slen ; idx += 1)
+		  str[idx] = val_from_bytes<uint16_t>(buf);
+	    result.setUtf16(str, slen);
+	    delete[]str;
+      }
+      return result;
+}
+
 ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
 {
       ICAObjectSendMessagePB msg;
@@ -141,9 +394,20 @@ void MacPTPCameraControl::ptp_get_device_info_(uint32_t&result_code)
 	// now the data[] has the DeviceInfo dataset
       UInt8*dptr = ptp_buf->data;
 
-      /*uint16_t standard_version =*/ val_from_bytes<uint16_t>(dptr);
+      standard_version_ = val_from_bytes<uint16_t>(dptr);
       vendor_extension_id_ = val_from_bytes<uint32_t>(dptr);
       vendor_extension_vers_ = val_from_bytes<uint16_t>(dptr);
+      vendor_extension_desc_ = val_from_bytes<QString>(dptr);
+      functional_mode_ = val_from_bytes<uint16_t>(dptr);
+      operations_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
+      events_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
+      device_properties_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
+      capture_formats_ = val_from_bytes< vector<uint16_t> >(dptr);
+      image_formats_ = val_from_bytes< vector<uint16_t> >(dptr);
+      ptp_manufacturer_ = val_from_bytes<QString>(dptr);
+      ptp_model_ = val_from_bytes<QString>(dptr);
+      device_version_ = val_from_bytes<QString>(dptr);
+      serial_number_ = val_from_bytes<QString>(dptr);
 }
 
 uint8_t MacPTPCameraControl::ptp_get_property_u8_(unsigned prop_code,
