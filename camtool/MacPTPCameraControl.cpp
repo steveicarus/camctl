@@ -18,6 +18,7 @@
  */
 
 # include  "MacICACameraControl.h"
+# include  "ptp_misc.h"
 # include  <QTreeWidgetItem>
 # include  <sstream>
 # include  <iomanip>
@@ -102,42 +103,9 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       item->setText(0, "OperationsSupported");
       for (unsigned idx = 0 ; idx < operations_supported_.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    switch (operations_supported_[idx]) {
-		case 0x1001:
-		  tmp->setText(1, "GetDeviceInfo");
-		  break;
-		case 0x1002:
-		  tmp->setText(1, "OpenSession");
-		  break;
-		case 0x1003:
-		  tmp->setText(1, "CloseSession");
-		  break;
-		case 0x1009:
-		  tmp->setText(1, "GetObject");
-		  break;
-		case 0x100a:
-		  tmp->setText(1, "GetThumb");
-		  break;
-		case 0x100e:
-		  tmp->setText(1, "InitiateCapture");
-		  break;
-		case 0x1014:
-		  tmp->setText(1, "GetDevicePropDesc");
-		  break;
-		case 0x1015:
-		  tmp->setText(1, "GetDevicePropValue");
-		  break;
-		case 0x1016:
-		  tmp->setText(1, "SetDevicePropvalue");
-		  break;
-		case 0x101c:
-		  tmp->setText(1, "InitiateOpenCapture");
-		  break;
-		default:
-		  tmp->setText(1, QString("0x%1")
-			       .arg(operations_supported_[idx],4,16));
-		  break;
-	    }
+	    string opcode_string = ptp_opcode_string(operations_supported_[idx],
+						     vendor_extension_id_);
+	    tmp->setText(1, opcode_string.c_str());
 	    item->addChild(tmp);
       }
       root->addChild(item);
@@ -172,7 +140,9 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       item->setText(0, "DevicePropertiesSupported");
       for (size_t idx = 0 ; idx < device_properties_supported_.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    tmp->setText(1, QString("0x%1").arg(device_properties_supported_[idx],4,16));
+	    string prop_string =  ptp_property_string(device_properties_supported_[idx],
+						      vendor_extension_id_);
+	    tmp->setText(1, prop_string.c_str());
 	    item->addChild(tmp);
       }
       root->addChild(item);

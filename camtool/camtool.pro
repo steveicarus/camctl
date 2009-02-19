@@ -15,6 +15,7 @@ HEADERS += CamtoolMain.h CamtoolAboutBox.h CamtoolAboutDevice.h
 SOURCES += main.cpp CamtoolMain.cpp grab_camera.cpp camera_images.cpp
 SOURCES += CamtoolAboutBox.cpp
 SOURCES += CamtoolAboutDevice.cpp
+SOURCES += ptp_misc.cpp
 
 # The CameraControl base class
 HEADERS += CameraControl.h
