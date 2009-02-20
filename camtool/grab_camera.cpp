@@ -102,6 +102,17 @@ void CamtoolMain::grab_camera_(void)
       ui.focus_mode_box->setCurrentIndex(ext_cur);
       ui.focus_mode_box->setEnabled(selected_camera_->set_focus_mode_ok());
 
+	// Get Image Size
+      selected_camera_->get_image_size_index(val_enum);
+      ext_cur = selected_camera_->get_image_size_index();
+
+      ui.image_size_box->clear();
+      for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
+	    ui.image_size_box->addItem(val_enum[idx].c_str());
+      }
+      ui.image_size_box->setCurrentIndex(ext_cur);
+      ui.image_size_box->setEnabled(selected_camera_->set_image_size_ok());
+
 	// Get the initial image list, and register for new images.
       camera_images(selected_camera_);
       selected_camera_->set_image_notification(this);

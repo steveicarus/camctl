@@ -102,6 +102,25 @@ float CameraControl::battery_level(void)
       return -1;
 }
 
+void CameraControl::get_image_size_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int CameraControl::get_image_size_index()
+{
+      return -1;
+}
+
+void CameraControl::set_image_size_index(int)
+{
+}
+
+bool CameraControl::set_image_size_ok()
+{
+      return false;
+}
+
 void CameraControl::get_exposure_program_index(vector<string>&values)
 {
       values.clear();

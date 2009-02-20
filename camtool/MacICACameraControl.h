@@ -162,6 +162,11 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
       virtual float battery_level(void);
 
+      virtual void get_image_size_index(std::vector<std::string>&values);
+      virtual int  get_image_size_index();
+      virtual void set_image_size_index(int);
+      virtual bool set_image_size_ok();
+
       virtual void get_exposure_program_index(std::vector<std::string>&values);
       virtual int  get_exposure_program_index();
       virtual void set_exposure_program_index(int);
@@ -205,9 +210,11 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
       void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
+      void ptp_set_property_string_(unsigned prop_code, const QString&val, uint32_t&rc);
       uint8_t  ptp_get_property_u8_(unsigned prop_code, uint32_t&rc);
       uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
       uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
+      QString ptp_get_property_string_(unsigned prop_code, uint32_t&rc);
 
       void ptp_get_device_info_(uint32_t&rc);
 
@@ -275,6 +282,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 		  std::vector<uint16_t>* enum_uint16_;
 		  std::vector<int32_t>* enum_int32_;
 		  std::vector<uint32_t>* enum_uint32_;
+		  std::vector<QString>* enum_string_;
 	    };
       };
       void ptp_get_property_desc_(prop_desc_t&, uint32_t&result_code);
@@ -300,6 +308,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
 	// Standard camera properties
       prop_desc_t battery_level_;
+      prop_desc_t image_size_;
       prop_desc_t exposure_program_;
       prop_desc_t exposure_time_;
       prop_desc_t fnumber_;

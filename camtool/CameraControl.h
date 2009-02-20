@@ -84,6 +84,11 @@ class CameraControl {
 	// Return the battery level 0-100, or -1 if unavailable or N/A
       virtual float battery_level(void);
 
+      virtual void get_image_size_index(std::vector<std::string>&values);
+      virtual int  get_image_size_index();
+      virtual void set_image_size_index(int);
+      virtual bool set_image_size_ok();
+
       virtual void get_exposure_program_index(std::vector<std::string>&values);
       virtual int  get_exposure_program_index();
       virtual void set_exposure_program_index(int);

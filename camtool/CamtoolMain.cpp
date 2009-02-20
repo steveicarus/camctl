@@ -86,10 +86,12 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.flash_mode_box,
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(flash_mode_slot_(int)));
-
       connect(ui.focus_mode_box,
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(focus_mode_slot_(int)));
+      connect(ui.image_size_box,
+	      SIGNAL(currentIndexChanged(int)),
+	      SLOT(image_size_slot_(int)));
 
 	// Actions
       connect(ui.action_capture_button,
@@ -310,6 +312,14 @@ void CamtoolMain::focus_mode_slot_(int index)
 	    return;
 
       selected_camera_->set_focus_mode_index(index);
+}
+
+void CamtoolMain::image_size_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_image_size_index(index);
 }
 
 void CamtoolMain::action_capture_slot_(void)
