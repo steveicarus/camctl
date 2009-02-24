@@ -89,7 +89,37 @@ static string ptp_standard_properties[] = {
       "CopyrightInfo"       // 0x501f
 };
 
-string ptp_opcode_string(uint16_t code, uint32_t)
+template<class KT, class VT> struct key_value {
+      KT key;
+      VT value;
+};
+
+static key_value<uint16_t,string> ptp_novendor_operation_codes[] = {
+      { 0xffff, "" }
+};
+
+static key_value<uint16_t,string> ptp_nikon_operation_codes[] = {
+      { 0x90c0, "NIKON Capture" },
+      { 0x90c1, "NIKON AfDrive" },
+      { 0x90c2, "NIKON SetControlMode" },
+      { 0x90c3, "NIKON DelImageSDRAM" },
+      { 0x90c4, "NIKON 90c4" },
+      { 0x90c5, "NIKON CurveDownload" },
+      { 0x90c6, "NIKON CurveUpload" },
+      { 0x90c7, "NIKON CheckEvent" },
+      { 0x90c8, "NIKON DeviceReady" },
+      { 0x90c9, "NIKON SetPreWBData" },
+      { 0x90ca, "NIKON 90ca" },
+      { 0x90cb, "NIKON AfCaptureSDRAM" },
+      { 0x9801, "MTP GetObjectPropsSupported" },
+      { 0x9802, "MTP GetObjectPropDesc" },
+      { 0x9803, "MTP GetObjectPropValue" },
+      { 0x9804, "MTP SetObjectPropValue" },
+      { 0x9805, "MTP GetObjPropList" },
+      { 0xffff, "" }
+};
+
+string ptp_opcode_string(uint16_t code, uint32_t extension_id)
 {
       if ( (code&0xf000) == 0x1000 ) { // PTP Standard Opcodes
 	    if ((code&0x0fff) <= 0x001c)
@@ -102,8 +132,24 @@ string ptp_opcode_string(uint16_t code, uint32_t)
 
       if ( (code&0xf000) == 0x9000 ) { // Vendor Opcodes
 
+	    key_value<uint16_t,string>*vendor_operation_codes;
+	    switch (extension_id) {
+		case 0x00a:
+		  vendor_operation_codes = ptp_nikon_operation_codes;
+		  break;
+		default:
+		  vendor_operation_codes = ptp_novendor_operation_codes;
+		  break;
+	    }
+
+	    while (vendor_operation_codes->key < code)
+		  vendor_operation_codes += 1;
+
+	    if (vendor_operation_codes->key == code)
+		  return vendor_operation_codes->value;
+
 	    ostringstream tmp;
-	    tmp << "Vendor-" << hex << code << ends;
+	    tmp << "Vendor[" << hex << extension_id << "]-" << hex << code << ends;
 	    return tmp.str();
       }
 

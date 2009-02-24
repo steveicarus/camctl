@@ -57,6 +57,14 @@ MacPTPCameraControl::~MacPTPCameraControl()
 
 QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
 {
+      uint32_t use_extension_id = vendor_extension_id_;
+	// Some Nikon cameras forgot to set their vendor extension ID
+	// to Nikon, and instead report themselves as "Microsoft." So
+	// define a practical extension id to use.
+      if (use_extension_id == 0x006 && camera_make() == "Nikon") {
+	    use_extension_id = 0x000a;
+      }
+
       QTreeWidgetItem*item;
       QTreeWidgetItem*root = new QTreeWidgetItem;
       root->setText(0, "MacPTPCameraControl");
@@ -106,7 +114,7 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       for (unsigned idx = 0 ; idx < operations_supported_.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
 	    string opcode_string = ptp_opcode_string(operations_supported_[idx],
-						     vendor_extension_id_);
+						     use_extension_id);
 	    tmp->setText(1, opcode_string.c_str());
 	    item->addChild(tmp);
       }
@@ -143,8 +151,8 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       for (size_t idx = 0 ; idx < device_properties_supported_.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
 	    string prop_string =  ptp_property_string(device_properties_supported_[idx],
-						      vendor_extension_id_);
-	    tmp->setText(1, prop_string.c_str());
+						      use_extension_id);
+	    tmp->setText(0, prop_string.c_str());
 	    item->addChild(tmp);
       }
       root->addChild(item);
