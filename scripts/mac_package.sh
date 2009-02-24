@@ -6,6 +6,11 @@
 
 cp -r camtool/camtool.app .
 
-scripts/macdeployqt/macdeployqt camtool.app -dmg
+scripts/macdeployqt/macdeployqt camtool.app
 
-rm -rf camtool.app
+basename='Icarus Camera Control'
+mv camtool.app "$basename.app"
+
+hdiutil create "$basename".dmg -srcfolder "$basename".app -format UDZO -volname "$basename"
+
+rm -rf "$basename".app
