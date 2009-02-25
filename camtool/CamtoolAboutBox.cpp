@@ -21,12 +21,14 @@
 # include  "CamtoolAboutBox.h"
 # include  <iostream>
 
+# include  "version.h"
 using namespace std;
 
 CamtoolAboutBox::CamtoolAboutBox(QWidget*parent)
 : QDialog(parent)
 {
       ui.setupUi(this);
+      ui.version_label->setText(version_string);
 }
 
 CamtoolAboutBox::~CamtoolAboutBox()

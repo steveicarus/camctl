@@ -11,7 +11,7 @@ QMAKE_CXXFLAGS += -F/System/Library/Frameworks/Carbon.framework/Frameworks
 
 # User interface files
 FORMS   += camtool.ui aboutbox.ui aboutdevice.ui
-HEADERS += CamtoolMain.h CamtoolAboutBox.h CamtoolAboutDevice.h
+HEADERS += CamtoolMain.h CamtoolAboutBox.h CamtoolAboutDevice.h version.h
 SOURCES += main.cpp CamtoolMain.cpp grab_camera.cpp camera_images.cpp
 SOURCES += CamtoolAboutBox.cpp
 SOURCES += CamtoolAboutDevice.cpp
