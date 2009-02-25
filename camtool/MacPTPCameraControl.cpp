@@ -258,6 +258,37 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       return root;
 }
 
+bool MacPTPCameraControl::operation_is_supported_(uint16_t code) const
+{
+      for (int idx = 0 ; idx < operations_supported_.size() ; idx += 1)
+	    if (code == operations_supported_[idx])
+		  return true;
+
+      return false;
+}
+
+CameraControl::capture_resp_t MacPTPCameraControl::capture_image(void)
+{
+      if (!operation_is_supported_(0x100e))
+	    return CAP_NOT_SUPPORTED;
+
+      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 0];
+      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
+
+      ptp_buf->commandCode = 0x100e; // InitiateCapture
+      ptp_buf->numOfInputParams = 2;
+      ptp_buf->params[0] = 0x00000000; // StorageID
+      ptp_buf->params[1] = 0x00000000; // ObjectformatCode
+      ptp_buf->numOfOutputParams = 0;
+      ptp_buf->dataUsageMode = kICACameraPassThruNotUsed;
+      ptp_buf->dataSize = 0;
+
+      ica_send_message_(ptp_buf, sizeof buf);
+      uint32_t result_code = ptp_buf->resultCode;
+
+      return CAP_OK;
+}
+
 template <class T> static T val_from_bytes(UInt8*&buf);
 
 template <> static int8_t val_from_bytes<int8_t>(UInt8*&buf)

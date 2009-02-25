@@ -38,7 +38,7 @@ MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[]
       { 0x04b0, 0x0104,  "Nikon", "Coolpix 995",    MacBlacklist },
       { 0x04b0, 0x0412,  "Nikon", "D80",            MacPTP },
 	// Terminate the list
-      { 0x0000, 0x0000,  0, 0, MacGeneric }
+      { 0x0000, 0x0000,  0, 0, MacPTP }
 };
 
 map<MacICACameraControl::usb_id_t,MacICACameraControl::dev_name_t> MacICACameraControl::usb_map_names;
@@ -88,7 +88,9 @@ const MacICACameraControl::dev_class_t MacICACameraControl::id_to_class(const Ma
       if (cur != usb_map_classes.end())
 	    return cur->second;
 
-      usb_map_classes[id] = MacGeneric;
+	// If no other detail is given, then assume this is some sort
+	// of PTP camera.
+      usb_map_classes[id] = MacPTP;
       return usb_map_classes[id];
 }
 

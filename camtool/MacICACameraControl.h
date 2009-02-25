@@ -160,6 +160,8 @@ class MacPTPCameraControl  : public MacICACameraControl {
     public:
       virtual QTreeWidgetItem*describe_camera();
 
+      capture_resp_t capture_image(void);
+
       virtual float battery_level(void);
 
       virtual void get_image_size_index(std::vector<std::string>&values);
@@ -305,6 +307,9 @@ class MacPTPCameraControl  : public MacICACameraControl {
       QString ptp_model_;
       QString device_version_;
       QString serial_number_;
+
+	// Test if the operation is supported
+      bool operation_is_supported_(uint16_t) const;
 
 	// Standard camera properties
       prop_desc_t battery_level_;
