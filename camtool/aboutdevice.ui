@@ -49,13 +49,14 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons" >
-      <set>QDialogButtonBox::Close</set>
+      <set>QDialogButtonBox::Close|QDialogButtonBox::Save</set>
      </property>
     </widget>
    </item>
   </layout>
   <zorder>label</zorder>
   <zorder>buttonBox</zorder>
+  <zorder>pushButton</zorder>
   <zorder>about_device_tree</zorder>
  </widget>
  <resources/>

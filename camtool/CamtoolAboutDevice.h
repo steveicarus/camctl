@@ -34,6 +34,12 @@ class CamtoolAboutDevice : public QDialog {
       void set_devicetree(QTreeWidgetItem*tree);
 
     private:
+      void do_save_();
+
+    private slots:
+      void button_box_slot_(QAbstractButton*button);
+
+    private:
       Ui::AboutDeviceDialog ui;
 };
 

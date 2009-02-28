@@ -19,7 +19,9 @@
 
 # include  <qapplication.h>
 # include  "CamtoolAboutDevice.h"
-# include  <iostream>
+# include  <QFileDialog>
+# include  <fstream>
+# include  <iomanip>
 
 using namespace std;
 
@@ -27,6 +29,10 @@ CamtoolAboutDevice::CamtoolAboutDevice(QWidget*parent)
 : QDialog(parent)
 {
       ui.setupUi(this);
+
+      connect(ui.buttonBox,
+	      SIGNAL(clicked(QAbstractButton*)),
+	      SLOT(button_box_slot_(QAbstractButton*)));
 }
 
 CamtoolAboutDevice::~CamtoolAboutDevice()
@@ -37,4 +43,45 @@ void CamtoolAboutDevice::set_devicetree(QTreeWidgetItem*tree)
 {
       ui.about_device_tree->clear();
       ui.about_device_tree->addTopLevelItem(tree);
+}
+
+void CamtoolAboutDevice::button_box_slot_(QAbstractButton*button)
+{
+      if (ui.buttonBox->standardButton(button) == QDialogButtonBox::Save)
+	    do_save_();
+}
+
+static void dump_tree(ostream&file, QTreeWidgetItem*root, int indent)
+{
+      file << setw(indent) << "";
+      for (int idx = 0 ; idx < root->columnCount() ; idx += 1) {
+	    QString text = root->text(idx);
+	    if (idx > 0)
+		  file << " / ";
+	    if (text.isEmpty())
+		  file << "-";
+	    else
+		  file << text.toStdString();
+      }
+      file << endl;
+
+      for (int idx = 0 ; idx < root->childCount() ; idx += 1)
+	    dump_tree(file, root->child(idx), indent + 4);
+}
+
+void CamtoolAboutDevice::do_save_()
+{
+      QString path = QFileDialog::getSaveFileName(0, tr("Where to write Camera Details"));
+      if (path.isEmpty())
+	    return;
+
+      ofstream file (path.toAscii());
+      QTreeWidgetItem*root = ui.about_device_tree->invisibleRootItem();
+
+      if (root == 0) {
+	    file << "*** No description? ***" << endl;
+	    return;
+      }
+
+      dump_tree(file, root, 0);
 }
