@@ -76,9 +76,11 @@ void CamtoolMain::images_list_slot_(QListWidgetItem*item)
       selected_camera_->get_image_data(file_index.toInt(), buf, buf_len);
 
       QString path = QFileDialog::getSaveFileName(0, tr("Save Image"), file_name);
-      FILE*fd = fopen(path.toAscii(), "wb");
-      assert(fd);
-      fwrite(buf, 1, buf_len, fd);
-      fclose(fd);
+      if (! path.isEmpty()) {
+	    FILE*fd = fopen(path.toAscii(), "wb");
+	    assert(fd);
+	    fwrite(buf, 1, buf_len, fd);
+	    fclose(fd);
+      }
       delete[]buf;
 }
