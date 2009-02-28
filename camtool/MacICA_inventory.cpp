@@ -32,11 +32,36 @@ using namespace std;
  * doesn't matter, as long as the vendor/device pair is unique.
  */
 MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[] = {
-	// Canon
+	// Canon (Vendor 0x04a9)
+      { 0x04a9, 0x30b7,  "Canon", "PowerShot A400", MacPTP },
+      { 0x04a9, 0x30b8,  "Canon", "PowerShot A310", MacPTP },
+      { 0x04a9, 0x30c0,  "Canon", "PowerShot SD200",MacPTP },
+      { 0x04a9, 0x30c1,  "Canon", "PowerShot A520", MacPTP },
+      { 0x04a9, 0x30c2,  "Canon", "PowerShot A510", MacPTP },
+      { 0x04a9, 0x30ea,  "Canon", "EOS 1D Mark II", MacPTP },
+      { 0x04a9, 0x30ec,  "Canon", "EOS 20D",        MacPTP },
+      { 0x04a9, 0x30ef,  "Canon", "EOS 350D",       MacPTP },
+      { 0x04a9, 0x30f0,  "Canon", "PowerShot S2 IS",MacPTP },
+      { 0x04a9, 0x30f2,  "Canon", "Digital IXUS 700",MacPTP },
+      { 0x04a9, 0x30f9,  "Canon", "PowerShot A410", MacPTP },
+      { 0x04a9, 0x30fc,  "Canon", "PowerShot A620", MacPTP },
+      { 0x04a9, 0x30fd,  "Canon", "PowerShot A610", MacPTP },
+      { 0x04a9, 0x30fe,  "Canon", "Digital IXUS 65",MacPTP },
+      { 0x04a9, 0x30ff,  "Canon", "Digital IXUS 55",MacPTP },
+      { 0x04a9, 0x310e,  "Canon", "Digital IXUS 50",MacPTP },
+      { 0x04a9, 0x3116,  "Canon", "Digital IXUS 750",MacPTP },
       { 0x04a9, 0x314d,  "Canon", "Powershot A560", MacBlacklist },
-	// Nikon devices
+	// Nikon devices (Vendor 0x04b0)
       { 0x04b0, 0x0104,  "Nikon", "Coolpix 995",    MacBlacklist },
+      { 0x04b0, 0x0402,  "Nikon", "D100",           MacPTP },
+      { 0x04b0, 0x0404,  "Nikon", "D2H SLR",        MacPTP },
+      { 0x04b0, 0x0406,  "Nikon", "D70",            MacPTP },
+      { 0x04b0, 0x0408,  "Nikon", "D2X SLR",        MacPTP },
+      { 0x04b0, 0x0409,  "Nikon", "D50",            MacPTP },
+      { 0x04b0, 0x040a,  "Nikon", "D50",            MacPTP },
+      { 0x04b0, 0x040e,  "Nikon", "D70s",           MacPTP },
       { 0x04b0, 0x0412,  "Nikon", "D80",            MacPTP },
+	// Apple (Vendor 0x05ac)
 	// Terminate the list
       { 0x0000, 0x0000,  0, 0, MacPTP }
 };
