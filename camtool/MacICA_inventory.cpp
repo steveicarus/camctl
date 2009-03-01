@@ -61,7 +61,9 @@ MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[]
       { 0x04b0, 0x040a,  "Nikon", "D50",            MacPTP },
       { 0x04b0, 0x040e,  "Nikon", "D70s",           MacPTP },
       { 0x04b0, 0x0412,  "Nikon", "D80",            MacPTP },
+      { 0x04b0, 0x0421,  "Nikon", "D90",            MacPTP },
 	// Apple (Vendor 0x05ac)
+      { 0x05ac, 0x1293,  "Apple", "iPod",           MacBlacklist },
 	// Terminate the list
       { 0x0000, 0x0000,  0, 0, MacPTP }
 };
