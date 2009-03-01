@@ -77,6 +77,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void flash_mode_slot_(int state);
       void focus_mode_slot_(int state);
       void image_size_slot_(int state);
+      void white_balance_slot_(int state);
 
 	// Slots for the Actions page
       void action_capture_slot_(void);

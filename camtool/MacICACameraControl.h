@@ -199,6 +199,11 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual void set_focus_mode_index(int);
       virtual bool set_focus_mode_ok();
 
+      virtual void get_white_balance_index(std::vector<std::string>&values);
+      virtual int  get_white_balance_index();
+      virtual void set_white_balance_index(int);
+      virtual bool set_white_balance_ok();
+
     public:
 	// Debug aids
       virtual int debug_property_get(unsigned prop, unsigned dtype,
@@ -319,6 +324,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	// Standard camera properties
       prop_desc_t battery_level_;
       prop_desc_t image_size_;
+      prop_desc_t white_balance_;
       prop_desc_t exposure_program_;
       prop_desc_t exposure_time_;
       prop_desc_t fnumber_;

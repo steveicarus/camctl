@@ -30,6 +30,7 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 : MacICACameraControl(dev),
     battery_level_(0x5001 /* PTP BatteryLevel */),
     image_size_(0x5003    /* PTP ImageSize */),
+    white_balance_(0x5005 /* PTP WhiteBalance */),
     exposure_program_(0x500e /* PTP ExposureProgramMode */),
     exposure_time_(0x500d /* PTP ExposureTime */),
     fnumber_(0x5007 /* PTP FNumber */),
@@ -43,6 +44,7 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 
       ptp_get_property_desc_(battery_level_, result_code);
       ptp_get_property_desc_(image_size_, result_code);
+      ptp_get_property_desc_(white_balance_, result_code);
       ptp_get_property_desc_(exposure_program_, result_code);
       ptp_get_property_desc_(exposure_time_, result_code);
       ptp_get_property_desc_(fnumber_, result_code);
@@ -1353,6 +1355,51 @@ void MacPTPCameraControl::set_focus_mode_index(int use_index)
 bool MacPTPCameraControl::set_focus_mode_ok()
 {
       return focus_mode_.set_ok();
+}
+
+
+void MacPTPCameraControl::get_white_balance_index(vector<string>&values)
+{
+      values.resize(white_balance_.get_enum_count());
+	// The WhiteBalance is by definition (PTP) a UINT16.
+      assert(white_balance_.get_type_code() == 4);
+
+      uint16_t prop_code = white_balance_.get_property_code();
+      for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
+	    uint16_t val_code = white_balance_.get_enum_index<uint16_t>(idx);
+	    values[idx] = ptp_property_value16_string(prop_code, val_code,
+						      ptp_extension_vendor_());
+      }
+}
+
+int MacPTPCameraControl::get_white_balance_index()
+{
+      uint32_t rc;
+      uint16_t val = ptp_get_property_u16_(white_balance_.get_property_code(), rc);
+      for (int idx = 0 ; idx < white_balance_.get_enum_count() ; idx += 1) {
+	    if (val == white_balance_.get_enum_index<uint16_t>(idx))
+		  return (int)idx;
+      }
+
+      return -1;
+}
+
+void MacPTPCameraControl::set_white_balance_index(int use_index)
+{
+      if (use_index < 0)
+	    return;
+      if (use_index >= white_balance_.get_enum_count())
+	    use_index = 0;
+
+      uint32_t rc;
+      ptp_set_property_u16_(white_balance_.get_property_code(),
+			    white_balance_.get_enum_index<uint16_t>(use_index),
+			    rc);
+}
+
+bool MacPTPCameraControl::set_white_balance_ok()
+{
+      return white_balance_.set_ok();
 }
 
 int MacPTPCameraControl::debug_property_get(unsigned prop,

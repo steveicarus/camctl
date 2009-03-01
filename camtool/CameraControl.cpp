@@ -235,6 +235,25 @@ bool CameraControl::set_focus_mode_ok()
       return false;
 }
 
+void CameraControl::get_white_balance_index(vector<string>&values)
+{
+      values.clear();
+}
+
+int32_t CameraControl::get_white_balance_index()
+{
+      return -1;
+}
+
+void CameraControl::set_white_balance_index(int)
+{
+}
+
+bool CameraControl::set_white_balance_ok()
+{
+      return false;
+}
+
 const list<CameraControl::file_key_t>&CameraControl::image_list()
 {
       image_list_.clear();

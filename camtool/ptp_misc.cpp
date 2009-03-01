@@ -203,6 +203,15 @@ static string ptp_standard_properties[] = {
  * table. Vendor-specific property values are put into vendor-specific tables.
  */
 static key_value<key_pair<uint16_t,uint16_t>,string> ptp_standard_property16_values[] = {
+	// WhiteBalance
+      { { 0x5005, 0x0000 }, "Undefined" },
+      { { 0x5005, 0x0001 }, "Manual" },
+      { { 0x5005, 0x0002 }, "Automatic" },
+      { { 0x5005, 0x0003 }, "One-push Automatic" },
+      { { 0x5005, 0x0004 }, "Daylight" },
+      { { 0x5005, 0x0005 }, "Florescent" },
+      { { 0x5005, 0x0006 }, "Tungsten" },
+      { { 0x5005, 0x0007 }, "Flash" },
 	// FocusMode
       { { 0x500a, 0x0000 }, "Undefined" },
       { { 0x500a, 0x0001 }, "Manual" },
@@ -228,6 +237,11 @@ static key_value<key_pair<uint16_t,uint16_t>,string> ptp_standard_property16_val
 };
 
 static key_value<key_pair<uint16_t,uint16_t>,string> ptp_nikon_property16_values[] = {
+	// WhiteBalance
+      { { 0x5005, 0x8010 }, "NIKON Cloudy" },
+      { { 0x5005, 0x8011 }, "NIKON Shade" },
+      { { 0x5005, 0x8012 }, "NIKON Color Temperature" },
+      { { 0x5005, 0x8013 }, "NIKON Preset White Balance" },
 	// FlashMode
       { { 0x500c, 0x8010 }, "NIKON Fill-flash" },
       { { 0x500c, 0x8012 }, "NIKON Rear curtain sync" }

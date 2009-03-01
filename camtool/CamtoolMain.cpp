@@ -92,6 +92,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.image_size_box,
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(image_size_slot_(int)));
+      connect(ui.white_balance_box,
+	      SIGNAL(currentIndexChanged(int)),
+	      SLOT(white_balance_slot_(int)));
 
 	// Actions
       connect(ui.action_capture_button,
@@ -320,6 +323,14 @@ void CamtoolMain::image_size_slot_(int index)
 	    return;
 
       selected_camera_->set_image_size_index(index);
+}
+
+void CamtoolMain::white_balance_slot_(int index)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      selected_camera_->set_white_balance_index(index);
 }
 
 void CamtoolMain::action_capture_slot_(void)

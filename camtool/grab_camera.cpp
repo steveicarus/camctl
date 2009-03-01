@@ -113,6 +113,17 @@ void CamtoolMain::grab_camera_(void)
       ui.image_size_box->setCurrentIndex(ext_cur);
       ui.image_size_box->setEnabled(selected_camera_->set_image_size_ok());
 
+	// Get White Balance
+      selected_camera_->get_white_balance_index(val_enum);
+      ext_cur = selected_camera_->get_white_balance_index();
+
+      ui.white_balance_box->clear();
+      for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
+	    ui.white_balance_box->addItem(val_enum[idx].c_str());
+      }
+      ui.white_balance_box->setCurrentIndex(ext_cur);
+      ui.white_balance_box->setEnabled(selected_camera_->set_white_balance_ok());
+
 	// Get the initial image list, and register for new images.
       camera_images(selected_camera_);
       selected_camera_->set_image_notification(this);

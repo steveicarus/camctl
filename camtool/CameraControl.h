@@ -127,6 +127,11 @@ class CameraControl {
       virtual void set_focus_mode_index(int);
       virtual bool set_focus_mode_ok();
 
+      virtual void get_white_balance_index(std::vector<std::string>&values);
+      virtual int  get_white_balance_index();
+      virtual void set_white_balance_index(int);
+      virtual bool set_white_balance_ok();
+
     public: // Camera control methods.
 
 	// Capture an image. This activates the shutter and captures
