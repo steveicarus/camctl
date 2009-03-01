@@ -22,8 +22,21 @@
 # include  <inttypes.h>
 # include  <string>
 
+/*
+ * Return the string description of the opcode. If it is a vendor
+ * specific code, then use the vendorid to look it up.
+ */
 extern std::string ptp_opcode_string(uint16_t code, uint32_t vendorid);
 
+/*
+ * Return the string description of the property code
+ */
 extern std::string ptp_property_string(uint16_t code, uint32_t vendorid);
+
+/*
+ * Return the string description of the property value.
+ */
+extern std::string ptp_property_value16_string(uint16_t code, uint16_t value,
+					       uint32_t vendorid);
 
 #endif

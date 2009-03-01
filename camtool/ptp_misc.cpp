@@ -21,7 +21,91 @@
 # include  <sstream>
 
 using namespace std;
+# define array_count(x) (sizeof(x) / sizeof((x)[0]))
 
+/*
+ * The tables below are organized as key-value pairs. The key_value
+ * template defines the relationship between key and value.
+ */
+template<class KT, class VT> struct key_value {
+      KT key;
+      VT value;
+};
+
+template <class KT, class VT>
+static size_t binary_search(KT key, key_value<KT,VT>*table, size_t table_size)
+{
+	// The key must be at >= lp (if present at all)
+      size_t lp = 0;
+	// The key must be at < hp (if present at all)
+      size_t hp = table_size;
+
+      while (lp < hp) {
+	    size_t mid = (lp + hp) / 2;
+	      // assert: mid >= lp
+	      // assert: mid < hp
+
+	    if (table[mid].key == key) // Lucky guess?
+		  return mid;
+
+	    if (table[mid].key < key) {
+		    // This assures that the search space shrinks
+		  assert(mid >= lp);
+		    // This assures that we stay within the table
+		  assert(mid < hp);
+		  lp = mid+1;
+	    } else { // table[mid] > key
+		    // This assures that the search space shrinks
+		  assert(mid < hp);
+		  hp = mid;
+	    }
+      }
+
+      assert(lp == hp);
+      if (lp == table_size)
+	    return lp;
+      if (table[lp].key != key)
+	    return table_size;
+      return lp;
+}
+
+/*
+ * In some cases, the key needs to be a pair of values. This template
+ * allows the table to define the key as a pair of types. Note that
+ * the types must support the <, != and == operators.
+ */
+template<class K1, class K2> struct key_pair {
+      K1 key1;
+      K2 key2;
+};
+
+template <class K1, class K2>
+bool operator < (const key_pair<K1,K2>&a, const key_pair<K1,K2>&b)
+{
+      if (a.key1 < b.key1) return true;
+      if (b.key1 < a.key1) return false;
+      if (a.key2 < b.key2) return true;
+      return false;
+}
+
+template <class K1, class K2>
+static inline bool operator != (const key_pair<K1,K2>&a, const key_pair<K1,K2>&b)
+{
+      if (a.key1 != b.key1) return true;
+      if (a.key2 != b.key2) return true;
+      return false;
+}
+
+template <class K1, class K2>
+static inline bool operator == (const key_pair<K1,K2>&a, const key_pair<K1,K2>&b)
+{
+      return ! (a != b);
+}
+
+/*
+ * The standard opcodes are all within a contiguous range, so this is
+ * an ordered lookup table instead of a map.
+ */
 static string ptp_standard_opcodes[] = {
       "Undefined",        // 0x1000
       "GetDeviceInfo",    // 0x1001
@@ -54,46 +138,6 @@ static string ptp_standard_opcodes[] = {
       "InitiateOpenCapture" // 0x101c
 };
 
-static string ptp_standard_properties[] = {
-      "Undefined",          // 0x5000
-      "BatteryLevel",       // 0x5001
-      "FunctionalMode",     // 0x5002
-      "ImageSize",          // 0x5003
-      "CompressionSetting", // 0x5004
-      "WhiteBalance",       // 0x5005
-      "RGB Gain",           // 0x5006
-      "F-Number",           // 0x5007
-      "FocalLength",        // 0x5008
-      "FocusDistance",      // 0x5009
-      "FocusMode",          // 0x500a
-      "ExposureMeteringMode", // 0x500b
-      "FlashMode",          // 0x500c
-      "ExposureTime",       // 0x500d
-      "ExposureProgramMode",// 0x500e
-      "ExposureIndex",      // 0x500f
-      "ExposureBiasCompensation", // 0x5010
-      "DateTime",           // 0x5011
-      "CaptureDelay",       // 0x5012
-      "StillCaptureMode",   // 0x5013
-      "Contrast",           // 0x5014
-      "Sharpness",          // 0x5015
-      "DigitalZoom",        // 0x5016
-      "EffectMode",         // 0x5017
-      "BurstNumber",        // 0x5018
-      "BurstInterval",      // 0x5019
-      "TimelapseNumber",    // 0x501a
-      "TimelapseInterval",  // 0x501b
-      "FocusMeteringMode",  // 0x501c
-      "UploadURL",          // 0x501d
-      "Artist",             // 0x501e
-      "CopyrightInfo"       // 0x501f
-};
-
-template<class KT, class VT> struct key_value {
-      KT key;
-      VT value;
-};
-
 static key_value<uint16_t,string> ptp_novendor_operation_codes[] = {
       { 0xffff, "" }
 };
@@ -115,8 +159,78 @@ static key_value<uint16_t,string> ptp_nikon_operation_codes[] = {
       { 0x9802, "MTP GetObjectPropDesc" },
       { 0x9803, "MTP GetObjectPropValue" },
       { 0x9804, "MTP SetObjectPropValue" },
-      { 0x9805, "MTP GetObjPropList" },
-      { 0xffff, "" }
+      { 0x9805, "MTP GetObjPropList" }
+};
+
+static string ptp_standard_properties[] = {
+      "Undefined",          // 0x5000
+      "BatteryLevel",       // 0x5001
+      "FunctionalMode",     // 0x5002
+      "ImageSize",          // 0x5003
+      "CompressionSetting", // 0x5004
+      "WhiteBalance",       // 0x5005
+      "RGB Gain",           // 0x5006
+      "F-Number",           // 0x5007
+      "FocalLength",        // 0x5008
+      "FocusDistance",      // 0x5009
+      "FocusMode",          // 0x500a
+      "ExposureMeteringMode",// 0x500b
+      "FlashMode",          // 0x500c
+      "ExposureTime",       // 0x500d
+      "ExposureProgramMode",// 0x500e
+      "ExposureIndex",      // 0x500f
+      "ExposureBiasCompensation",// 0x5010
+      "DateTime",           // 0x5011
+      "CaptureDelay",       // 0x5012
+      "StillCaptureMode",   // 0x5013
+      "Contrast",           // 0x5014
+      "Sharpness",          // 0x5015
+      "DigitalZoom",        // 0x5016
+      "EffectMode",         // 0x5017
+      "BurstNumber",        // 0x5018
+      "BurstInterval",      // 0x5019
+      "TimelapseNumber",    // 0x501a
+      "TimelapseInterval",  // 0x501b
+      "FocusMeteringMode",  // 0x501c
+      "UploadURL",          // 0x501d
+      "Artist",             // 0x501e
+      "CopyrightInfo"       // 0x501f
+};
+
+/*
+ * Various properties with integer values are mapped to values. Keep
+ * all the property-value maps to this single sorted
+ * table. Vendor-specific property values are put into vendor-specific tables.
+ */
+static key_value<key_pair<uint16_t,uint16_t>,string> ptp_standard_property16_values[] = {
+	// FocusMode
+      { { 0x500a, 0x0000 }, "Undefined" },
+      { { 0x500a, 0x0001 }, "Manual" },
+      { { 0x500a, 0x0002 }, "Automatic" },
+      { { 0x500a, 0x0003 }, "Automatic/Macro" },
+	// FlashMode
+      { { 0x500c, 0x0000 }, "Undefined" },
+      { { 0x500c, 0x0001 }, "auto flash" },
+      { { 0x500c, 0x0002 }, "Flash off" },
+      { { 0x500c, 0x0003 }, "Fill flash" },
+      { { 0x500c, 0x0004 }, "Red eye auto" },
+      { { 0x500c, 0x0005 }, "Red eye fill" },
+      { { 0x500c, 0x0006 }, "External Sync" },
+	// ExposureProgramMode
+      { { 0x500e, 0x0000 }, "Undefined" },
+      { { 0x500e, 0x0001 }, "Manual" },
+      { { 0x500e, 0x0002 }, "Automatic" },
+      { { 0x500e, 0x0003 }, "Aperture Priority" },
+      { { 0x500e, 0x0004 }, "Shutter Priority" },
+      { { 0x500e, 0x0005 }, "Program Creative" },
+      { { 0x500e, 0x0006 }, "Program Action" },
+      { { 0x500e, 0x0007 }, "Portait" }
+};
+
+static key_value<key_pair<uint16_t,uint16_t>,string> ptp_nikon_property16_values[] = {
+	// FlashMode
+      { { 0x500c, 0x8010 }, "NIKON Fill-flash" },
+      { { 0x500c, 0x8012 }, "NIKON Rear curtain sync" }
 };
 
 string ptp_opcode_string(uint16_t code, uint32_t extension_id)
@@ -132,21 +246,24 @@ string ptp_opcode_string(uint16_t code, uint32_t extension_id)
 
       if ( (code&0xf000) == 0x9000 ) { // Vendor Opcodes
 
-	    key_value<uint16_t,string>*vendor_operation_codes;
+	    key_value<uint16_t,string>*table;
+	    size_t table_size = 0;
 	    switch (extension_id) {
 		case 0x00a:
-		  vendor_operation_codes = ptp_nikon_operation_codes;
+		  table = ptp_nikon_operation_codes;
+		  table_size = array_count(ptp_nikon_operation_codes);
 		  break;
 		default:
-		  vendor_operation_codes = ptp_novendor_operation_codes;
+		  table = ptp_novendor_operation_codes;
+		  table_size = array_count(ptp_novendor_operation_codes);
 		  break;
 	    }
 
-	    while (vendor_operation_codes->key < code)
-		  vendor_operation_codes += 1;
-
-	    if (vendor_operation_codes->key == code)
-		  return vendor_operation_codes->value;
+	    size_t key = binary_search(code, table, table_size);
+	    if (key < table_size) {
+		  assert(table[key].key == code);
+		  return table[key].value;
+	    }
 
 	    ostringstream tmp;
 	    tmp << "Vendor[" << hex << extension_id << "]-" << hex << code << ends;
@@ -180,4 +297,51 @@ string ptp_property_string(uint16_t code, uint32_t)
       ostringstream tmp;
       tmp << "Invalid-" << hex << code << ends;
       return tmp.str();
+}
+
+string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
+{
+      key_pair<uint16_t,uint16_t> use_key;
+      use_key.key1 = code;
+      use_key.key2 = val;
+
+      key_value<key_pair<uint16_t,uint16_t>,string>*table = 0;
+      size_t table_size = 0;
+
+      if ((val & 0x8000) == 0) {
+	    table = ptp_standard_property16_values;
+	    table_size = array_count(ptp_standard_property16_values);
+	    size_t key = binary_search(use_key, table, table_size);
+
+	    if (key < table_size) {
+		  return table[key].value;
+
+	    } else {
+		  ostringstream tmp;
+		  tmp << "Reserved-" << hex << code << ends;
+		  return tmp.str();
+	    }
+      }
+
+      switch (vend) {
+	  case 0x0a: // Nikon
+	    table = ptp_nikon_property16_values;
+	    table_size = array_count(ptp_nikon_property16_values);
+	    break;
+	  default:
+	    table = 0;
+	    table_size = 0;
+	    break;
+      }
+
+      size_t key = table? binary_search(use_key, table, table_size) : 0;
+
+      if (key < table_size) {
+	    return table[key].value;
+
+      } else {
+	    ostringstream tmp;
+	    tmp << "Vendor[" << hex << vend << "]-" << hex << val << ends;
+	    return tmp.str();
+      }
 }

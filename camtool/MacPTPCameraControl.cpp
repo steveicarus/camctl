@@ -55,7 +55,7 @@ MacPTPCameraControl::~MacPTPCameraControl()
 {
 }
 
-QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
+uint32_t MacPTPCameraControl::ptp_extension_vendor_() const
 {
       uint32_t use_extension_id = vendor_extension_id_;
 	// Some Nikon cameras forgot to set their vendor extension ID
@@ -64,6 +64,13 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       if (use_extension_id == 0x006 && camera_make() == "Nikon") {
 	    use_extension_id = 0x000a;
       }
+
+      return use_extension_id;
+}
+
+QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
+{
+      uint32_t use_extension_id = ptp_extension_vendor_();
 
       QTreeWidgetItem*item;
       QTreeWidgetItem*root = new QTreeWidgetItem;
@@ -1081,40 +1088,11 @@ void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
 	// The ExposureProgramMode is by definition (PTP) a UINT16.
       assert(exposure_program_.get_type_code() == 4);
 
+      uint16_t use_code = exposure_program_.get_property_code();
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
-	    ostringstream tmp;
 	    uint16_t value = exposure_program_.get_enum_index<uint16_t>(idx);
-	    switch (value) {
-		case 0x0000: // UNDEFINED
-		  tmp << "NONE" << ends;
-		  break;
-		case 0x0001: // Manual
-		  tmp << "Manual" << ends;
-		  break;
-		case 0x0002: // Automatic
-		  tmp << "Automatic" << ends;
-		  break;
-		case 0x0003: // Aperture Priority
-		  tmp << "Aperture Priority" << ends;
-		  break;
-		case 0x0004: // Shutter Priority
-		  tmp << "Shutter Priority" << ends;
-		  break;
-		case 0x0005: // Program Creative (greater depth of field)
-		  tmp << "Program Creative" << ends;
-		  break;
-		case 0x0006: // Program Action (faster shutter)
-		  tmp << "Program Action" << ends;
-		  break;
-		case 0x0007: // Portrait
-		  tmp << "Portrait" << ends;
-		  break;
-		default:
-		  tmp << "Vendor program: 0x"
-		      << setw(4) << hex << value << ends;
-		  break;
-	    }
-	    values[idx] = tmp.str();
+	    values[idx] = ptp_property_value16_string(use_code, value,
+						      ptp_extension_vendor_());
       }
 }
 
@@ -1294,39 +1272,11 @@ void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
 	// The FlashMode is by definition (PTP) a UINT16.
       assert(flash_mode_.get_type_code() == 4);
 
+      uint16_t prop_code = flash_mode_.get_property_code();
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
-	    ostringstream tmp;
 	    uint16_t val_code = flash_mode_.get_enum_index<uint16_t>(idx);
-	    switch (val_code) {
-		case 0x0000:
-		  tmp << "Undefined" << ends;
-		  break;
-		case 0x0001:
-		  tmp << "Auto" << ends;
-		  break;
-		case 0x0002:
-		  tmp << "Flash Off" << ends;
-		  break;
-		case 0x0003:
-		  tmp << "Fill Flash" << ends;
-		  break;
-		case 0x0004:
-		  tmp << "Red-eye Auto" << ends;
-		  break;
-		case 0x0005:
-		  tmp << "Red-eye Fill" << ends;
-		  break;
-		case 0x0006:
-		  tmp << "External Sync" << ends;
-		  break;
-		default:
-		  if (val_code < 0x8000)
-			tmp << "Reserved-" << hex << val_code << ends;
-		  else
-			tmp << "Vendor-" << hex << val_code << ends;
-		  break;
-	    }
-	    values[idx] = tmp.str();
+	    values[idx] = ptp_property_value16_string(prop_code, val_code,
+						      ptp_extension_vendor_());
       }
 }
 
@@ -1367,30 +1317,11 @@ void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
 	// The FocusMode is by definition (PTP) a UINT16.
       assert(focus_mode_.get_type_code() == 4);
 
+      uint16_t prop_code = focus_mode_.get_property_code();
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
-	    ostringstream tmp;
 	    uint16_t val_code = focus_mode_.get_enum_index<uint16_t>(idx);
-	    switch (val_code) {
-		case 0x0000:
-		  tmp << "Undefined" << ends;
-		  break;
-		case 0x0001:
-		  tmp << "Manual" << ends;
-		  break;
-		case 0x0002:
-		  tmp << "Automatic" << ends;
-		  break;
-		case 0x0003:
-		  tmp << "Automatic/Macro" << ends;
-		  break;
-		default:
-		  if (val_code < 0x8000)
-			tmp << "Reserved-" << hex << val_code << ends;
-		  else
-			tmp << "Vendor-" << hex << val_code << ends;
-		  break;
-	    }
-	    values[idx] = tmp.str();
+	    values[idx] = ptp_property_value16_string(prop_code, val_code,
+						      ptp_extension_vendor_());
       }
 }
 

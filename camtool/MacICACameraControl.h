@@ -208,6 +208,11 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual std::string debug_property_describe(unsigned prop);
 
     private:
+	// Return the vendor extension ID, possibly fixed up for bogus
+	// camera behavior.
+      uint32_t ptp_extension_vendor_() const;
+
+    private:
       void ptp_get_device_info_(void);
 
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
