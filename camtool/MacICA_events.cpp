@@ -30,16 +30,20 @@ MacICACameraControl*MacICACameraControl::notification_camera_ = 0;
 void MacICACameraControl::register_for_events(void)
 {
 	// Enable some interesting notifications.
-      CFMutableArrayRef events_array = CFArrayCreateMutable(0, 0, 0);
+      CFMutableArrayRef events_array = CFArrayCreateMutable(0, 16, 0);
       CFArrayAppendValue(events_array, kICANotificationTypeCaptureComplete);
-      CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
-      CFArrayAppendValue(events_array, kICANotificationTypeObjectRemoved);
       CFArrayAppendValue(events_array, kICANotificationTypeDeviceAdded);
-      CFArrayAppendValue(events_array, kICANotificationTypeDeviceRemoved);
+      CFArrayAppendValue(events_array, kICANotificationTypeDeviceConnectionProgress);
       CFArrayAppendValue(events_array, kICANotificationTypeDeviceInfoChanged);
       CFArrayAppendValue(events_array, kICANotificationTypeDevicePropertyChanged);
+      CFArrayAppendValue(events_array, kICANotificationTypeDeviceRemoved);
       CFArrayAppendValue(events_array, kICANotificationTypeDeviceWasReset);
+      CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
+      CFArrayAppendValue(events_array, kICANotificationTypeObjectInfoChanged);
+      CFArrayAppendValue(events_array, kICANotificationTypeObjectRemoved);
       CFArrayAppendValue(events_array, kICANotificationTypeProprietary);
+      CFArrayAppendValue(events_array, kICANotificationTypeRequestObjectTransfer);
+      CFArrayAppendValue(events_array, kICANotificationTypeTransactionCanceled);
       CFArrayAppendValue(events_array, kICANotificationTypeUnreportedStatus);
 
       ICARegisterForEventNotificationPB register_pb;
@@ -49,6 +53,8 @@ void MacICACameraControl::register_for_events(void)
       register_pb.notificationProc = ica_notification;
       register_pb.options = 0;
       ICARegisterForEventNotification(&register_pb, 0);
+
+      CFRelease(events_array);
 }
 
 /*
