@@ -29,6 +29,11 @@
 extern std::string ptp_opcode_string(uint16_t code, uint32_t vendorid);
 
 /*
+ * Return the string description of the event code.
+ */
+extern std::string ptp_event_string(uint16_t code, uint32_t vendorid);
+
+/*
  * Return the string description of the property code
  */
 extern std::string ptp_property_string(uint16_t code, uint32_t vendorid);

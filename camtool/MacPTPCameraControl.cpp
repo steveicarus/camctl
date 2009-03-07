@@ -133,24 +133,9 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       item->setText(0, "EventsSupported");
       for (unsigned idx = 0 ; idx < events_supported_.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    switch (events_supported_[idx]) {
-		case 0x4002:
-		  tmp->setText(1, "ObjectAdded");
-		  break;
-		case 0x4006:
-		  tmp->setText(1, "DevicePropChanged");
-		  break;
-		case 0x4008:
-		  tmp->setText(1, "DeviceInfoChanged");
-		  break;
-		case 0x400d:
-		  tmp->setText(1, "CaptureComplete");
-		  break;
-		default:
-		  tmp->setText(1, QString("0x%1")
-			       .arg(events_supported_[idx],4,16));
-		  break;
-	    }
+	    string event_string = ptp_event_string(events_supported_[idx],
+						   use_extension_id);
+	    tmp->setText(1, event_string.c_str());
 	    item->addChild(tmp);
       }
       root->addChild(item);

@@ -133,6 +133,14 @@ void CamtoolMain::ungrab_camera_(void)
 {
       selected_camera_->set_image_notification(0);
       selected_camera_->close_session();
+
+      ui.exposure_program_box->setEnabled(false);
       ui.set_exposure_time_box->setEnabled(false);
+      ui.set_aperture_box->setEnabled(false);
+      ui.set_iso_box->setEnabled(false);
+      ui.flash_mode_box->setEnabled(false);
+      ui.focus_mode_box->setEnabled(false);
+      ui.image_size_box->setEnabled(false);
+      ui.white_balance_box->setEnabled(false);
       ui.camera_label->setText("<select camera>");
 }

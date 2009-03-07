@@ -162,6 +162,24 @@ static key_value<uint16_t,string> ptp_nikon_operation_codes[] = {
       { 0x9805, "MTP GetObjPropList" }
 };
 
+static string ptp_standard_events[] = {
+      "Undefined",         // 0x4000
+      "CancelTransaction", // 0x4001
+      "ObjectAdded",       // 0x4002
+      "ObjectRemoved",     // 0x4003
+      "StoreAdded",        // 0x4004
+      "StoreRemoved",      // 0x4005
+      "DevicePropChanged", // 0x4006
+      "ObjectInfoChanged", // 0x4007
+      "DeviceInfoChanged", // 0x4008
+      "RequestObjectTransfer", // 0x4009
+      "StoreFull",         // 0x400a
+      "DeviceReset",       // 0x400b
+      "StoreInfoChanged",  // 0x400c
+      "CaptureComplete",   // 0x400d
+      "UnreportedStatus"  // 0x400e
+};
+
 static string ptp_standard_properties[] = {
       "Undefined",          // 0x5000
       "BatteryLevel",       // 0x5001
@@ -209,7 +227,7 @@ static key_value<key_pair<uint16_t,uint16_t>,string> ptp_standard_property16_val
       { { 0x5005, 0x0002 }, "Automatic" },
       { { 0x5005, 0x0003 }, "One-push Automatic" },
       { { 0x5005, 0x0004 }, "Daylight" },
-      { { 0x5005, 0x0005 }, "Florescent" },
+      { { 0x5005, 0x0005 }, "Flourescent" },
       { { 0x5005, 0x0006 }, "Tungsten" },
       { { 0x5005, 0x0007 }, "Flash" },
 	// FocusMode
@@ -244,7 +262,17 @@ static key_value<key_pair<uint16_t,uint16_t>,string> ptp_nikon_property16_values
       { { 0x5005, 0x8013 }, "NIKON Preset White Balance" },
 	// FlashMode
       { { 0x500c, 0x8010 }, "NIKON Fill-flash" },
-      { { 0x500c, 0x8012 }, "NIKON Rear curtain sync" }
+      { { 0x500c, 0x8011 }, "NIKON Slow sync" },
+      { { 0x500c, 0x8012 }, "NIKON Rear curtain + Slow sync" },
+      { { 0x500c, 0x8013 }, "NIKON Slow sync + Red eye" },
+	// ExposureProgramMode
+      { { 0x500e, 0x8010 }, "NIKON Auto" },
+      { { 0x500e, 0x8011 }, "NIKON Portrait" },
+      { { 0x500e, 0x8012 }, "NIKON Landscape" },
+      { { 0x500e, 0x8013 }, "NIKON Close up" },
+      { { 0x500e, 0x8014 }, "NIKON Sports" },
+      { { 0x500e, 0x8015 }, "NIKON Night portrait" },
+      { { 0x500e, 0x8016 }, "NIKON Night Landscape" }
 };
 
 string ptp_opcode_string(uint16_t code, uint32_t extension_id)
@@ -278,6 +306,29 @@ string ptp_opcode_string(uint16_t code, uint32_t extension_id)
 		  assert(table[key].key == code);
 		  return table[key].value;
 	    }
+
+	    ostringstream tmp;
+	    tmp << "Vendor[" << hex << extension_id << "]-" << hex << code << ends;
+	    return tmp.str();
+      }
+
+      ostringstream tmp;
+      tmp << "Invalid-" << hex << code << ends;
+      return tmp.str();
+}
+
+string ptp_event_string(uint16_t code, uint32_t extension_id)
+{
+      if ( (code&0xf000) == 0x4000 ) { // PTP Standard Events
+	    if ((code&0x0fff) <= 0x000f)
+		  return ptp_standard_events[code&0x0fff];
+
+	    ostringstream tmp;
+	    tmp << "Reserved-" << hex << code << ends;
+	    return tmp.str();
+      }
+
+      if ( (code&0xf000) == 0xc000 ) { // Vendor Opcodes
 
 	    ostringstream tmp;
 	    tmp << "Vendor[" << hex << extension_id << "]-" << hex << code << ends;

@@ -37,12 +37,6 @@ class CameraControl {
 	// and load them into the camera_list below.
       static void camera_inventory();
 
-	// This is a list of all the cameras discovered by the camera
-	// inventory. The camera_inventory methods of the derived
-	// classes fill in this list. The user may use this list to
-	// display/select the camera to use.
-      static std::list<CameraControl*>camera_list;
-
 	// Use this as a debug log for directing debug output from the
 	// entire library.
       static std::ofstream debug_log;
@@ -175,16 +169,28 @@ class CameraControl {
 	    Notification();
 	    virtual ~Notification() =0;
 	    virtual void camera_images(CameraControl*);
+	    virtual void camera_added(CameraControl*);
+	    virtual void camera_removed(CameraControl*);
       };
 
 	// Notify when images are added. Remove the notification by
 	// passing a 0 pointer.
       void set_image_notification(Notification*);
 
+	// Notify me when a new camera device is added. This method is
+	// static because it is about a new camera, and not the
+	// existing camera.
+      static void set_camera_added_notification(Notification*);
+
+	// Notify when this camera is removed.
+      void set_camera_removed_notification(Notification*);
+
     protected:
 	// These are used by derived classes to announce events that
 	// trigger notifications.
       void mark_image_notification();
+      static void mark_camera_added(CameraControl*);
+      static void mark_camera_removed(CameraControl*);
 
     public: // Debug helper methods
 
@@ -208,6 +214,8 @@ class CameraControl {
     private:
       std::list<file_key_t> image_list_;
       Notification*images_notification_;
+      static Notification*added_notification_;
+      Notification*removed_notification_;
 
     private: // Not implemented
       CameraControl(const CameraControl&);

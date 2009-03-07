@@ -111,8 +111,14 @@ class MacICACameraControl : public CameraControl {
     private:
       void refresh_dev_dict_(void);
 
+      static void register_for_events(void);
       static void ica_notification(CFStringRef notification_type,
 				   CFDictionaryRef notification_dict);
+      static MacICACameraControl* notification_camera_;
+
+    protected:
+      static void scan_devices_(void);
+
     private:
       void scan_images(std::list<file_key_t>&);
 
@@ -129,7 +135,7 @@ class MacICABlacklist : public MacICACameraControl {
     private:
 	// The camera_inventory function from MacICACameraControl
 	// actually creates objects of this type.
-      friend void MacICACameraControl::camera_inventory(void);
+      friend void MacICACameraControl::scan_devices_(void);
       MacICABlacklist(ICAObject dev);
 
     public:
@@ -151,7 +157,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
     private:
 	// The camera_inventory function from MacICACameraControl
 	// actually creates objects of this type.
-      friend void MacICACameraControl::camera_inventory(void);
+      friend void MacICACameraControl::scan_devices_(void);
       MacPTPCameraControl(ICAObject dev);
 
     public:

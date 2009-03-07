@@ -37,6 +37,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       selected_camera_ = 0;
 
       ui.setupUi(this);
+      CameraControl::set_camera_added_notification(this);
       detect_cameras_();
 
       ui.battery_display->display("   ");
@@ -62,9 +63,6 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SLOT(help_about_camera_slot_()));
 
 	// Select Camera
-      connect(ui.rescan_button,
-	      SIGNAL(clicked()),
-	      SLOT(rescan_cameras_slot_()));
       connect(ui.grab_check_box,
 	      SIGNAL(stateChanged(int)),
 	      SLOT(grab_camera_slot_(int)));
@@ -143,33 +141,51 @@ void CamtoolMain::no_camera_selected_(void)
 void CamtoolMain::detect_cameras_(void)
 {
       ui.camera_list_box->clear();
-
+      ui.camera_list_box->setEnabled(false);
+      ui.grab_check_box->setEnabled(false);
       CameraControl::camera_inventory();
+}
 
-	// Handle the special case that there are no cameras. Put a
-	// placeholder in the combo box and quit.
-      if (CameraControl::camera_list.size() == 0) {
-	    QString tmp ("No camera found");
-	    ui.camera_list_box->addItem(tmp);
-	    ui.camera_list_box->setEnabled(false);
-	    ui.grab_check_box->setEnabled(false);
+void CamtoolMain::camera_added(CameraControl*camera)
+{
+      CameraControl::debug_log << "CamtoolMain: Add camera:" << endl;
+
+      camera->set_camera_removed_notification(this);
+
+      QString item_str (camera->camera_make().c_str());
+      item_str.append(" ");
+      item_str.append(camera->camera_model().c_str());
+
+      ui.camera_list_box->addItem(item_str, qVariantFromValue(camera));
+      ui.camera_list_box->setEnabled(selected_camera_ == 0? true : false);
+      ui.grab_check_box->setEnabled(true);
+}
+
+void CamtoolMain::camera_removed(CameraControl*camera)
+{
+      CameraControl::debug_log << "CamtoolMain: Remove camera:" << endl;
+
+      int index = ui.camera_list_box->findData(qVariantFromValue(camera));
+      if (index < 0) {
+	    CameraControl::debug_log << "Removed camera not in my list" << endl;
 	    return;
       }
 
-      for (list<CameraControl*>::iterator cur = CameraControl::camera_list.begin()
-		 ; cur != CameraControl::camera_list.end() ; cur ++) {
-
-	    CameraControl*item = *cur;
-
-	    QString item_str (item->camera_make().c_str());
-	    item_str.append(" ");
-	    item_str.append(item->camera_model().c_str());
-
-	    ui.camera_list_box->addItem(item_str, qVariantFromValue(item));
+      ui.camera_list_box->removeItem(index);
+      if (selected_camera_ == camera) {
+	      // Uncheck the "grab" check box. This should send a
+	      // signal that causes all the other ungrab activities to happen.
+	    ui.grab_check_box->setCheckState(Qt::Unchecked);
+	      // Rely on the grab_check_box slot to take care of the rest.
+	    return;
       }
 
-      ui.camera_list_box->setEnabled(true);
-      ui.grab_check_box->setEnabled(true);
+	// If this removal empties the list, then disable the select
+	// box and the grab checl box.
+      if (ui.camera_list_box->count() == 0) {
+	    ui.camera_list_box->setEnabled(false);
+	    ui.grab_check_box->setEnabled(false);
+      }
 }
 
 void CamtoolMain::display_battery_(void)
@@ -231,11 +247,6 @@ void CamtoolMain::help_about_camera_slot_(void)
       about_device_->activateWindow();
 }
 
-void CamtoolMain::rescan_cameras_slot_(void)
-{
-      detect_cameras_();
-}
-
 /*
  * If the "Grab selected camera" box is checked, we disable the rescan
  * button and the camera list box. This effectively locks down the
@@ -251,14 +262,21 @@ void CamtoolMain::grab_camera_slot_(int state)
 	    } else {
 		  selected_camera_ = 0;
 	    }
-	    ui.rescan_button->setEnabled(false);
 	    ui.camera_list_box->setEnabled(false);
 	    grab_camera_();
       } else {
 	    heartbeat_timer_.stop();
 	    ungrab_camera_();
-	    ui.rescan_button->setEnabled(true);
-	    ui.camera_list_box->setEnabled(true);
+	      // After releasing the current camera, re-enable the
+	      // camera list box. (Although if the list is empty, we
+	      // really want to disable it.
+	    if (ui.camera_list_box->count() > 0) {
+		  ui.camera_list_box->setEnabled(true);
+	    } else {
+		  ui.camera_list_box->setEnabled(false);
+		  ui.grab_check_box->setEnabled(false);
+	    }
+
 	    selected_camera_ = 0;
       }
 

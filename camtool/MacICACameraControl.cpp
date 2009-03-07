@@ -25,12 +25,6 @@
 
 using namespace std;
 
-// XXXX HACK!
-// ICA Notifications don't have a private data pointer, so when I open
-// a session, I save the camera object here. In the long run, the
-// proper thing for me to do is to create a map of camera objects here.
-static MacICACameraControl*notification_camera_ = 0;
-
 /*
  * Convenience function to get a C-long value from a dictionary.
  */
@@ -123,33 +117,12 @@ int MacICACameraControl::open_session(void)
       ICAOpenSession(&pb, 0);
       session_id_ = pb.sessionID;
 
-	// Enable some interesting notifications.
       notification_camera_ = this;
-      CFMutableArrayRef events_array = CFArrayCreateMutable(0, 0, 0);
-      CFArrayAppendValue(events_array, kICANotificationTypeCaptureComplete);
-      CFArrayAppendValue(events_array, kICANotificationTypeObjectAdded);
-      CFArrayAppendValue(events_array, kICANotificationTypeObjectRemoved);
-
-      ICARegisterForEventNotificationPB register_pb;
-      memset(&register_pb, 0, sizeof register_pb);
-      register_pb.objectOfInterest = dev_;
-      register_pb.eventsOfInterest = events_array;
-      register_pb.notificationProc = ica_notification;
-      register_pb.options = 0;
-      ICARegisterForEventNotification(&register_pb, 0);
-
       return 0;
 }
 
 int MacICACameraControl::close_session(void)
 {
-      ICARegisterForEventNotificationPB register_pb;
-      memset(&register_pb, 0, sizeof register_pb);
-      register_pb.objectOfInterest = dev_;
-      register_pb.eventsOfInterest = 0;
-      register_pb.notificationProc = ica_notification;
-      register_pb.options = 0;
-      ICARegisterForEventNotification(&register_pb, 0);
       notification_camera_ = 0;
 
       ICACloseSessionPB pb;
@@ -157,36 +130,6 @@ int MacICACameraControl::close_session(void)
       pb.sessionID = session_id_;
       ICACloseSession(&pb, 0);
       return 0;
-}
-
-/*
- * This is the callback function for camera notifications.
- */
-void MacICACameraControl::ica_notification(CFStringRef notification_type,
-					   CFDictionaryRef notification_dict)
-{
-	// Start out by getting a description of the notification and
-	// writing it to the debug log.
-      char type_buf[1024];
-      CFStringGetCString(notification_type, type_buf, sizeof type_buf,
-			 kCFStringEncodingASCII);
-      debug_log << "**** ica_notification: type="
-		<< type_buf << endl;
-      dump_value(debug_log, notification_dict);
-      debug_log << "****" << endl << flush;
-
-	// What kind of notification?
-      if (CFStringCompare(notification_type,kICANotificationTypeObjectAdded,0) == kCFCompareEqualTo) {
-
-	      // This is an ObjectAdded notification. This usually
-	      // means that an image file was added. Refresh the image
-	      // list from the camera and debug the new files list.
-	    debug_log << "**** Object added ****" << endl;
-
-	    assert(notification_camera_);
-	    notification_camera_->refresh_dev_dict_();
-	    notification_camera_->mark_image_notification();
-      }
 }
 
 CameraControl::capture_resp_t MacICACameraControl::capture_image(void)

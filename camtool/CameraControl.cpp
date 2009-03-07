@@ -26,24 +26,19 @@
 
 using namespace std;
 
+CameraControl::Notification* CameraControl::added_notification_ = 0;
+
 void CameraControl::camera_inventory(void)
 {
-      while (! camera_list.empty()) {
-	    CameraControl*cur = camera_list.front();
-	    camera_list.pop_front();
-	    delete cur;
-      }
-
       MacICACameraControl::camera_inventory();
 }
-
-std::list<CameraControl*> CameraControl::camera_list;
 
 std::ofstream CameraControl::debug_log;
 
 CameraControl::CameraControl()
 {
       images_notification_ = 0;
+      removed_notification_ = 0;
 }
 
 CameraControl::~CameraControl()
@@ -309,6 +304,18 @@ void CameraControl::Notification::camera_images(CameraControl*)
 		<< endl << flush;
 }
 
+void CameraControl::Notification::camera_added(CameraControl*)
+{
+      debug_log << "**** CameraControl: unimplemented camera_added notification"
+		<< endl << flush;
+}
+
+void CameraControl::Notification::camera_removed(CameraControl*)
+{
+      debug_log << "**** CameraControl: unimplemented camera_removed notification"
+		<< endl << flush;
+}
+
 void CameraControl::set_image_notification(CameraControl::Notification*that)
 {
       assert(images_notification_ == 0 || that==0);
@@ -319,4 +326,28 @@ void CameraControl::mark_image_notification(void)
 {
       if (images_notification_)
 	    images_notification_->camera_images(this);
+}
+
+void CameraControl::set_camera_added_notification(CameraControl::Notification*that)
+{
+      assert(added_notification_ == 0 || that == 0);
+      added_notification_ = that;
+}
+
+void CameraControl::mark_camera_added(CameraControl*camera)
+{
+      if (added_notification_)
+	    added_notification_->camera_added(camera);
+}
+
+void CameraControl::set_camera_removed_notification(CameraControl::Notification*that)
+{
+      assert(removed_notification_ == 0 || that == 0);
+      removed_notification_ = that;
+}
+
+void CameraControl::mark_camera_removed(CameraControl*camera)
+{
+      if (camera->removed_notification_)
+	    camera->removed_notification_->camera_removed(camera);
 }

@@ -40,6 +40,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       ~CamtoolMain();
 
     private:
+	// Hold on to the camera that the user grabs.
       CameraControl*selected_camera_;
 
       QTimer heartbeat_timer_;
@@ -65,7 +66,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void help_about_camera_slot_();
 
 	// Slots for the Select Camera page
-      void rescan_cameras_slot_(void);
       void grab_camera_slot_(int state);
 
 	// Slots for the Camera Settings page.
@@ -96,6 +96,8 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
     private:
 	// Callbacks
       void camera_images(CameraControl*);
+      void camera_added(CameraControl*);
+      void camera_removed(CameraControl*);
 
     private:
       Ui::CamtoolMainWidget ui;
