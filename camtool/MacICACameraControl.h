@@ -262,6 +262,11 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	      // properties generally have a factory default value.
 	      //template <class T> T get_factory_default();
 
+	      // Get the current value and the number for the enum. If
+	      // the current value is not in the enum, or this is not
+	      // and enum, then return -1;
+	    template <class T> T get_current(void);
+
 	      // Properties may come as enum values. In that case, the
 	      // get_enum_count returns a value >0 that is the number
 	      // of enum values that the property supports. The
@@ -275,8 +280,9 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	  public:
 	      // These are some methods for filling in the property description.
 	    template <class T> void set_factory_default(T val);
-	    template <class T> void set_enum_vector(const std::vector<T>&vec);
+	    template <class T> void set_current(T val);
 
+	    template <class T> void set_enum_vector(const std::vector<T>&vec);
 	    template <class T> void set_range(T val_min, T val_max, T step);
 
 	  private:
@@ -291,6 +297,17 @@ class MacPTPCameraControl  : public MacICACameraControl {
 		  uint16_t fact_uint16_;
 		  int32_t fact_int32_;
 		  uint32_t fact_uint32_;
+		  QString* fact_string_;
+	    };
+
+	    union {
+		  int8_t current_int8_;
+		  uint8_t current_uint8_;
+		  int16_t current_int16_;
+		  uint16_t current_uint16_;
+		  int32_t current_int32_;
+		  uint32_t current_uint32_;
+		  QString* current_string_;
 	    };
 
 	    union {

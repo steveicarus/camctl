@@ -527,12 +527,13 @@ void MacPTPCameraControl::ptp_set_property_u16_(unsigned prop_code,
       ptp_buf->data[0] = (val >> 0) & 0xff;
       ptp_buf->data[1] = (val >> 8) & 0xff;
 
-      debug_log << "ptp_set_property_u16_: commandCode=" << ptp_buf->commandCode
+      debug_log << "ptp_set_property_u16_: commandCode="
+		<< hex << ptp_buf->commandCode
 		<< " params[0]=" << ptp_buf->params[0]
 		<< " dataSize=" << ptp_buf->dataSize
 		<< " data=" << hex
-		<< setw(2) << ptp_buf->data[0]
-		<< setw(2) << ptp_buf->data[1]
+		<< setw(2) << (unsigned)ptp_buf->data[0]
+		<< setw(2) << (unsigned)ptp_buf->data[1]
 		<< endl << flush;
 	    
       ica_send_message_(ptp_buf, sizeof buf);
@@ -557,7 +558,8 @@ void MacPTPCameraControl::ptp_set_property_u32_(unsigned prop_code,
       ptp_buf->data[2] = (val >>16) & 0xff;
       ptp_buf->data[3] = (val >>24) & 0xff;
 
-      debug_log << "ptp_set_property_u32_: commandCode=" << ptp_buf->commandCode
+      debug_log << "ptp_set_property_u32_: commandCode="
+		<< hex << ptp_buf->commandCode
 		<< " params[0]=" << ptp_buf->params[0]
 		<< " dataSize=" << ptp_buf->dataSize
 		<< " data=" << hex
@@ -595,6 +597,12 @@ void MacPTPCameraControl::ptp_set_property_string_(unsigned prop_code,
       }
       *dptr++ = 0;
       *dptr++ = 0;
+
+      debug_log << "ptp_set_property_string_: commandCode="
+		<< hex << ptp_buf->commandCode
+		<< " params[0]=" << ptp_buf->params[0]
+		<< " dataSize=" << ptp_buf->dataSize
+		<< dec << endl << flush;
 
       ICAError err = ica_send_message_(ptp_buf, sizeof buf);
       result_code = ptp_buf->resultCode;
@@ -665,6 +673,48 @@ int MacPTPCameraControl::prop_desc_t::get_enum_count() const
       return -1;
 }
 
+template<> int8_t MacPTPCameraControl::prop_desc_t::get_current<int8_t>(void)
+{
+      assert(type_code_ == 1);
+      return current_uint8_;
+}
+
+template<> uint8_t MacPTPCameraControl::prop_desc_t::get_current<uint8_t>(void)
+{
+      assert(type_code_ == 2);
+      return current_uint8_;
+}
+
+template<> int16_t MacPTPCameraControl::prop_desc_t::get_current<int16_t>(void)
+{
+      assert(type_code_ == 3);
+      return current_uint16_;
+}
+
+template<> uint16_t MacPTPCameraControl::prop_desc_t::get_current<uint16_t>(void)
+{
+      assert(type_code_ == 4);
+      return current_uint16_;
+}
+
+template<> int32_t MacPTPCameraControl::prop_desc_t::get_current<int32_t>(void)
+{
+      assert(type_code_ == 5);
+      return current_uint32_;
+}
+
+template<> uint32_t MacPTPCameraControl::prop_desc_t::get_current<uint32_t>(void)
+{
+      assert(type_code_ == 6);
+      return current_uint32_;
+}
+
+template<> QString MacPTPCameraControl::prop_desc_t::get_current<QString>(void)
+{
+      assert(type_code_ == 0xffff);
+      return *current_string_;
+}
+
 template<> uint8_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint8_t>(int idx)
 {
       assert(type_code_ == 2);
@@ -702,6 +752,12 @@ void MacPTPCameraControl::prop_desc_t::set_type_code(uint16_t code)
 {
       assert(type_code_ == 0);
       type_code_ = code;
+      switch (type_code_) {
+	  case 0xffff: // String
+	    fact_string_ = 0;
+	    current_string_ = 0;
+	    break;
+      }
 }
 
 void MacPTPCameraControl::prop_desc_t::set_flag(bool flag)
@@ -748,6 +804,55 @@ template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint32_t>
 template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<QString>(QString val)
 {
       assert(type_code_ == 0xffff);
+      if (fact_string_ == 0)
+	    fact_string_ = new QString(val);
+      else
+	    *fact_string_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<int8_t>(int8_t val)
+{
+      assert(type_code_ == 1);
+      current_int8_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<uint8_t>(uint8_t val)
+{
+      assert(type_code_ == 2);
+      current_uint8_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<int16_t>(int16_t val)
+{
+      assert(type_code_ == 3);
+      current_int16_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<uint16_t>(uint16_t val)
+{
+      assert(type_code_ == 4);
+      current_uint16_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<int32_t>(int32_t val)
+{
+      assert(type_code_ == 5);
+      current_int32_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<uint32_t>(uint32_t val)
+{
+      assert(type_code_ == 6);
+      current_uint32_ = val;
+}
+
+template <> void MacPTPCameraControl::prop_desc_t::set_current<QString>(QString val)
+{
+      assert(type_code_ == 0xffff);
+      if (current_string_ == 0)
+	    current_string_ = new QString(val);
+      else
+	    *current_string_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_range<int8_t>(int8_t val_min, int8_t val_max, int8_t step)
@@ -857,32 +962,32 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 
 	// Starting at data[5]...
 	//   -- Factory Default value
-	//   -- Current value  (we ignore the current value here)
+	//   -- Current value
       switch (dtype) {
 	  case 0:  // UNDEFINED
 	  case 1:  // INT8
 	    desc.set_factory_default(val_from_bytes<int8_t>(dptr));
-	    val_from_bytes<int8_t>(dptr);
+	    desc.set_current(val_from_bytes<int8_t>(dptr));
 	    break;
 	  case 2:  // UINT8
 	    desc.set_factory_default(val_from_bytes<uint8_t>(dptr));
-	    val_from_bytes<uint8_t>(dptr);
+	    desc.set_current(val_from_bytes<uint8_t>(dptr));
 	    break;
 	  case 3:  // INT16
 	    desc.set_factory_default(val_from_bytes<int16_t>(dptr));
-	    val_from_bytes<int16_t>(dptr);
+	    desc.set_current(val_from_bytes<int16_t>(dptr));
 	    break;
 	  case 4:  // UINT16
 	    desc.set_factory_default(val_from_bytes<uint16_t>(dptr));
-	    val_from_bytes<uint16_t>(dptr);
+	    desc.set_current(val_from_bytes<uint16_t>(dptr));
 	    break;
 	  case 5:  // INT32
 	    desc.set_factory_default(val_from_bytes<int32_t>(dptr));
-	    val_from_bytes<int32_t>(dptr);
+	    desc.set_current(val_from_bytes<int32_t>(dptr));
 	    break;
 	  case 6:  // UINT32
 	    desc.set_factory_default(val_from_bytes<uint32_t>(dptr));
-	    val_from_bytes<uint32_t>(dptr);
+	    desc.set_current(val_from_bytes<uint32_t>(dptr));
 	    break;
 	  case 7:  // INT64
 	  case 8:  // UINT64
@@ -891,7 +996,7 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 	    break;
 	  case 0xffff: // String
 	    desc.set_factory_default(val_from_bytes<QString>(dptr));
-	    val_from_bytes<QString>(dptr);
+	    desc.set_current(val_from_bytes<QString>(dptr));
 	    break;
 	  default:
 	    break;
@@ -1041,7 +1146,7 @@ void MacPTPCameraControl::get_image_size_index(vector<string>&values)
 int MacPTPCameraControl::get_image_size_index()
 {
       uint32_t rc;
-      QString val = ptp_get_property_string_(image_size_.get_property_code(), rc);
+      QString val = image_size_.get_current<QString>();
       for (int idx = 0 ; idx < image_size_.get_enum_count() ; idx += 1) {
 	    if (val == image_size_.get_enum_index<QString>(idx))
 		  return idx;
@@ -1085,8 +1190,7 @@ void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
 
 int MacPTPCameraControl::get_exposure_program_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(exposure_program_.get_property_code(), rc);
+      uint16_t val = exposure_program_.get_current<uint16_t>();
       for (int idx = 0 ; idx < exposure_program_.get_enum_count() ; idx += 1) {
 	    if (val == exposure_program_.get_enum_index<uint16_t>(idx))
 		  return idx;
@@ -1106,6 +1210,7 @@ void MacPTPCameraControl::set_exposure_program_index(int use_index)
       ptp_set_property_u16_(exposure_program_.get_property_code(),
 			    exposure_program_.get_enum_index<uint16_t>(use_index),
 			    rc);
+      exposure_program_.set_current(exposure_program_.get_enum_index<uint16_t>(use_index));
 }
 
 bool MacPTPCameraControl::set_exposure_program_ok()
@@ -1135,8 +1240,7 @@ void MacPTPCameraControl::get_exposure_time_index(vector<string>&values)
 
 int MacPTPCameraControl::get_exposure_time_index()
 {
-      uint32_t rc;
-      uint32_t val = ptp_get_property_u32_(exposure_time_.get_property_code(), rc);
+      uint32_t val = exposure_time_.get_current<uint32_t>();
       for (int idx = 0 ; idx < exposure_time_.get_enum_count() ; idx += 1) {
 	    if (val == exposure_time_.get_enum_index<uint32_t>(idx))
 		  return (int)idx;
@@ -1152,11 +1256,16 @@ void MacPTPCameraControl::set_exposure_time_index(int use_index)
       if (use_index >= exposure_time_.get_enum_count())
 	    use_index = 0;
 
+
       uint32_t val = exposure_time_.get_enum_index<uint32_t>(use_index);
+      if (exposure_time_.get_current<uint32_t>() == val)
+	    return;
+
       uint32_t rc;
       ptp_set_property_u32_(exposure_time_.get_property_code(), val, rc);
+      exposure_time_.set_current(val);
 
-      debug_log << "set_exposure_Time_index: index=" << use_index
+      debug_log << "set_exposure_time_index: index=" << use_index
 		<< ", val=" << hex << val
 		<< ", rc=" << rc
 		<< dec << endl;
@@ -1182,8 +1291,7 @@ void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
 
 int MacPTPCameraControl::get_fnumber_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(fnumber_.get_property_code(), rc);
+      uint16_t val = fnumber_.get_current<uint16_t>();
       for (int idx = 0 ; idx < fnumber_.get_enum_count() ; idx += 1) {
 	    if (val == fnumber_.get_enum_index<uint16_t>(idx))
 		  return (int)idx;
@@ -1199,10 +1307,17 @@ void MacPTPCameraControl::set_fnumber_index(int use_index)
       if (use_index >= fnumber_.get_enum_count())
 	    use_index = 0;
 
+      uint16_t use_val = fnumber_.get_enum_index<uint16_t>(use_index);
+      if (fnumber_.get_current<uint16_t>() == use_val)
+	    return;
+
+      debug_log << "Setting fnumber from "
+		<< hex << fnumber_.get_current<uint16_t>()
+		<< " to " << hex << use_val << endl << flush;
+
       uint32_t rc;
-      ptp_set_property_u16_(fnumber_.get_property_code(),
-			    fnumber_.get_enum_index<uint16_t>(use_index),
-			    rc);
+      ptp_set_property_u16_(fnumber_.get_property_code(), use_val, rc);
+      fnumber_.set_current(use_val);
 }
 
 bool MacPTPCameraControl::set_fnumber_ok()
@@ -1225,8 +1340,7 @@ void MacPTPCameraControl::get_iso_index(vector<string>&values)
 
 int MacPTPCameraControl::get_iso_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(iso_.get_property_code(), rc);
+      uint16_t val = iso_.get_current<uint16_t>();
       for (int idx = 0 ; idx < iso_.get_enum_count() ; idx += 1) {
 	    if (val == iso_.get_enum_index<uint16_t>(idx))
 		  return (int)idx;
@@ -1242,10 +1356,13 @@ void MacPTPCameraControl::set_iso_index(int use_index)
       if (use_index >= iso_.get_enum_count())
 	    use_index = 0;
 
+      uint16_t use_val = iso_.get_enum_index<uint16_t>(use_index);
+      if (iso_.get_current<uint16_t>() == use_val)
+	    return;
+
       uint32_t rc;
-      ptp_set_property_u16_(iso_.get_property_code(),
-			    iso_.get_enum_index<uint16_t>(use_index),
-			    rc);
+      ptp_set_property_u16_(iso_.get_property_code(), use_val, rc);
+      iso_.set_current(use_val);
 }
 
 bool MacPTPCameraControl::set_iso_ok()
@@ -1269,8 +1386,7 @@ void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
 
 int MacPTPCameraControl::get_flash_mode_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(flash_mode_.get_property_code(), rc);
+      uint16_t val = flash_mode_.get_current<uint16_t>();
       for (int idx = 0 ; idx < flash_mode_.get_enum_count() ; idx += 1) {
 	    if (val == flash_mode_.get_enum_index<uint16_t>(idx))
 		  return (int)idx;
@@ -1286,10 +1402,13 @@ void MacPTPCameraControl::set_flash_mode_index(int use_index)
       if (use_index >= flash_mode_.get_enum_count())
 	    use_index = 0;
 
+      uint16_t use_val = flash_mode_.get_enum_index<uint16_t>(use_index);
+      if (flash_mode_.get_current<uint16_t>() == use_val)
+	    return;
+
       uint32_t rc;
-      ptp_set_property_u16_(flash_mode_.get_property_code(),
-			    flash_mode_.get_enum_index<uint16_t>(use_index),
-			    rc);
+      ptp_set_property_u16_(flash_mode_.get_property_code(), use_val, rc);
+      flash_mode_.set_current(use_val);
 }
 
 bool MacPTPCameraControl::set_flash_mode_ok()
@@ -1314,8 +1433,7 @@ void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
 
 int MacPTPCameraControl::get_focus_mode_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(focus_mode_.get_property_code(), rc);
+      uint16_t val = focus_mode_.get_current<uint16_t>();
       for (int idx = 0 ; idx < focus_mode_.get_enum_count() ; idx += 1) {
 	    if (val == focus_mode_.get_enum_index<uint16_t>(idx))
 		  return (int)idx;
@@ -1331,10 +1449,13 @@ void MacPTPCameraControl::set_focus_mode_index(int use_index)
       if (use_index >= focus_mode_.get_enum_count())
 	    use_index = 0;
 
+      uint16_t use_val = focus_mode_.get_enum_index<uint16_t>(use_index);
+      if (focus_mode_.get_current<uint16_t>() == use_val)
+	    return;
+
       uint32_t rc;
-      ptp_set_property_u16_(focus_mode_.get_property_code(),
-			    focus_mode_.get_enum_index<uint16_t>(use_index),
-			    rc);
+      ptp_set_property_u16_(focus_mode_.get_property_code(), use_val, rc);
+      focus_mode_.set_current(use_val);
 }
 
 bool MacPTPCameraControl::set_focus_mode_ok()
@@ -1359,8 +1480,7 @@ void MacPTPCameraControl::get_white_balance_index(vector<string>&values)
 
 int MacPTPCameraControl::get_white_balance_index()
 {
-      uint32_t rc;
-      uint16_t val = ptp_get_property_u16_(white_balance_.get_property_code(), rc);
+      uint16_t val = white_balance_.get_current<uint16_t>();
       for (int idx = 0 ; idx < white_balance_.get_enum_count() ; idx += 1) {
 	    if (val == white_balance_.get_enum_index<uint16_t>(idx))
 		  return (int)idx;
@@ -1520,7 +1640,7 @@ string MacPTPCameraControl::debug_property_describe(unsigned prop_code)
       out += "GetSet flag: ";
       out += tmp_buf;
 
-      out += "Factury default: " + format_val(dptr, type_code) + "\n";
+      out += "Factory default: " + format_val(dptr, type_code) + "\n";
       out += "Current value: "   + format_val(dptr,type_code)  + "\n";
 
       int form_flag = val_from_bytes<uint8_t>(dptr);

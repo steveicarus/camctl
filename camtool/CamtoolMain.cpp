@@ -299,7 +299,8 @@ void CamtoolMain::set_aperture_slot_(int index)
 {
       if (selected_camera_ == 0)
 	    return;
-
+      if (index < 0)
+	    return;
       selected_camera_->set_fnumber_index(index);
 }
 

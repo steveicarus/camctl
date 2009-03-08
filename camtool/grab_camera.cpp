@@ -40,10 +40,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_exposure_program_index(val_enum);
       ext_cur = selected_camera_->get_exposure_program_index();
 
+      ui.exposure_program_box->blockSignals(true);
       ui.exposure_program_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.exposure_program_box->addItem(val_enum[idx].c_str());
       }
+      ui.exposure_program_box->blockSignals(false);
       ui.exposure_program_box->setCurrentIndex(ext_cur);
       ui.exposure_program_box->setEnabled(selected_camera_->set_exposure_program_ok());
 
@@ -51,10 +53,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_exposure_time_index(val_enum);
       ext_cur = selected_camera_->get_exposure_time_index();
 
+      ui.set_exposure_time_box->blockSignals(true);
       ui.set_exposure_time_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.set_exposure_time_box->addItem(val_enum[idx].c_str());
       }
+      ui.set_exposure_time_box->blockSignals(false);
       ui.set_exposure_time_box->setCurrentIndex(ext_cur);
       ui.set_exposure_time_box->setEnabled(selected_camera_->set_exposure_time_ok());
 
@@ -62,10 +66,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_fnumber_index(val_enum);
       ext_cur = selected_camera_->get_fnumber_index();
 
+      ui.set_aperture_box->blockSignals(true);
       ui.set_aperture_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.set_aperture_box->addItem(val_enum[idx].c_str());
       }
+      ui.set_aperture_box->blockSignals(false);
       ui.set_aperture_box->setCurrentIndex(ext_cur);
       ui.set_aperture_box->setEnabled(selected_camera_->set_fnumber_ok());
 
@@ -73,10 +79,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_iso_index(val_enum);
       ext_cur = selected_camera_->get_iso_index();
 
+      ui.set_iso_box->blockSignals(true);
       ui.set_iso_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.set_iso_box->addItem(val_enum[idx].c_str());
       }
+      ui.set_iso_box->blockSignals(false);
       ui.set_iso_box->setCurrentIndex(ext_cur);
       ui.set_iso_box->setEnabled(selected_camera_->set_iso_ok());
 
@@ -84,10 +92,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_flash_mode_index(val_enum);
       ext_cur = selected_camera_->get_flash_mode_index();
 
+      ui.flash_mode_box->blockSignals(true);
       ui.flash_mode_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.flash_mode_box->addItem(val_enum[idx].c_str());
       }
+      ui.flash_mode_box->blockSignals(false);
       ui.flash_mode_box->setCurrentIndex(ext_cur);
       ui.flash_mode_box->setEnabled(selected_camera_->set_flash_mode_ok());
 
@@ -95,10 +105,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_focus_mode_index(val_enum);
       ext_cur = selected_camera_->get_focus_mode_index();
 
+      ui.focus_mode_box->blockSignals(true);
       ui.focus_mode_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.focus_mode_box->addItem(val_enum[idx].c_str());
       }
+      ui.focus_mode_box->blockSignals(false);
       ui.focus_mode_box->setCurrentIndex(ext_cur);
       ui.focus_mode_box->setEnabled(selected_camera_->set_focus_mode_ok());
 
@@ -106,10 +118,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_image_size_index(val_enum);
       ext_cur = selected_camera_->get_image_size_index();
 
+      ui.image_size_box->blockSignals(true);
       ui.image_size_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.image_size_box->addItem(val_enum[idx].c_str());
       }
+      ui.image_size_box->blockSignals(false);
       ui.image_size_box->setCurrentIndex(ext_cur);
       ui.image_size_box->setEnabled(selected_camera_->set_image_size_ok());
 
@@ -117,10 +131,12 @@ void CamtoolMain::grab_camera_(void)
       selected_camera_->get_white_balance_index(val_enum);
       ext_cur = selected_camera_->get_white_balance_index();
 
+      ui.white_balance_box->blockSignals(true);
       ui.white_balance_box->clear();
       for (size_t idx = 0 ; idx < val_enum.size() ; idx += 1) {
 	    ui.white_balance_box->addItem(val_enum[idx].c_str());
       }
+      ui.white_balance_box->blockSignals(false);
       ui.white_balance_box->setCurrentIndex(ext_cur);
       ui.white_balance_box->setEnabled(selected_camera_->set_white_balance_ok());
 
