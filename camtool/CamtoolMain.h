@@ -28,6 +28,7 @@
 # include  <CameraControl.h>
 # include  <fstream>
 
+class CamtoolPreferences;
 class CamtoolAboutBox;
 class CamtoolAboutDevice;
 
@@ -62,6 +63,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void heartbeat_slot_();
 
 	// Slots for the Menubar
+      void preferences_slot_();
       void help_about_slot_();
       void help_about_camera_slot_();
 
@@ -86,7 +88,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void images_list_slot_(QListWidgetItem*);
 
 	// Slots for the (debug) page
-      void select_logfile_slot_(void);
       void dump_generic_slot_(void);
 
       void debug_ptp_set_slot_(void);
@@ -101,6 +102,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
     private:
       Ui::CamtoolMainWidget ui;
+      CamtoolPreferences*preferences_;
       CamtoolAboutBox*about_;
       CamtoolAboutDevice*about_device_;
 };
