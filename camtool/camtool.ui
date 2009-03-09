@@ -107,8 +107,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>288</width>
-             <height>134</height>
+             <width>482</width>
+             <height>227</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -340,29 +340,6 @@
         <string>(debug)</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4" >
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2" >
-          <item>
-           <widget class="QLineEdit" name="logfile_path" />
-          </item>
-          <item>
-           <widget class="QCommandLinkButton" name="select_logfile_button" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip" >
-             <string>Select a debug log file to enable logging and debug output.</string>
-            </property>
-            <property name="text" >
-             <string>Select debug file</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3" >
           <item>
@@ -604,6 +581,13 @@
     <addaction name="help_about_action" />
     <addaction name="help_about_camera_action" />
    </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>File</string>
+    </property>
+    <addaction name="preferences_action" />
+   </widget>
+   <addaction name="menuFile" />
    <addaction name="menuHelp" />
   </widget>
   <action name="help_about_action" >
@@ -614,6 +598,11 @@
   <action name="help_about_camera_action" >
    <property name="text" >
     <string>About Camera</string>
+   </property>
+  </action>
+  <action name="preferences_action" >
+   <property name="text" >
+    <string>Preferences...</string>
    </property>
   </action>
  </widget>

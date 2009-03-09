@@ -19,6 +19,7 @@
 
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
+# include  "CamtoolPreferences.h"
 # include  "CamtoolAboutBox.h"
 # include  "CamtoolAboutDevice.h"
 # include  <QFileDialog>
@@ -32,11 +33,14 @@ Q_DECLARE_METATYPE(CameraControl*)
 CamtoolMain::CamtoolMain(QWidget*parent)
 : QMainWindow(parent), heartbeat_timer_(this)
 {
+      preferences_ = 0;
       about_ = 0;
       about_device_ = 0;
       selected_camera_ = 0;
 
       ui.setupUi(this);
+      preferences_ = new CamtoolPreferences(this);
+
       CameraControl::set_camera_added_notification(this);
       detect_cameras_();
 
@@ -55,6 +59,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SLOT(heartbeat_slot_()));
 
 	// Menu bar
+      connect(ui.preferences_action,
+	      SIGNAL(triggered()),
+	      SLOT(preferences_slot_()));
       connect(ui.help_about_action,
 	      SIGNAL(triggered()),
 	      SLOT(help_about_slot_()));
@@ -105,9 +112,6 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SLOT(images_list_slot_(QListWidgetItem*)));
 
 	// (debug)
-      connect(ui.select_logfile_button,
-	      SIGNAL(clicked()),
-	      SLOT(select_logfile_slot_()));
       connect(ui.dump_generic_button,
 	      SIGNAL(clicked()),
 	      SLOT(dump_generic_slot_()));
@@ -216,6 +220,14 @@ void CamtoolMain::heartbeat_slot_(void)
 
       selected_camera_->heartbeat();
       display_battery_();
+}
+
+void CamtoolMain::preferences_slot_(void)
+{
+      assert(preferences_);
+      preferences_->show();
+      preferences_->raise();
+      preferences_->activateWindow();
 }
 
 void CamtoolMain::help_about_slot_(void)
@@ -377,19 +389,6 @@ void CamtoolMain::action_capture_slot_(void)
 		break;
 	  }
       }
-}
-
-void CamtoolMain::select_logfile_slot_(void)
-{
-      QString filename = QFileDialog::getSaveFileName(this, tr("Log File"));
-      if (CameraControl::debug_log.is_open())
-	    CameraControl::debug_log.close();
-
-      ui.logfile_path->setText(filename);
-
-      CameraControl::debug_log.open(filename.toAscii());
-      CameraControl::debug_log << "Open log file " << filename.toAscii().data() << endl;
-      CameraControl::debug_log << flush;
 }
 
 void CamtoolMain::dump_generic_slot_(void)
