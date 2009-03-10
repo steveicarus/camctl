@@ -1,6 +1,6 @@
 #!/bin/sh
 
-version='20090301'
+version='20090309'
 
 # This script makes an installable package of the camtool. Run this script
 # from the root of the source (the directory that contains the camtool
