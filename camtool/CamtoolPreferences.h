@@ -32,12 +32,25 @@ class CamtoolPreferences : public QDialog {
       CamtoolPreferences(QWidget*parent);
       ~CamtoolPreferences();
 
+	// Get the preferred tethered path directory. This method will
+	// make sure that the path exists, is a directory, and is writable.
+      QString get_tethered_path() const;
+
     private:
       Ui::PreferencesDialog ui;
 
       QSettings settings_;
 
+      QString home_path_;
+
+    private:
+      void clear_tethered_path_();
+
     private slots:
+      void select_tethered_slot_();
+      void tethered_path_slot_();
+      void image_output_buttons_slot_(QAbstractButton*);
+
       void select_logfile_slot_(void);
       void logfile_path_slot_(void);
 };
