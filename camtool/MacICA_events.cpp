@@ -98,6 +98,17 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
 		  notification_camera_->refresh_dev_dict_();
 		  notification_camera_->mark_image_notification();
 	    }
+      } else if (CFStringCompare(notification_type,kICANotificationTypeObjectRemoved,0) == kCFCompareEqualTo) {
+
+	      // This is an ObjectAdded notification. This usually
+	      // means that an image file was added. Refresh the image
+	      // list from the camera and debug the new files list.
+	    debug_log << "**** Object removed ****" << endl;
+
+	    if (notification_camera_) {
+		  notification_camera_->refresh_dev_dict_();
+		  notification_camera_->mark_image_notification();
+	    }
       }
 }
 

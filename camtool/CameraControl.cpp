@@ -249,6 +249,11 @@ bool CameraControl::set_white_balance_ok()
       return false;
 }
 
+CameraControl::capture_resp_t CameraControl::capture_volatile_image()
+{
+      return capture_image();
+}
+
 const list<CameraControl::file_key_t>&CameraControl::image_list()
 {
       image_list_.clear();
@@ -256,7 +261,7 @@ const list<CameraControl::file_key_t>&CameraControl::image_list()
       return image_list_;
 }
 
-void CameraControl::get_image_data(long, char*&buf, size_t&buf_len)
+void CameraControl::get_image_data(long, char*&buf, size_t&buf_len, bool)
 {
       buf = 0;
       buf_len = 0;

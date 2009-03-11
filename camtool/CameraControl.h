@@ -130,13 +130,18 @@ class CameraControl {
 
 	// Capture an image. This activates the shutter and captures
 	// the image using the current settings. The image is left on
-	// the camera.
+	// the camera. The capture_volatile_image() method is similar,
+	// except that it tries to get the camera to capture the image
+	// into volatile memory instead of flash. If the derived class
+	// doesn't implement this method, then resort to the
+	// capture_image() method instead.
       enum capture_resp_t {
 	    CAP_OK,
 	    CAP_NOT_SUPPORTED,
 	    CAP_ERROR
       };
       virtual capture_resp_t capture_image() =0;
+      virtual capture_resp_t capture_volatile_image();
 
     public: // Image file manipulation methods.
 
@@ -153,8 +158,10 @@ class CameraControl {
 	// fills in the buf pointer and the buffer len. The method
 	// allocates the memory of the buffer, it is up to the caller
 	// to free the buffer when it is done.
-      virtual void get_image_data(long key, char*&buf, size_t&buf_len);
+      virtual void get_image_data(long key, char*&buf, size_t&buf_len,
+				  bool delete_image =false);
       virtual void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
+
 
     public: // Notifications
 

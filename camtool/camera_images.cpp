@@ -71,16 +71,24 @@ void CamtoolMain::images_list_slot_(QListWidgetItem*item)
       QString file_name = item->text();
       QVariant file_index = item->data(Qt::UserRole);
 
-      char*buf;
-      size_t buf_len;
-      selected_camera_->get_image_data(file_index.toInt(), buf, buf_len);
-
       QString path = QFileDialog::getSaveFileName(0, tr("Save Image"), file_name);
       if (! path.isEmpty()) {
+	    QMessageBox::StandardButton resp
+		  = QMessageBox::question(this, tr("Delete From Camera"),
+					  tr("Delete this image from the camera"
+					     " after download?"),
+					  QMessageBox::Yes|QMessageBox::No,
+					  QMessageBox::No);
+	    bool delete_flag = resp==QMessageBox::Yes;
+	    char*buf;
+	    size_t buf_len;
+	    selected_camera_->get_image_data(file_index.toInt(), buf, buf_len,
+					     delete_flag);
+
 	    FILE*fd = fopen(path.toAscii(), "wb");
 	    assert(fd);
 	    fwrite(buf, 1, buf_len, fd);
 	    fclose(fd);
+	    delete[]buf;
       }
-      delete[]buf;
 }

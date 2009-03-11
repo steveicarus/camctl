@@ -57,7 +57,8 @@ class MacICACameraControl : public CameraControl {
 
     public:
       capture_resp_t capture_image(void);
-      void get_image_data(long key, char*&buf, size_t&buf_len);
+      void get_image_data(long key, char*&buf, size_t&buf_len,
+			  bool delete_image);
       void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
 
       void debug_dump(std::ostream&, const std::string&) const;
