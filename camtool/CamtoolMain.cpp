@@ -105,6 +105,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.action_capture_button,
 	      SIGNAL(clicked()),
 	      SLOT(action_capture_slot_()));
+      connect(ui.action_tethered_button,
+	      SIGNAL(clicked()),
+	      SLOT(action_tethered_slot_()));
 
 	// Images
       connect(ui.images_list,
@@ -364,14 +367,8 @@ void CamtoolMain::white_balance_slot_(int index)
       selected_camera_->set_white_balance_index(index);
 }
 
-void CamtoolMain::action_capture_slot_(void)
+void CamtoolMain::display_capture_error_message_(CameraControl::capture_resp_t rc)
 {
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      CameraControl::capture_resp_t rc = selected_camera_->capture_image();
       switch (rc) {
 	  case CameraControl::CAP_OK:
 	    break;
@@ -389,6 +386,33 @@ void CamtoolMain::action_capture_slot_(void)
 		break;
 	  }
       }
+}
+
+void CamtoolMain::action_capture_slot_(void)
+{
+      if (selected_camera_ == 0) {
+	    no_camera_selected_();
+	    return;
+      }
+
+      CameraControl::capture_resp_t rc = selected_camera_->capture_image();
+      display_capture_error_message_(rc);
+}
+
+void CamtoolMain::action_tethered_slot_(void)
+{
+      if (selected_camera_ == 0) {
+	    no_camera_selected_();
+	    return;
+      }
+
+	// First, capture to volatile memory on the device
+      CameraControl::capture_resp_t rc = selected_camera_->capture_volatile_image();
+      display_capture_error_message_(rc);
+
+      QMessageBox::warning(this, tr("Not supported"),
+			   tr("Sorry, tethered capture is not implemented yet."
+			      " Please download the image yourself."));
 }
 
 void CamtoolMain::dump_generic_slot_(void)

@@ -52,6 +52,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Helper methods.
       void no_camera_selected_();
 
+      void display_capture_error_message_(CameraControl::capture_resp_t rc);
       void display_battery_(void);
 
       void detect_cameras_(void);
@@ -83,6 +84,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
 	// Slots for the Actions page
       void action_capture_slot_(void);
+      void action_tethered_slot_(void);
 
 	// Slots for the Images page
       void images_list_slot_(QListWidgetItem*);
