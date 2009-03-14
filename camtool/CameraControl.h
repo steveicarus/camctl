@@ -176,6 +176,7 @@ class CameraControl {
 	    Notification();
 	    virtual ~Notification() =0;
 	    virtual void camera_images(CameraControl*);
+	    virtual void camera_capture_complete(CameraControl*);
 	    virtual void camera_added(CameraControl*);
 	    virtual void camera_removed(CameraControl*);
       };
@@ -183,6 +184,9 @@ class CameraControl {
 	// Notify when images are added. Remove the notification by
 	// passing a 0 pointer.
       void set_image_notification(Notification*);
+
+	// Notify when a capture is complete
+      void set_capture_complete_notification(Notification*);
 
 	// Notify me when a new camera device is added. This method is
 	// static because it is about a new camera, and not the
@@ -196,6 +200,7 @@ class CameraControl {
 	// These are used by derived classes to announce events that
 	// trigger notifications.
       void mark_image_notification();
+      void mark_capture_complete();
       static void mark_camera_added(CameraControl*);
       static void mark_camera_removed(CameraControl*);
 
@@ -221,6 +226,7 @@ class CameraControl {
     private:
       std::list<file_key_t> image_list_;
       Notification*images_notification_;
+      Notification*capture_complete_notification_;
       static Notification*added_notification_;
       Notification*removed_notification_;
 

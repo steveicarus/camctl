@@ -143,10 +143,12 @@ void CamtoolMain::grab_camera_(void)
 	// Get the initial image list, and register for new images.
       camera_images(selected_camera_);
       selected_camera_->set_image_notification(this);
+      selected_camera_->set_capture_complete_notification(this);
 }
 
 void CamtoolMain::ungrab_camera_(void)
 {
+      selected_camera_->set_capture_complete_notification(0);
       selected_camera_->set_image_notification(0);
       selected_camera_->close_session();
 

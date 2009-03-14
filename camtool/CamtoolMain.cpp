@@ -37,6 +37,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       about_ = 0;
       about_device_ = 0;
       selected_camera_ = 0;
+      tethered_in_progress_ = 0;
 
       ui.setupUi(this);
       preferences_ = new CamtoolPreferences(this);
@@ -395,6 +396,7 @@ void CamtoolMain::action_capture_slot_(void)
 	    return;
       }
 
+      tethered_in_progress_ = false;
       CameraControl::capture_resp_t rc = selected_camera_->capture_image();
       display_capture_error_message_(rc);
 }
@@ -406,13 +408,24 @@ void CamtoolMain::action_tethered_slot_(void)
 	    return;
       }
 
+	// Mark that a tethered capture is in progress. This will
+	// effect how received images are processed.
+      tethered_in_progress_ = true;
+
 	// First, capture to volatile memory on the device
       CameraControl::capture_resp_t rc = selected_camera_->capture_volatile_image();
       display_capture_error_message_(rc);
+}
 
-      QMessageBox::warning(this, tr("Not supported"),
+void CamtoolMain::camera_capture_complete(CameraControl*)
+{
+      if (tethered_in_progress_) {
+	    tethered_in_progress_ = false;
+
+	    QMessageBox::warning(this, tr("Not supported"),
 			   tr("Sorry, tethered capture is not implemented yet."
 			      " Please download the image yourself."));
+      }
 }
 
 void CamtoolMain::dump_generic_slot_(void)

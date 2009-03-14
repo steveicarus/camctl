@@ -39,6 +39,7 @@ CameraControl::CameraControl()
 {
       images_notification_ = 0;
       removed_notification_ = 0;
+      capture_complete_notification_ = 0;
 }
 
 CameraControl::~CameraControl()
@@ -309,6 +310,12 @@ void CameraControl::Notification::camera_images(CameraControl*)
 		<< endl << flush;
 }
 
+void CameraControl::Notification::camera_capture_complete(CameraControl*)
+{
+      debug_log << "**** CameraControl: unimplemented camera_capture_complete notification"
+		<< endl << flush;
+}
+
 void CameraControl::Notification::camera_added(CameraControl*)
 {
       debug_log << "**** CameraControl: unimplemented camera_added notification"
@@ -331,6 +338,18 @@ void CameraControl::mark_image_notification(void)
 {
       if (images_notification_)
 	    images_notification_->camera_images(this);
+}
+
+void CameraControl::set_capture_complete_notification(CameraControl::Notification*that)
+{
+      assert(capture_complete_notification_ == 0 || that == 0);
+      capture_complete_notification_ = that;
+}
+
+void CameraControl::mark_capture_complete(void)
+{
+      if (capture_complete_notification_)
+	    capture_complete_notification_->camera_capture_complete(this);
 }
 
 void CameraControl::set_camera_added_notification(CameraControl::Notification*that)

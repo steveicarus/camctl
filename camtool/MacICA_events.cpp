@@ -21,6 +21,7 @@
 # include  "MacICACameraControl.h"
 # include  <ImageCapture/ImageCapture.h>
 # include  <iostream>
+# include  <iomanip>
 # include  <assert.h>
 
 using namespace std;
@@ -98,10 +99,11 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
 		  notification_camera_->refresh_dev_dict_();
 		  notification_camera_->mark_image_notification();
 	    }
+
       } else if (CFStringCompare(notification_type,kICANotificationTypeObjectRemoved,0) == kCFCompareEqualTo) {
 
-	      // This is an ObjectAdded notification. This usually
-	      // means that an image file was added. Refresh the image
+	      // This is an ObjectRemoved notification. This usually
+	      // means that an image file was removed. Refresh the image
 	      // list from the camera and debug the new files list.
 	    debug_log << "**** Object removed ****" << endl;
 
@@ -109,6 +111,36 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
 		  notification_camera_->refresh_dev_dict_();
 		  notification_camera_->mark_image_notification();
 	    }
+
+      } else if (CFStringCompare(notification_type,kICANotificationTypeProprietary,0) == kCFCompareEqualTo) {
+
+	      // Proprietary events may actually be standard events
+	      // for a subordinate standard. (i.e. PTP)
+	    CFStringRef class_key = (CFStringRef)CFDictionaryGetValue(notification_dict,
+							 kICANotificationClassKey);
+	    CFNumberRef raw_event = (CFNumberRef)CFDictionaryGetValue(notification_dict,
+							 kICANotificationRawEventKey);
+
+	    assert(class_key);
+	    if (CFStringCompare(class_key,kICANotificationClassPTPStandard,0) == kCFCompareEqualTo) {
+		    // This is a PTP event. Many interesting standard
+		    // PTP events are not handled by the ICA itself,
+		    // so we interpret them here.
+		  int event_code;
+		  assert(raw_event);
+		  CFNumberGetValue(raw_event, kCFNumberIntType, &event_code);
+
+		  debug_log << "PTP Event: " << hex << setw(4) << event_code << dec << endl;
+		  switch (event_code) {
+		      case 0x400d: // PTP Capture Complete
+			notification_camera_->mark_capture_complete();
+			break;
+		      default:
+			break;
+		  }
+	    }
       }
+
+      debug_log << flush;
 }
 

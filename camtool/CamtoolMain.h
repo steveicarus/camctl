@@ -99,6 +99,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
     private:
 	// Callbacks
       void camera_images(CameraControl*);
+      void camera_capture_complete(CameraControl*);
       void camera_added(CameraControl*);
       void camera_removed(CameraControl*);
 
@@ -107,5 +108,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolPreferences*preferences_;
       CamtoolAboutBox*about_;
       CamtoolAboutDevice*about_device_;
+
+      bool tethered_in_progress_;
 };
 #endif
