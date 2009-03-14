@@ -144,7 +144,7 @@ void CamtoolPreferences::logfile_path_slot_(void)
       QString filename = ui.logfile_path->text();
       settings_.setValue(KEY_LOGFILE_PATH, filename);
 
-      CameraControl::debug_log.open(filename.toAscii());
+      CameraControl::debug_log.open(filename.toAscii(), ios_base::out|ios_base::app);
       CameraControl::debug_log << "Open log file " << filename.toAscii().data() << endl;
       CameraControl::debug_log << flush;
 }
