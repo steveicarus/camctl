@@ -37,7 +37,8 @@ std::ofstream CameraControl::debug_log;
 
 CameraControl::CameraControl()
 {
-      images_notification_ = 0;
+      image_added_notification_ = 0;
+      image_deleted_notification_ = 0;
       removed_notification_ = 0;
       capture_complete_notification_ = 0;
 }
@@ -257,8 +258,7 @@ CameraControl::capture_resp_t CameraControl::capture_volatile_image()
 
 const list<CameraControl::file_key_t>&CameraControl::image_list()
 {
-      image_list_.clear();
-      scan_images(image_list_);
+      mark_image_notification();
       return image_list_;
 }
 
@@ -304,9 +304,15 @@ CameraControl::Notification::~Notification()
 {
 }
 
-void CameraControl::Notification::camera_images(CameraControl*)
+void CameraControl::Notification::camera_image_added(CameraControl*, const CameraControl::file_key_t&)
 {
-      debug_log << "**** CameraControl: unimplemented camera_images notification"
+      debug_log << "**** CameraControl: unimplemented camera_image_added notification"
+		<< endl << flush;
+}
+
+void CameraControl::Notification::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&)
+{
+      debug_log << "**** CameraControl: unimplemented camera_image_deleted notification"
 		<< endl << flush;
 }
 
@@ -328,16 +334,74 @@ void CameraControl::Notification::camera_removed(CameraControl*)
 		<< endl << flush;
 }
 
-void CameraControl::set_image_notification(CameraControl::Notification*that)
+void CameraControl::set_image_added_notification(CameraControl::Notification*that)
 {
-      assert(images_notification_ == 0 || that==0);
-      images_notification_ = that;
+      assert(image_added_notification_ == 0 || that==0);
+      image_added_notification_ = that;
+}
+
+void CameraControl::set_image_deleted_notification(CameraControl::Notification*that)
+{
+      assert(image_deleted_notification_ == 0 || that==0);
+      image_deleted_notification_ = that;
 }
 
 void CameraControl::mark_image_notification(void)
 {
-      if (images_notification_)
-	    images_notification_->camera_images(this);
+	// Get the current state of the image list from the derived
+	// class.
+      list<file_key_t> new_image_list;
+      scan_images(new_image_list);
+
+	// Get a map of all the existing items. This map will help us
+	// detect added/deleted images.
+      map<file_key_t,int> flag_map;
+      for (list<file_key_t>::iterator cur = image_list_.begin()
+		 ; cur != image_list_.end() ; cur ++) {
+	    flag_map[*cur] = -1;
+      }
+
+      for (list<file_key_t>::iterator cur = new_image_list.begin()
+		 ; cur != new_image_list.end() ; cur ++) {
+	    flag_map[*cur] += 1;
+      }
+
+	// Done building the map of image changes, so replace the new
+	// list with the updated list.
+      image_list_ = new_image_list;
+
+	// Now the map contains all the images that were present, and
+	// are now present. If the image is present before and after,
+	// then the flag will be 0. If the image is deleted, the flag
+	// will be <0 and if the image is new, >0.
+
+      for (map<file_key_t,int>::const_iterator cur = flag_map.begin()
+		 ; cur != flag_map.end() ; cur ++) {
+	    if (cur->second == 0)
+		  continue;
+	    if (cur->second > 0)
+		  mark_image_added_(cur->first);
+	    else
+		  mark_image_deleted_(cur->first);
+      }
+}
+
+void CameraControl::mark_image_added_(const file_key_t&file)
+{
+      debug_log << "Camera added file " << file.second
+		<< " (id=" << file.first << ")"
+		<< endl << flush;
+      if (image_added_notification_)
+	    image_added_notification_->camera_image_added(this, file);
+}
+
+void CameraControl::mark_image_deleted_(const file_key_t&file)
+{
+      debug_log << "Camera deleted file " << file.second
+		<< " (id=" << file.first << ")"
+		<< endl << flush;
+      if (image_deleted_notification_)
+	    image_deleted_notification_->camera_image_deleted(this, file);
 }
 
 void CameraControl::set_capture_complete_notification(CameraControl::Notification*that)

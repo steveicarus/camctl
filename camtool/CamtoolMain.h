@@ -55,6 +55,8 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void display_capture_error_message_(CameraControl::capture_resp_t rc);
       void display_battery_(void);
 
+      void resync_camera_images_(void);
+
       void detect_cameras_(void);
       void grab_camera_(void);
       void ungrab_camera_(void);
@@ -88,6 +90,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
 	// Slots for the Images page
       void images_list_slot_(QListWidgetItem*);
+      void images_refresh_slot_(void);
 
 	// Slots for the (debug) page
       void dump_generic_slot_(void);
@@ -98,7 +101,8 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
     private:
 	// Callbacks
-      void camera_images(CameraControl*);
+      void camera_image_added(CameraControl*, const CameraControl::file_key_t&);
+      void camera_image_deleted(CameraControl*, const CameraControl::file_key_t&);
       void camera_capture_complete(CameraControl*);
       void camera_added(CameraControl*);
       void camera_removed(CameraControl*);

@@ -175,7 +175,8 @@ class CameraControl {
 	  public:
 	    Notification();
 	    virtual ~Notification() =0;
-	    virtual void camera_images(CameraControl*);
+	    virtual void camera_image_added(CameraControl*, const file_key_t&file);
+	    virtual void camera_image_deleted(CameraControl*, const file_key_t&file);
 	    virtual void camera_capture_complete(CameraControl*);
 	    virtual void camera_added(CameraControl*);
 	    virtual void camera_removed(CameraControl*);
@@ -183,7 +184,8 @@ class CameraControl {
 
 	// Notify when images are added. Remove the notification by
 	// passing a 0 pointer.
-      void set_image_notification(Notification*);
+      void set_image_added_notification(Notification*);
+      void set_image_deleted_notification(Notification*);
 
 	// Notify when a capture is complete
       void set_capture_complete_notification(Notification*);
@@ -203,6 +205,9 @@ class CameraControl {
       void mark_capture_complete();
       static void mark_camera_added(CameraControl*);
       static void mark_camera_removed(CameraControl*);
+    private:
+      void mark_image_added_(const file_key_t&new_file);
+      void mark_image_deleted_(const file_key_t&old_file);
 
     public: // Debug helper methods
 
@@ -225,7 +230,8 @@ class CameraControl {
 
     private:
       std::list<file_key_t> image_list_;
-      Notification*images_notification_;
+      Notification*image_added_notification_;
+      Notification*image_deleted_notification_;
       Notification*capture_complete_notification_;
       static Notification*added_notification_;
       Notification*removed_notification_;

@@ -107,8 +107,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>482</width>
-             <height>227</height>
+             <width>288</width>
+             <height>134</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -340,7 +340,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QPushButton" name="refresh_button" >
             <property name="enabled" >
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text" >
              <string>Refresh</string>

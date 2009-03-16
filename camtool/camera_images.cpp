@@ -26,41 +26,55 @@
 using namespace std;
 
 
-void CamtoolMain::camera_images(CameraControl*camera)
+void CamtoolMain::resync_camera_images_(void)
 {
-      std::list<CameraControl::file_key_t> files = camera->image_list();
+      assert(selected_camera_);
+      std::list<CameraControl::file_key_t> files = selected_camera_->image_list();
 
       ui.images_list->clear();
 
-      long last_key = -1;
       for (list<CameraControl::file_key_t>::iterator cur = files.begin()
 		 ; cur != files.end() ; cur ++) {
 
-	    last_key = cur->first;
-	    CameraControl::debug_log << "  " << last_key << " " << cur->second << endl;
+	    long cur_key = cur->first;
+	    CameraControl::debug_log << "  " << cur_key << " " << cur->second << endl;
 
 	    QString file_name (cur->second.c_str());
-	    QVariant file_index ((int)last_key);
+	    QVariant file_index ((int)cur_key);
 
 	    QListWidgetItem*item = new QListWidgetItem(file_name);
 	    item->setData(Qt::UserRole, file_index);
 	    ui.images_list->addItem(item);
       }
+}
 
-      if (last_key == -1)
-	    return;
+void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::file_key_t&file)
+{
+      long cur_key = file.first;
 
-	// Get the thumbnail of the last image and write it into the
+      QString file_name (file.second.c_str());
+      QVariant file_index ((int)cur_key);
+
+      QListWidgetItem*item = new QListWidgetItem(file_name);
+      item->setData(Qt::UserRole, file_index);
+      ui.images_list->addItem(item);
+
+	// Get the thumbnail of the new image and write it into the
 	// image thumbnail display.
       char*buf;
       size_t buf_len;
-      camera->get_image_thumbnail(last_key, buf, buf_len);
+      camera->get_image_thumbnail(cur_key, buf, buf_len);
 
       QPixmap pix_tmp;
       pix_tmp.loadFromData((const uchar*)buf, buf_len);
       action_thumbnail_pixmap_->setPixmap(pix_tmp);
 
       delete[]buf;
+}
+
+void CamtoolMain::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&)
+{
+      CameraControl::debug_log << "CamtoolMain:: delete image?" << endl << flush;
 }
 
 void CamtoolMain::images_list_slot_(QListWidgetItem*item)
@@ -91,4 +105,12 @@ void CamtoolMain::images_list_slot_(QListWidgetItem*item)
 	    fclose(fd);
 	    delete[]buf;
       }
+}
+
+void CamtoolMain::images_refresh_slot_(void)
+{
+      if (selected_camera_ == 0)
+	    return;
+
+      resync_camera_images_();
 }

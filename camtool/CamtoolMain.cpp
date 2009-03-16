@@ -114,6 +114,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.images_list,
 	      SIGNAL(itemDoubleClicked(QListWidgetItem*)),
 	      SLOT(images_list_slot_(QListWidgetItem*)));
+      connect(ui.refresh_button,
+	      SIGNAL(clicked()),
+	      SLOT(images_refresh_slot_()));
 
 	// (debug)
       connect(ui.dump_generic_button,

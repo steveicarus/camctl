@@ -141,15 +141,19 @@ void CamtoolMain::grab_camera_(void)
       ui.white_balance_box->setEnabled(selected_camera_->set_white_balance_ok());
 
 	// Get the initial image list, and register for new images.
-      camera_images(selected_camera_);
-      selected_camera_->set_image_notification(this);
+      resync_camera_images_();
+      selected_camera_->set_image_added_notification(this);
+      selected_camera_->set_image_deleted_notification(this);
+
+	// Register for capture_complete notifications.
       selected_camera_->set_capture_complete_notification(this);
 }
 
 void CamtoolMain::ungrab_camera_(void)
 {
       selected_camera_->set_capture_complete_notification(0);
-      selected_camera_->set_image_notification(0);
+      selected_camera_->set_image_added_notification(0);
+      selected_camera_->set_image_deleted_notification(0);
       selected_camera_->close_session();
 
       ui.exposure_program_box->setEnabled(false);
