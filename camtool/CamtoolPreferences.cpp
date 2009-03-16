@@ -105,6 +105,7 @@ void CamtoolPreferences::select_tethered_slot_(void)
       if (dirname.isEmpty())
 	    return;
 
+      dirname = QDir::cleanPath(dirname);
       ui.tethered_path->setText(dirname);
       tethered_path_slot_();
 }

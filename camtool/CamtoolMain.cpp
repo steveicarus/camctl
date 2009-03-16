@@ -422,13 +422,8 @@ void CamtoolMain::action_tethered_slot_(void)
 
 void CamtoolMain::camera_capture_complete(CameraControl*)
 {
-      if (tethered_in_progress_) {
+      if (tethered_in_progress_)
 	    tethered_in_progress_ = false;
-
-	    QMessageBox::warning(this, tr("Not supported"),
-			   tr("Sorry, tethered capture is not implemented yet."
-			      " Please download the image yourself."));
-      }
 }
 
 void CamtoolMain::dump_generic_slot_(void)
