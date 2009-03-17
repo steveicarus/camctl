@@ -136,9 +136,22 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
       }
 }
 
-void CamtoolMain::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&)
+void CamtoolMain::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&file)
 {
       CameraControl::debug_log << "CamtoolMain:: delete image?" << endl << flush;
+      long cur_key = file.first;
+
+      QString file_name (file.second.c_str());
+      QVariant file_index ((int)cur_key);
+
+      for (int idx = 0 ; idx < ui.images_list->count() ; idx += 1) {
+	    QListWidgetItem*cur = ui.images_list->item(idx);
+	    if (cur->data(Qt::UserRole) == file_index) {
+		  ui.images_list->removeItemWidget(cur);
+		  delete cur;
+		  break;
+	    }
+      }
 }
 
 void CamtoolMain::images_list_slot_(QListWidgetItem*item)
