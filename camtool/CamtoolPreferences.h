@@ -36,6 +36,11 @@ class CamtoolPreferences : public QDialog {
 	// make sure that the path exists, is a directory, and is writable.
       QString get_tethered_path() const;
 
+	// Get the next name to use for a tethered file. This method
+	// will also automatically substitute the file number in the
+	// name string and increment the counter.
+      QString get_tethered_file();
+
     private:
       Ui::PreferencesDialog ui;
 
@@ -45,10 +50,13 @@ class CamtoolPreferences : public QDialog {
 
     private:
       void clear_tethered_path_();
+      void clear_tethered_name_();
 
     private slots:
       void select_tethered_slot_();
       void tethered_path_slot_();
+      void tethered_name_slot_();
+      void tethered_number_slot_(int);
       void image_output_buttons_slot_(QAbstractButton*);
 
       void select_logfile_slot_(void);

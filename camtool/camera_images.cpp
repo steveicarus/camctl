@@ -97,14 +97,25 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
 			dir.cd(tmp);
 		  }
 
-		    // Build the path to the destination file. Make
-		    // sure the new file doesn't exist already.
-		  QString path = dir.filePath(file_name);
-		  QFile file(path);
-		  if (file.exists()) {
-			QMessageBox::information(this, tr("File Exists"),
-						 tr("File already exists: ") + path);
-			break;
+		    // Look for a file name to use for the output image.
+		  QString path;
+		  for (;;) {
+			  // Get the next file name to use.
+			QString use_name = preferences_->get_tethered_file();
+
+			  // Get the suffix that the camera selected.
+			int suff = file_name.lastIndexOf(QChar('.'));
+			if (suff >= 0)
+			      use_name .append( file_name.mid(suff) );
+
+			  // Build the path to the destination file
+			  // and see if it doesn't exist already. If
+			  // it doesn't exist, we're done. If it does
+			  // exist, try again.
+			path = dir.filePath(use_name);
+			QFile tmpfile(path);
+			if (! tmpfile.exists())
+			      break;
 		  }
 
 		    // Create the file and write the image data.

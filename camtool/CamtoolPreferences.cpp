@@ -30,6 +30,9 @@ using namespace std;
  * These are constants for the settings keys
  */
 static const char KEY_TETHERED_PATH[] = "images/tethered_path";
+static const char KEY_TETHERED_NAME[] = "images/tethered_name";
+static const char KEY_TETHERED_NUMBER[] = "image/tethered_number";
+
 static const char KEY_LOGFILE_PATH[]  = "debug/logfile_path";
 
 CamtoolPreferences::CamtoolPreferences(QWidget*parent)
@@ -47,6 +50,12 @@ CamtoolPreferences::CamtoolPreferences(QWidget*parent)
       connect(ui.tethered_path,
 	      SIGNAL(editingFinished()),
 	      SLOT(tethered_path_slot_()));
+      connect(ui.tethered_name,
+	      SIGNAL(editingFinished()),
+	      SLOT(tethered_name_slot_()));
+      connect(ui.tethered_number,
+	      SIGNAL(valueChanged(int)),
+	      SLOT(tethered_number_slot_(int)));
 
       connect(ui.image_output_buttons,
 	      SIGNAL(clicked(QAbstractButton*)),
@@ -74,6 +83,15 @@ CamtoolPreferences::CamtoolPreferences(QWidget*parent)
 	    ui.tethered_path->setText(tmp);
       }
 
+      tmp = settings_.value(KEY_TETHERED_NAME).toString();
+      if (tmp.isEmpty()) {
+	    clear_tethered_name_();
+      } else {
+	    ui.tethered_name->setText(tmp);
+      }
+
+      ui.tethered_number->setValue(settings_.value(KEY_TETHERED_NUMBER).toInt());
+
 	// Retrieve the saved value for the logfile path.
       tmp = settings_.value(KEY_LOGFILE_PATH).toString();
       if (! tmp.isEmpty()) {
@@ -91,11 +109,33 @@ QString CamtoolPreferences::get_tethered_path() const
       return ui.tethered_path->text();
 }
 
+QString CamtoolPreferences::get_tethered_file()
+{
+      QString tmp (ui.tethered_name->text());
+
+      int file_number = ui.tethered_number->value();
+      ui.tethered_number->setValue(file_number+1);
+      QString file_number_string (QString("%1").arg(file_number,5,10,QChar('0')));
+
+      for (int idx = tmp.indexOf("%N") ; idx >= 0 ; idx = tmp.indexOf("%N")) {
+	    tmp.replace(idx, 2, file_number_string);
+      }
+
+      return tmp;
+}
+
 void CamtoolPreferences::clear_tethered_path_(void)
 {
       QString tmp;
       tmp = home_path_ + "/Pictures/Icarus Camera Control";
       ui.tethered_path->setText(tmp);
+}
+
+void CamtoolPreferences::clear_tethered_name_(void)
+{
+      QString tmp;
+      tmp = "image%N";
+      ui.tethered_name->setText(tmp);
 }
 
 void CamtoolPreferences::select_tethered_slot_(void)
@@ -112,8 +152,21 @@ void CamtoolPreferences::select_tethered_slot_(void)
 
 void CamtoolPreferences::tethered_path_slot_(void)
 {
+      cerr << "Preferences::tethered_path_slot_" << endl;
       QString filename = ui.tethered_path->text();
       settings_.setValue(KEY_TETHERED_PATH, filename);
+}
+
+void CamtoolPreferences::tethered_name_slot_(void)
+{
+      cerr << "Preferences::tethered_name_slot_" << endl;
+      QString name = ui.tethered_name->text();
+      settings_.setValue(KEY_TETHERED_NAME, name);
+}
+
+void CamtoolPreferences::tethered_number_slot_(int val)
+{
+      settings_.setValue(KEY_TETHERED_NUMBER, val);
 }
 
 void CamtoolPreferences::image_output_buttons_slot_(QAbstractButton*button)
@@ -122,7 +175,10 @@ void CamtoolPreferences::image_output_buttons_slot_(QAbstractButton*button)
 
 	  case QDialogButtonBox::RestoreDefaults:
 	    clear_tethered_path_();
+	    clear_tethered_name_();
+	    ui.tethered_number->setValue(0);
 	    tethered_path_slot_();
+	    settings_.sync();
 	    break;
 
 	  default:
