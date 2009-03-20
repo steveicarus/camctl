@@ -152,14 +152,12 @@ void CamtoolPreferences::select_tethered_slot_(void)
 
 void CamtoolPreferences::tethered_path_slot_(void)
 {
-      cerr << "Preferences::tethered_path_slot_" << endl;
       QString filename = ui.tethered_path->text();
       settings_.setValue(KEY_TETHERED_PATH, filename);
 }
 
 void CamtoolPreferences::tethered_name_slot_(void)
 {
-      cerr << "Preferences::tethered_name_slot_" << endl;
       QString name = ui.tethered_name->text();
       settings_.setValue(KEY_TETHERED_NAME, name);
 }
@@ -199,9 +197,22 @@ void CamtoolPreferences::select_logfile_slot_(void)
 void CamtoolPreferences::logfile_path_slot_(void)
 {
       QString filename = ui.logfile_path->text();
+
+      if (filename.isEmpty()) {
+	    CameraControl::debug_log.close();
+	    return;
+      }
+
       settings_.setValue(KEY_LOGFILE_PATH, filename);
 
       CameraControl::debug_log.open(filename.toAscii(), ios_base::out|ios_base::app);
       CameraControl::debug_log << "Open log file " << filename.toAscii().data() << endl;
       CameraControl::debug_log << flush;
+}
+
+void CamtoolPreferences::debug_buttons_slot_(QAbstractButton*button)
+{
+      if (ui.debug_buttons->buttonRole(button) == QDialogButtonBox::ResetRole) {
+	    ui.logfile_path->clear();
+      }
 }

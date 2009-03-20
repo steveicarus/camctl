@@ -61,6 +61,7 @@ class CamtoolPreferences : public QDialog {
 
       void select_logfile_slot_(void);
       void logfile_path_slot_(void);
+      void debug_buttons_slot_(QAbstractButton*);
 };
 
 #endif
