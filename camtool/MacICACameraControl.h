@@ -251,6 +251,13 @@ class MacPTPCameraControl  : public MacICACameraControl {
 
 	    uint16_t get_property_code() const { return prop_code_; }
 
+	      // This method causes the property to be marked as
+	      // unsupported by the device.
+	    void clear_property_support();
+
+	      // Return if this property is supported.
+	    bool test_property_support() const { return support_flag_; }
+
 	      // Set the PTP defined type code.
 	    void set_type_code(uint16_t val);
 	    uint16_t get_type_code() const { return type_code_; }
@@ -258,7 +265,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	      // Set the flag indicating whether this property is can
 	      // be set. TRUE means it can be set, and FALSE means not.
 	    void set_flag(bool flag);
-	    bool set_ok(void) const { return set_flag_; }
+	    bool set_ok(void) const { return support_flag_ && set_flag_; }
 
 	      // properties generally have a factory default value.
 	      //template <class T> T get_factory_default();
@@ -289,6 +296,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
 	  private:
 	    uint16_t prop_code_;
 	    uint16_t type_code_;
+	    bool support_flag_;
 	    bool range_flag_;
 	    bool set_flag_;
 	    union {

@@ -616,12 +616,23 @@ MacPTPCameraControl::prop_desc_t::prop_desc_t(uint16_t prop_code)
 {
       prop_code_ = prop_code;
       type_code_ = 0;
+      support_flag_ = false;
       set_flag_ = false;
       range_flag_ = false;
 }
 
 MacPTPCameraControl::prop_desc_t::~prop_desc_t()
 {
+      clear_property_support();
+}
+
+void MacPTPCameraControl::prop_desc_t::clear_property_support()
+{
+      if (support_flag_ == false)
+	    return;
+
+      support_flag_ = false;
+
       switch (type_code_) {
 	  case 1:
 	    if (enum_int8_) delete enum_int8_;
@@ -678,48 +689,49 @@ int MacPTPCameraControl::prop_desc_t::get_enum_count() const
 
 template<> int8_t MacPTPCameraControl::prop_desc_t::get_current<int8_t>(void)
 {
-      assert(type_code_ == 1);
+      assert(support_flag_ && type_code_ == 1);
       return current_uint8_;
 }
 
 template<> uint8_t MacPTPCameraControl::prop_desc_t::get_current<uint8_t>(void)
 {
-      assert(type_code_ == 2);
+      assert(support_flag_ && type_code_ == 2);
       return current_uint8_;
 }
 
 template<> int16_t MacPTPCameraControl::prop_desc_t::get_current<int16_t>(void)
 {
-      assert(type_code_ == 3);
+      assert(support_flag_ && type_code_ == 3);
       return current_uint16_;
 }
 
 template<> uint16_t MacPTPCameraControl::prop_desc_t::get_current<uint16_t>(void)
 {
-      assert(type_code_ == 4);
+      assert(support_flag_ && type_code_ == 4);
       return current_uint16_;
 }
 
 template<> int32_t MacPTPCameraControl::prop_desc_t::get_current<int32_t>(void)
 {
-      assert(type_code_ == 5);
+      assert(support_flag_ && type_code_ == 5);
       return current_uint32_;
 }
 
 template<> uint32_t MacPTPCameraControl::prop_desc_t::get_current<uint32_t>(void)
 {
-      assert(type_code_ == 6);
+      assert(support_flag_ && type_code_ == 6);
       return current_uint32_;
 }
 
 template<> QString MacPTPCameraControl::prop_desc_t::get_current<QString>(void)
 {
-      assert(type_code_ == 0xffff);
+      assert(support_flag_ && type_code_ == 0xffff);
       return *current_string_;
 }
 
 template<> uint8_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint8_t>(int idx)
 {
+      assert(support_flag_);
       assert(type_code_ == 2);
       assert(enum_uint8_ != 0);
       assert(range_flag_ == false);
@@ -729,6 +741,7 @@ template<> uint8_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint8_t>(int
 
 template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint16_t>(int idx)
 {
+      assert(support_flag_);
       assert(type_code_ == 4);
       assert(enum_uint16_ != 0);
       assert((int)enum_uint16_->size() > idx);
@@ -737,6 +750,7 @@ template<> uint16_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint16_t>(i
 
 template<> uint32_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint32_t>(int idx)
 {
+      assert(support_flag_);
       assert(type_code_ == 6);
       assert(enum_uint32_ != 0);
       assert((int)enum_uint32_->size() > idx);
@@ -745,6 +759,7 @@ template<> uint32_t MacPTPCameraControl::prop_desc_t::get_enum_index<uint32_t>(i
 
 template<> QString MacPTPCameraControl::prop_desc_t::get_enum_index<QString>(int idx)
 {
+      assert(support_flag_);
       assert(type_code_ == 0xffff);
       assert(enum_string_ != 0);
       assert((int)enum_string_->size() > idx);
@@ -754,6 +769,7 @@ template<> QString MacPTPCameraControl::prop_desc_t::get_enum_index<QString>(int
 void MacPTPCameraControl::prop_desc_t::set_type_code(uint16_t code)
 {
       assert(type_code_ == 0);
+      support_flag_ = true;
       type_code_ = code;
       switch (type_code_) {
 	  case 0xffff: // String
@@ -788,25 +804,25 @@ template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<int16_t>(
 
 template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint16_t>(uint16_t val)
 {
-      assert(type_code_ == 4);
+      assert(support_flag_ && type_code_ == 4);
       fact_uint16_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<int32_t>(int32_t val)
 {
-      assert(type_code_ == 5);
+      assert(support_flag_ && type_code_ == 5);
       fact_int32_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<uint32_t>(uint32_t val)
 {
-      assert(type_code_ == 6);
+      assert(support_flag_ && type_code_ == 6);
       fact_uint32_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<QString>(QString val)
 {
-      assert(type_code_ == 0xffff);
+      assert(support_flag_ && type_code_ == 0xffff);
       if (fact_string_ == 0)
 	    fact_string_ = new QString(val);
       else
@@ -815,43 +831,43 @@ template <> void MacPTPCameraControl::prop_desc_t::set_factory_default<QString>(
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<int8_t>(int8_t val)
 {
-      assert(type_code_ == 1);
+      assert(support_flag_ && type_code_ == 1);
       current_int8_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<uint8_t>(uint8_t val)
 {
-      assert(type_code_ == 2);
+      assert(support_flag_ && type_code_ == 2);
       current_uint8_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<int16_t>(int16_t val)
 {
-      assert(type_code_ == 3);
+      assert(support_flag_ && type_code_ == 3);
       current_int16_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<uint16_t>(uint16_t val)
 {
-      assert(type_code_ == 4);
+      assert(support_flag_ && type_code_ == 4);
       current_uint16_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<int32_t>(int32_t val)
 {
-      assert(type_code_ == 5);
+      assert(support_flag_ && type_code_ == 5);
       current_int32_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<uint32_t>(uint32_t val)
 {
-      assert(type_code_ == 6);
+      assert(support_flag_ && type_code_ == 6);
       current_uint32_ = val;
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_current<QString>(QString val)
 {
-      assert(type_code_ == 0xffff);
+      assert(support_flag_ && type_code_ == 0xffff);
       if (current_string_ == 0)
 	    current_string_ = new QString(val);
       else
@@ -860,7 +876,7 @@ template <> void MacPTPCameraControl::prop_desc_t::set_current<QString>(QString 
 
 template <> void MacPTPCameraControl::prop_desc_t::set_range<int8_t>(int8_t val_min, int8_t val_max, int8_t step)
 {
-      assert(type_code_ == 1);
+      assert(support_flag_ && type_code_ == 1);
       range_flag_ = true;
       enum_int8_ = new std::vector<int8_t> (3);
       (*enum_int8_)[0] = val_min;
@@ -870,7 +886,7 @@ template <> void MacPTPCameraControl::prop_desc_t::set_range<int8_t>(int8_t val_
 
 template <> void MacPTPCameraControl::prop_desc_t::set_range<uint8_t>(uint8_t val_min, uint8_t val_max, uint8_t step)
 {
-      assert(type_code_ == 2);
+      assert(support_flag_ && type_code_ == 2);
       range_flag_ = true;
       enum_uint8_ = new std::vector<uint8_t> (3);
       (*enum_uint8_)[0] = val_min;
@@ -880,7 +896,7 @@ template <> void MacPTPCameraControl::prop_desc_t::set_range<uint8_t>(uint8_t va
 
 template <> void MacPTPCameraControl::prop_desc_t::get_range<uint8_t>(uint8_t&val_min, uint8_t&val_max, uint8_t&step)
 {
-      assert(type_code_ == 2);
+      assert(support_flag_ && type_code_ == 2);
       assert(range_flag_);
       assert(enum_uint8_->size() == 3);
       val_min = (*enum_uint8_)[0];
@@ -890,43 +906,43 @@ template <> void MacPTPCameraControl::prop_desc_t::get_range<uint8_t>(uint8_t&va
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int8_t>(const std::vector<int8_t>&ref)
 {
-      assert(type_code_ == 1);
+      assert(support_flag_ && type_code_ == 1);
       enum_int8_ = new std::vector<int8_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint8_t>(const std::vector<uint8_t>&ref)
 {
-      assert(type_code_ == 2);
+      assert(support_flag_ && type_code_ == 2);
       enum_uint8_ = new std::vector<uint8_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int16_t>(const std::vector<int16_t>&ref)
 {
-      assert(type_code_ == 3);
+      assert(support_flag_ && type_code_ == 3);
       enum_int16_ = new std::vector<int16_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint16_t>(const std::vector<uint16_t>&ref)
 {
-      assert(type_code_ == 4);
+      assert(support_flag_ && type_code_ == 4);
       enum_uint16_ = new std::vector<uint16_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<int32_t>(const std::vector<int32_t>&ref)
 {
-      assert(type_code_ == 5);
+      assert(support_flag_ && type_code_ == 5);
       enum_int32_ = new std::vector<int32_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<uint32_t>(const std::vector<uint32_t>&ref)
 {
-      assert(type_code_ == 6);
+      assert(support_flag_ && type_code_ == 6);
       enum_uint32_ = new std::vector<uint32_t> (ref);
 }
 
 template <> void MacPTPCameraControl::prop_desc_t::set_enum_vector<QString>(const std::vector<QString>&ref)
 {
-      assert(type_code_ == 0xffff);
+      assert(support_flag_ && type_code_ == 0xffff);
       enum_string_ = new std::vector<QString> (ref);
 }
 
@@ -947,6 +963,15 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
       ica_send_message_(ptp_buf, sizeof buf);
       result_code = ptp_buf->resultCode;
 
+      if (result_code != 0x2001) {
+	    debug_log << "GetDevicePropDesc(0x"
+		      << hex << desc.get_property_code() << ")"
+		      << " --result_code--> 0x" << hex << result_code
+		      << dec << endl << flush;
+	    desc.clear_property_support();
+	    return;
+      }
+
       UInt8*dptr = ptp_buf->data;
 
 	// data[0]
@@ -956,6 +981,8 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 
 	// data[2]
 	// data[3] -- data type code
+	// Setting the type code for the property also turns its
+	// support flag on.
       uint16_t dtype = val_from_bytes<uint16_t>(dptr);
       desc.set_type_code(dtype);
 
@@ -1102,6 +1129,9 @@ void MacPTPCameraControl::ptp_get_property_desc_(prop_desc_t&desc,
 
 float MacPTPCameraControl::battery_level(void)
 {
+      if (battery_level_.test_property_support() == false)
+	    return -1;
+
 	// The BatteryLevel is by definition (PTP) a UINT8.
       assert(battery_level_.get_type_code() == 2);
 
@@ -1134,6 +1164,11 @@ float MacPTPCameraControl::battery_level(void)
 
 void MacPTPCameraControl::get_image_size_index(vector<string>&values)
 {
+      if (image_size_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(image_size_.get_enum_count());
 	// The ImageSize is by definition (PTP) a String
       assert(image_size_.get_type_code() == 0xffff);
@@ -1148,6 +1183,9 @@ void MacPTPCameraControl::get_image_size_index(vector<string>&values)
 
 int MacPTPCameraControl::get_image_size_index()
 {
+      if (image_size_.test_property_support() == false)
+	    return -1;
+
       QString val = image_size_.get_current<QString>();
       for (int idx = 0 ; idx < image_size_.get_enum_count() ; idx += 1) {
 	    if (val == image_size_.get_enum_index<QString>(idx))
@@ -1178,6 +1216,11 @@ bool MacPTPCameraControl::set_image_size_ok()
 
 void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
 {
+      if (exposure_program_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(exposure_program_.get_enum_count());
 	// The ExposureProgramMode is by definition (PTP) a UINT16.
       assert(exposure_program_.get_type_code() == 4);
@@ -1192,6 +1235,9 @@ void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
 
 int MacPTPCameraControl::get_exposure_program_index()
 {
+      if (exposure_program_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = exposure_program_.get_current<uint16_t>();
       for (int idx = 0 ; idx < exposure_program_.get_enum_count() ; idx += 1) {
 	    if (val == exposure_program_.get_enum_index<uint16_t>(idx))
@@ -1222,6 +1268,11 @@ bool MacPTPCameraControl::set_exposure_program_ok()
 
 void MacPTPCameraControl::get_exposure_time_index(vector<string>&values)
 {
+      if (exposure_time_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(exposure_time_.get_enum_count());
 	// The ExposureTime is by definition (PTP) a UINT32.
       assert(exposure_time_.get_type_code() == 6);
@@ -1242,6 +1293,9 @@ void MacPTPCameraControl::get_exposure_time_index(vector<string>&values)
 
 int MacPTPCameraControl::get_exposure_time_index()
 {
+      if (exposure_time_.test_property_support() == false)
+	    return -1;
+
       uint32_t val = exposure_time_.get_current<uint32_t>();
       for (int idx = 0 ; idx < exposure_time_.get_enum_count() ; idx += 1) {
 	    if (val == exposure_time_.get_enum_index<uint32_t>(idx))
@@ -1280,6 +1334,11 @@ bool MacPTPCameraControl::set_exposure_time_ok()
 
 void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
 {
+      if (fnumber_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(fnumber_.get_enum_count());
 	// The FNumber is by definition (PTP) a UINT16.
       assert(fnumber_.get_type_code() == 4);
@@ -1293,6 +1352,9 @@ void MacPTPCameraControl::get_fnumber_index(vector<string>&values)
 
 int MacPTPCameraControl::get_fnumber_index()
 {
+      if (fnumber_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = fnumber_.get_current<uint16_t>();
       for (int idx = 0 ; idx < fnumber_.get_enum_count() ; idx += 1) {
 	    if (val == fnumber_.get_enum_index<uint16_t>(idx))
@@ -1329,6 +1391,11 @@ bool MacPTPCameraControl::set_fnumber_ok()
 
 void MacPTPCameraControl::get_iso_index(vector<string>&values)
 {
+      if (iso_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(iso_.get_enum_count());
 	// The FNumber is by definition (PTP) a UINT16.
       assert(iso_.get_type_code() == 4);
@@ -1342,6 +1409,9 @@ void MacPTPCameraControl::get_iso_index(vector<string>&values)
 
 int MacPTPCameraControl::get_iso_index()
 {
+      if (iso_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = iso_.get_current<uint16_t>();
       for (int idx = 0 ; idx < iso_.get_enum_count() ; idx += 1) {
 	    if (val == iso_.get_enum_index<uint16_t>(idx))
@@ -1374,6 +1444,11 @@ bool MacPTPCameraControl::set_iso_ok()
 
 void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
 {
+      if (flash_mode_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(flash_mode_.get_enum_count());
 	// The FlashMode is by definition (PTP) a UINT16.
       assert(flash_mode_.get_type_code() == 4);
@@ -1388,6 +1463,9 @@ void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
 
 int MacPTPCameraControl::get_flash_mode_index()
 {
+      if (flash_mode_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = flash_mode_.get_current<uint16_t>();
       for (int idx = 0 ; idx < flash_mode_.get_enum_count() ; idx += 1) {
 	    if (val == flash_mode_.get_enum_index<uint16_t>(idx))
@@ -1421,6 +1499,11 @@ bool MacPTPCameraControl::set_flash_mode_ok()
 
 void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
 {
+      if (focus_mode_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(focus_mode_.get_enum_count());
 	// The FocusMode is by definition (PTP) a UINT16.
       assert(focus_mode_.get_type_code() == 4);
@@ -1435,6 +1518,9 @@ void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
 
 int MacPTPCameraControl::get_focus_mode_index()
 {
+      if (focus_mode_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = focus_mode_.get_current<uint16_t>();
       for (int idx = 0 ; idx < focus_mode_.get_enum_count() ; idx += 1) {
 	    if (val == focus_mode_.get_enum_index<uint16_t>(idx))
@@ -1468,6 +1554,11 @@ bool MacPTPCameraControl::set_focus_mode_ok()
 
 void MacPTPCameraControl::get_white_balance_index(vector<string>&values)
 {
+      if (white_balance_.test_property_support() == false) {
+	    values.clear();
+	    return;
+      }
+
       values.resize(white_balance_.get_enum_count());
 	// The WhiteBalance is by definition (PTP) a UINT16.
       assert(white_balance_.get_type_code() == 4);
@@ -1482,6 +1573,9 @@ void MacPTPCameraControl::get_white_balance_index(vector<string>&values)
 
 int MacPTPCameraControl::get_white_balance_index()
 {
+      if (white_balance_.test_property_support() == false)
+	    return -1;
+
       uint16_t val = white_balance_.get_current<uint16_t>();
       for (int idx = 0 ; idx < white_balance_.get_enum_count() ; idx += 1) {
 	    if (val == white_balance_.get_enum_index<uint16_t>(idx))
