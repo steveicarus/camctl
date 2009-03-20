@@ -254,7 +254,7 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
 
 bool MacPTPCameraControl::operation_is_supported_(uint16_t code) const
 {
-      for (int idx = 0 ; idx < operations_supported_.size() ; idx += 1)
+      for (size_t idx = 0 ; idx < operations_supported_.size() ; idx += 1)
 	    if (code == operations_supported_[idx])
 		  return true;
 
@@ -279,6 +279,9 @@ CameraControl::capture_resp_t MacPTPCameraControl::capture_image(void)
 
       ica_send_message_(ptp_buf, sizeof buf);
       uint32_t result_code = ptp_buf->resultCode;
+
+      debug_log << "InitiateCapture (result_code="
+		<< hex << result_code << dec << ")" << endl << flush;
 
       return CAP_OK;
 }
@@ -1145,7 +1148,6 @@ void MacPTPCameraControl::get_image_size_index(vector<string>&values)
 
 int MacPTPCameraControl::get_image_size_index()
 {
-      uint32_t rc;
       QString val = image_size_.get_current<QString>();
       for (int idx = 0 ; idx < image_size_.get_enum_count() ; idx += 1) {
 	    if (val == image_size_.get_enum_index<QString>(idx))
