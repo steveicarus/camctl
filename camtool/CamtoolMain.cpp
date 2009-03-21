@@ -50,8 +50,20 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	// Set up the thumbnail display widget.
       action_thumbnail_scene_ = new QGraphicsScene;
       action_thumbnail_pixmap_ = new QGraphicsPixmapItem;
+      action_thumbnail_hist_red_ = new QGraphicsPixmapItem;
+      action_thumbnail_hist_green_ = new QGraphicsPixmapItem;
+      action_thumbnail_hist_blue_ = new QGraphicsPixmapItem;
 
       action_thumbnail_scene_->addItem(action_thumbnail_pixmap_);
+      action_thumbnail_scene_->addItem(action_thumbnail_hist_red_);
+      action_thumbnail_scene_->addItem(action_thumbnail_hist_green_);
+      action_thumbnail_scene_->addItem(action_thumbnail_hist_blue_);
+
+      action_thumbnail_pixmap_->setPos(0,0);
+      action_thumbnail_hist_red_  ->setPos(THUMB_WID+10,  0);
+      action_thumbnail_hist_green_->setPos(THUMB_WID+10, 34);
+      action_thumbnail_hist_blue_ ->setPos(THUMB_WID+10, 68);
+
       ui.action_thumbnail_view->setScene(action_thumbnail_scene_);
 
 	// Heartbeat timer

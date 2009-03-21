@@ -46,7 +46,13 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
       QTimer heartbeat_timer_;
       QGraphicsScene* action_thumbnail_scene_;
+	// Pixmap to hold a thumbnail image.
+      enum { THUMB_WID = 160, THUMB_HEI = 140,
+	     THUMB_HIST_WID = 64, THUMB_HIST_HEI=32 };
       QGraphicsPixmapItem*action_thumbnail_pixmap_;
+      QGraphicsPixmapItem*action_thumbnail_hist_red_;
+      QGraphicsPixmapItem*action_thumbnail_hist_green_;
+      QGraphicsPixmapItem*action_thumbnail_hist_blue_;
 
     private:
 	// Helper methods.

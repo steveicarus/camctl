@@ -60,15 +60,79 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
       item->setData(Qt::UserRole, file_index);
       ui.images_list->addItem(item);
 
-	// Get the thumbnail of the new image and write it into the
-	// image thumbnail display.
+	// Get the thumbnail of the new image and decode it into a
+	// QImage object.
       char*buf;
       size_t buf_len;
       camera->get_image_thumbnail(cur_key, buf, buf_len);
 
-      QPixmap pix_tmp;
-      pix_tmp.loadFromData((const uchar*)buf, buf_len);
-      action_thumbnail_pixmap_->setPixmap(pix_tmp);
+      QImage image_tmp;
+      image_tmp.loadFromData((const uchar*)buf, buf_len);
+      delete[]buf;
+
+	// Calculate thumbnail histograms
+      {
+	    unsigned long red_hist[THUMB_HIST_WID];
+	    unsigned long gre_hist[THUMB_HIST_WID];
+	    unsigned long blu_hist[THUMB_HIST_WID];
+	    for (int idx = 0 ; idx < THUMB_HIST_WID ; idx += 1) {
+		  red_hist[idx] = 0;
+		  gre_hist[idx] = 0;
+		  blu_hist[idx] = 0;
+	    }
+
+	    for (int y = 0 ; y < image_tmp.height() ; y += 1) {
+		  for (int x = 0 ; x < image_tmp.width() ; x += 1) {
+			QRgb pix = image_tmp.pixel(x,y);
+			red_hist[ qRed(pix)   / (256/THUMB_HIST_WID) ] += 1;
+			gre_hist[ qGreen(pix) / (256/THUMB_HIST_WID) ] += 1;
+			blu_hist[ qBlue(pix)  / (256/THUMB_HIST_WID) ] += 1;
+		  }
+	    }
+
+	    unsigned long norm_red = 0;
+	    unsigned long norm_gre = 0;
+	    unsigned long norm_blu = 0;
+	    for (int idx = 0 ; idx < THUMB_HIST_WID ; idx += 1) {
+		  if (red_hist[idx] > norm_red) norm_red = red_hist[idx];
+		  if (gre_hist[idx] > norm_gre) norm_gre = red_hist[idx];
+		  if (blu_hist[idx] > norm_blu) norm_blu = red_hist[idx];
+	    }
+	    for (int idx = 0 ; idx < THUMB_HIST_WID ; idx += 1) {
+		  red_hist[idx] = red_hist[idx] * THUMB_HIST_HEI / norm_red;
+		  gre_hist[idx] = gre_hist[idx] * THUMB_HIST_HEI / norm_gre;
+		  blu_hist[idx] = blu_hist[idx] * THUMB_HIST_HEI / norm_blu;
+	    }
+
+	    QRgb pix_black = qRgb(0,0,0);
+	    QRgb pix_red = qRgb(255,0,0);
+	    QRgb pix_gre = qRgb(0,255,0);
+	    QRgb pix_blu = qRgb(0,0,255);
+	    QImage red_ihist(THUMB_HIST_WID, THUMB_HIST_HEI, QImage::Format_RGB32);
+	    QImage gre_ihist(THUMB_HIST_WID, THUMB_HIST_HEI, QImage::Format_RGB32);
+	    QImage blu_ihist(THUMB_HIST_WID, THUMB_HIST_HEI, QImage::Format_RGB32);
+	    for (int y = 0 ; y < THUMB_HIST_HEI ; y += 1) {
+		  for (int x = 0 ; x < THUMB_HIST_WID ; x += 1) {
+			red_ihist.setPixel(x,y,red_hist[x] > THUMB_HIST_HEI-y? pix_red : pix_black);
+			gre_ihist.setPixel(x,y,gre_hist[x] > THUMB_HIST_HEI-y? pix_gre : pix_black);
+			blu_ihist.setPixel(x,y,blu_hist[x] > THUMB_HIST_HEI-y? pix_blu : pix_black);
+		  }
+	    }
+
+	    action_thumbnail_hist_red_  ->setPixmap(QPixmap::fromImage(red_ihist));
+	    action_thumbnail_hist_green_->setPixmap(QPixmap::fromImage(gre_ihist));
+	    action_thumbnail_hist_blue_ ->setPixmap(QPixmap::fromImage(blu_ihist));
+      }
+
+	// If necessary, scale the thumbnail to fit the standard
+	// thumbnail window.
+      if (image_tmp.width() > THUMB_WID
+	  || image_tmp.height() > THUMB_HEI
+	  || (image_tmp.width() != THUMB_WID && image_tmp.height() != THUMB_HEI))
+	  image_tmp = image_tmp.scaled(THUMB_WID,THUMB_HEI, Qt::KeepAspectRatio);
+
+	// Put the thumbnail into the display.
+      action_thumbnail_pixmap_->setPixmap(QPixmap::fromImage(image_tmp));
 
       delete[]buf;
 
