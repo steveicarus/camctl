@@ -56,6 +56,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       action_thumbnail_hist_green_ = new QGraphicsPixmapItem;
       action_thumbnail_hist_blue_ = new QGraphicsPixmapItem;
 
+      action_thumbnail_scene_->setBackgroundBrush(QBrush(QColor(80,80,80)));
       action_thumbnail_scene_->addItem(action_thumbnail_pixmap_);
       action_thumbnail_scene_->addItem(action_thumbnail_hist_red_);
       action_thumbnail_scene_->addItem(action_thumbnail_hist_green_);

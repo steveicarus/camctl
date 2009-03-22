@@ -20,6 +20,7 @@
 # include  <qapplication.h>
 # include  "CamtoolPreview.h"
 # include  "CamtoolMain.h"
+# include  "image_math.h"
 # include  <iostream>
 
 using namespace std;
@@ -37,14 +38,34 @@ CamtoolPreview::CamtoolPreview(CamtoolMain*parent)
       preview_scene_ = new QGraphicsScene;
       preview_pixmap_ = new QGraphicsPixmapItem;
       preview_scene_->addItem(preview_pixmap_);
-
       ui.preview_image->setScene(preview_scene_);
+
+      charts_scene_ = new QGraphicsScene;
+      charts_red_hist_ = new QGraphicsPixmapItem;
+      charts_green_hist_ = new QGraphicsPixmapItem;
+      charts_blue_hist_ = new QGraphicsPixmapItem;
+
+      charts_scene_->setBackgroundBrush(QBrush(QColor(0,0,0)));
+      charts_scene_->addItem(charts_red_hist_);
+      charts_scene_->addItem(charts_green_hist_);
+      charts_scene_->addItem(charts_blue_hist_);
+
+      charts_red_hist_  ->setPos(0, 0);
+      charts_green_hist_->setPos(0, 1*(CHART_HEI+10));
+      charts_blue_hist_ ->setPos(0, 2*(CHART_HEI+10));
+
+      ui.preview_charts->setScene(charts_scene_);
 }
 
 CamtoolPreview::~CamtoolPreview()
 {
       delete preview_pixmap_;
       delete preview_scene_;
+
+      delete charts_red_hist_;
+      delete charts_green_hist_;
+      delete charts_blue_hist_;
+      delete charts_scene_;
 }
 
 void CamtoolPreview::display_preview_image(const QString&file_name,
@@ -53,7 +74,18 @@ void CamtoolPreview::display_preview_image(const QString&file_name,
       QImage image_tmp;
       image_tmp.loadFromData( (const uchar*)data, data_len );
 
+	// Load the image into the display.
       preview_pixmap_->setPixmap(QPixmap::fromImage(image_tmp));
+
+      QImage red_hist (CHART_WID, CHART_HEI, QImage::Format_RGB32);
+      QImage gre_hist (CHART_WID, CHART_HEI, QImage::Format_RGB32);
+      QImage blu_hist (CHART_WID, CHART_HEI, QImage::Format_RGB32);
+
+      calculate_histograms(image_tmp, red_hist, gre_hist, blu_hist);
+
+      charts_red_hist_  ->setPixmap(QPixmap::fromImage(red_hist));
+      charts_green_hist_->setPixmap(QPixmap::fromImage(gre_hist));
+      charts_blue_hist_ ->setPixmap(QPixmap::fromImage(blu_hist));
 }
 
 void CamtoolPreview::preview_buttons_slot_(QAbstractButton*button)

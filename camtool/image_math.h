@@ -1,5 +1,5 @@
-#ifndef __CamtoolPreview_H
-#define __CamtoolPreview_H
+#ifndef __image_math_H
+#define __image_math_H
 
 /*
  * Copyright (c) 2009 Stephen Williams (steve@icarus.com)
@@ -20,38 +20,12 @@
  *    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-# include  <qapplication.h>
-# include  "ui_preview.h"
+class QImage;
 
-class CamtoolMain;
-class QString;
-
-class CamtoolPreview : public QDialog {
-
-      Q_OBJECT
-
-    public:
-      CamtoolPreview(CamtoolMain*parent);
-      ~CamtoolPreview();
-
-      void display_preview_image(const QString&file_name, const char*data, size_t data_len);
-
-    private slots:
-      void preview_buttons_slot_(QAbstractButton*);
-
-    private:
-      QGraphicsScene* preview_scene_;
-      QGraphicsPixmapItem*preview_pixmap_;
-
-      enum {CHART_WID = 128, CHART_HEI = 50};
-      QGraphicsScene*     charts_scene_;
-      QGraphicsPixmapItem*charts_red_hist_;
-      QGraphicsPixmapItem*charts_green_hist_;
-      QGraphicsPixmapItem*charts_blue_hist_;
-
-    private:
-      CamtoolMain*main_window_;
-      Ui::PreviewWindow ui;
-};
+extern void calculate_histograms(const QImage&reference,
+				 QImage&red_histogram,
+				 QImage&green_histogram,
+				 QImage&blue_histogram,
+				 bool skip_saturated_black =false);
 
 #endif
