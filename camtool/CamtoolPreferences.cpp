@@ -32,6 +32,7 @@ using namespace std;
 static const char KEY_TETHERED_PATH[] = "images/tethered_path";
 static const char KEY_TETHERED_NAME[] = "images/tethered_name";
 static const char KEY_TETHERED_NUMBER[] = "image/tethered_number";
+static const char KEY_PREVIEW_RAISED[] = "preview/raised";
 
 static const char KEY_LOGFILE_PATH[]  = "debug/logfile_path";
 
@@ -122,6 +123,16 @@ QString CamtoolPreferences::get_tethered_file()
       }
 
       return tmp;
+}
+
+bool CamtoolPreferences::get_preview_raised(void)
+{
+      return settings_.value(KEY_PREVIEW_RAISED).toBool();
+}
+
+void CamtoolPreferences::set_preview_raised(bool flag)
+{
+      settings_.setValue(KEY_PREVIEW_RAISED, flag);
 }
 
 void CamtoolPreferences::clear_tethered_path_(void)

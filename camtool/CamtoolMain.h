@@ -31,6 +31,7 @@
 class CamtoolPreferences;
 class CamtoolAboutBox;
 class CamtoolAboutDevice;
+class CamtoolPreview;
 
 class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
@@ -39,6 +40,11 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
     public:
       CamtoolMain(QWidget *parent =0);
       ~CamtoolMain();
+
+	// The Preview window uses this to uncheck the preview window action
+      void close_preview_window();
+	// Return true if the preview window is active.
+      bool preview_window_active();
 
     private:
 	// Hold on to the camera that the user grabs.
@@ -67,12 +73,16 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void grab_camera_(void);
       void ungrab_camera_(void);
 
+      void display_thumbnail_(CameraControl*camera, long image_key);
+      void write_tethered_image_(const QString&file_name, const char*data, size_t data_len);
+
     private slots:
 	// Slot for the heartbeat timer.
       void heartbeat_slot_();
 
 	// Slots for the Menubar
       void preferences_slot_();
+      void tools_preview_slot_();
       void help_about_slot_();
       void help_about_camera_slot_();
 
@@ -118,6 +128,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolPreferences*preferences_;
       CamtoolAboutBox*about_;
       CamtoolAboutDevice*about_device_;
+      CamtoolPreview*preview_;
 
       bool tethered_in_progress_;
 };

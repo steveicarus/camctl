@@ -20,6 +20,7 @@
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
 # include  "CamtoolPreferences.h"
+# include  "CamtoolPreview.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
 # include  <iostream>
@@ -49,17 +50,8 @@ void CamtoolMain::resync_camera_images_(void)
       }
 }
 
-void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::file_key_t&file)
+void CamtoolMain::display_thumbnail_(CameraControl*camera, long cur_key)
 {
-      long cur_key = file.first;
-
-      QString file_name (file.second.c_str());
-      QVariant file_index ((int)cur_key);
-
-      QListWidgetItem*item = new QListWidgetItem(file_name);
-      item->setData(Qt::UserRole, file_index);
-      ui.images_list->addItem(item);
-
 	// Get the thumbnail of the new image and decode it into a
 	// QImage object.
       char*buf;
@@ -135,69 +127,102 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
       action_thumbnail_pixmap_->setPixmap(QPixmap::fromImage(image_tmp));
 
       delete[]buf;
+}
+
+void CamtoolMain::write_tethered_image_(const QString&file_name, const char*data, size_t data_len)
+{
+	// Get the destination directory for tethered images. If the
+	// directory doesn't exist, try to create it in its parent
+	// directory. 
+      QDir dir (preferences_->get_tethered_path());
+      if (! dir.exists()) {
+	    QString tmp = dir.dirName();
+	    if (!dir.cdUp()) {
+		  QMessageBox::information(this, tr("No Directory"),
+				   tr("Directory doesn't exist: ") + dir.path());
+		  return;
+	    }
+
+	    if (!dir.mkdir(tmp)) {
+		  QMessageBox::information(this, tr("No Directory"),
+				   tr("Unable to make directory: ") + dir.path());
+		  return;
+	    }
+	    dir.cd(tmp);
+      }
+
+	// Look for a file name to use for the output image.
+      QString path;
+      for (;;) {
+	      // Get the next file name to use.
+	    QString use_name = preferences_->get_tethered_file();
+
+	      // Get the suffix that the camera selected.
+	    int suff = file_name.lastIndexOf(QChar('.'));
+	    if (suff >= 0)
+		  use_name .append( file_name.mid(suff) );
+
+	      // Build the path to the destination file and see if it
+	      // doesn't exist already. If it doesn't exist, we're
+	      // done. If it does exist, try again.
+	    path = dir.filePath(use_name);
+	    QFile tmpfile(path);
+	    if (! tmpfile.exists())
+		  break;
+      }
+
+	// Create the file and write the image data.
+      FILE*fd = fopen(path.toAscii(), "wb");
+      if (fd == 0) {
+	    QMessageBox::information(this, tr("Write Error"),
+			     tr("Unable to open output file for write: ") + path);
+	    return;
+      }
+
+      assert(fd);
+      fwrite(data, 1, data_len, fd);
+      fclose(fd);
+}
+
+void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::file_key_t&file)
+{
+      long cur_key = file.first;
+
+      QString file_name (file.second.c_str());
+      QVariant file_index ((int)cur_key);
+
+	// Add a file entry into the file list.
+      QListWidgetItem*item = new QListWidgetItem(file_name);
+      item->setData(Qt::UserRole, file_index);
+      ui.images_list->addItem(item);
+
+	// Display a thumbnail of the captured image.
+      display_thumbnail_(camera, cur_key);
+
+	// If tethered capture is in progress, or if the preview
+	// window is open, then we need the image data.
+      char*buf = 0;
+      size_t buf_len = 0;
+      if (tethered_in_progress_ || preview_window_active()) {
+	    bool remove_image_flag = false;
+	    if (tethered_in_progress_)
+		  remove_image_flag = true;
+
+	    camera->get_image_data(cur_key, buf, buf_len, remove_image_flag);
+      }
+
+	// If the preview is enabled, then display the image there.
+      if (preview_window_active())
+	    preview_->display_preview_image(file_name, buf, buf_len);
 
 	// If we are busy with a tethered capture, then immediately
 	// collect the image from the camera and send it to the
 	// tethered capture directory.
-      if (tethered_in_progress_) {
-	    do {
-		    // Get the destination directory for tethered
-		    // images. If the directory doesn't exist, try to
-		    // create it in its parent directory.
-		  QDir dir (preferences_->get_tethered_path());
-		  if (! dir.exists()) {
-			QString tmp = dir.dirName();
-			if (!dir.cdUp()) {
-			      QMessageBox::information(this, tr("No Directory"),
-						       tr("Directory doesn't exist: ") + dir.path());
-			      break;
-			}
+      if (tethered_in_progress_)
+	    write_tethered_image_(file_name, buf, buf_len);
 
-			if (!dir.mkdir(tmp)) {
-			      QMessageBox::information(this, tr("No Directory"),
-						       tr("Unable to make directory: ") + dir.path());
-			      break;
-			}
-			dir.cd(tmp);
-		  }
-
-		    // Look for a file name to use for the output image.
-		  QString path;
-		  for (;;) {
-			  // Get the next file name to use.
-			QString use_name = preferences_->get_tethered_file();
-
-			  // Get the suffix that the camera selected.
-			int suff = file_name.lastIndexOf(QChar('.'));
-			if (suff >= 0)
-			      use_name .append( file_name.mid(suff) );
-
-			  // Build the path to the destination file
-			  // and see if it doesn't exist already. If
-			  // it doesn't exist, we're done. If it does
-			  // exist, try again.
-			path = dir.filePath(use_name);
-			QFile tmpfile(path);
-			if (! tmpfile.exists())
-			      break;
-		  }
-
-		    // Create the file and write the image data.
-		  FILE*fd = fopen(path.toAscii(), "wb");
-		  if (fd == 0) {
-			QMessageBox::information(this, tr("Write Error"),
-						 tr("Unable to open output file for write: ") + path);
-			break;
-		  }
-
-		  assert(fd);
-		  camera->get_image_data(cur_key, buf, buf_len, true);
-
-		  fwrite(buf, 1, buf_len, fd);
-		  fclose(fd);
-		  delete[]buf;
-	    } while (0);
-      }
+	// Clean up the allocated image buffer, if any.
+      if (buf) delete[]buf;
 }
 
 void CamtoolMain::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&file)

@@ -41,6 +41,11 @@ class CamtoolPreferences : public QDialog {
 	// name string and increment the counter.
       QString get_tethered_file();
 
+	// Remember the state of the preview window, raised(true) or
+	// closed(false).
+      bool get_preview_raised();
+      void set_preview_raised(bool);
+
     private:
       Ui::PreferencesDialog ui;
 

@@ -22,6 +22,7 @@
 # include  "CamtoolPreferences.h"
 # include  "CamtoolAboutBox.h"
 # include  "CamtoolAboutDevice.h"
+# include  "CamtoolPreview.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
 # include  <iostream>
@@ -41,6 +42,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 
       ui.setupUi(this);
       preferences_ = new CamtoolPreferences(this);
+      preview_ = new CamtoolPreview(this);
 
       CameraControl::set_camera_added_notification(this);
       detect_cameras_();
@@ -75,6 +77,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.preferences_action,
 	      SIGNAL(triggered()),
 	      SLOT(preferences_slot_()));
+      connect(ui.tools_preview,
+	      SIGNAL(triggered()),
+	      SLOT(tools_preview_slot_()));
       connect(ui.help_about_action,
 	      SIGNAL(triggered()),
 	      SLOT(help_about_slot_()));
@@ -144,12 +149,18 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.debug_ptp_describe_button,
 	      SIGNAL(clicked()),
 	      SLOT(debug_ptp_describe_slot_()));
+
+      if (preferences_->get_preview_raised()) {
+	    ui.tools_preview->setChecked(true);
+	    tools_preview_slot_();
+      }
 }
 
 CamtoolMain::~CamtoolMain()
 {
       if (about_)
 	    delete about_;
+      delete preview_;
 }
 
 void CamtoolMain::no_camera_selected_(void)
@@ -247,6 +258,31 @@ void CamtoolMain::preferences_slot_(void)
       preferences_->show();
       preferences_->raise();
       preferences_->activateWindow();
+}
+
+void CamtoolMain::tools_preview_slot_(void)
+{
+      assert(preview_);
+      if (ui.tools_preview->isChecked()) {
+	    preview_->show();
+	    preview_->raise();
+	    preview_->activateWindow();
+	    preferences_->set_preview_raised(true);
+      } else {
+	    preview_->close();
+	    preferences_->set_preview_raised(false);
+      }
+}
+
+void CamtoolMain::close_preview_window(void)
+{
+      ui.tools_preview->setChecked(false);
+      preferences_->set_preview_raised(false);
+}
+
+bool CamtoolMain::preview_window_active(void)
+{
+      return ui.tools_preview->isChecked();
 }
 
 void CamtoolMain::help_about_slot_(void)

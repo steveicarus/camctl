@@ -107,8 +107,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>288</width>
-             <height>134</height>
+             <width>482</width>
+             <height>227</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -603,7 +603,14 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="preferences_action" />
    </widget>
+   <widget class="QMenu" name="menuTools" >
+    <property name="title" >
+     <string>Tools</string>
+    </property>
+    <addaction name="tools_preview" />
+   </widget>
    <addaction name="menuFile" />
+   <addaction name="menuTools" />
    <addaction name="menuHelp" />
   </widget>
   <action name="help_about_action" >
@@ -619,6 +626,14 @@ p, li { white-space: pre-wrap; }
   <action name="preferences_action" >
    <property name="text" >
     <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="tools_preview" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Preview Window</string>
    </property>
   </action>
  </widget>
