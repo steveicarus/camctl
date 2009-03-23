@@ -32,6 +32,7 @@ class CamtoolPreferences;
 class CamtoolAboutBox;
 class CamtoolAboutDevice;
 class CamtoolPreview;
+class CamtoolDebug;
 
 class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 
@@ -45,6 +46,8 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void close_preview_window();
 	// Return true if the preview window is active.
       bool preview_window_active();
+
+      CameraControl* get_selected_camera(void);
 
     private:
 	// Hold on to the camera that the user grabs.
@@ -83,6 +86,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Slots for the Menubar
       void preferences_slot_();
       void tools_preview_slot_();
+      void tools_debug_slot_();
       void help_about_slot_();
       void help_about_camera_slot_();
 
@@ -108,13 +112,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void images_list_slot_(QListWidgetItem*);
       void images_refresh_slot_(void);
 
-	// Slots for the (debug) page
-      void dump_generic_slot_(void);
-
-      void debug_ptp_set_slot_(void);
-      void debug_ptp_get_slot_(void);
-      void debug_ptp_describe_slot_(void);
-
     private:
 	// Callbacks
       void camera_image_added(CameraControl*, const CameraControl::file_key_t&);
@@ -129,6 +126,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolAboutBox*about_;
       CamtoolAboutDevice*about_device_;
       CamtoolPreview*preview_;
+      CamtoolDebug*debug_window_;
 
       bool tethered_in_progress_;
 };

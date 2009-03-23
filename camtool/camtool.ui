@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>425</height>
+    <width>413</width>
+    <height>409</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -25,73 +25,6 @@
       <property name="currentIndex" >
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab" >
-       <attribute name="title" >
-        <string>Select Camera</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2" >
-        <item>
-         <spacer name="verticalSpacer_3" >
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>442</width>
-            <height>45</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QComboBox" name="camera_list_box" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip" >
-           <string>Select the camera to use from this menu.</string>
-          </property>
-          <item>
-           <property name="text" >
-            <string>Scan for camera...</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="grab_check_box" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip" >
-           <string>Check this box to grab the camera for use.</string>
-          </property>
-          <property name="text" >
-           <string>Grab Selected Camera</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_2" >
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>442</width>
-            <height>94</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
       <widget class="QWidget" name="tab_2" >
        <attribute name="title" >
         <string>Camera Settings</string>
@@ -102,13 +35,67 @@
           <property name="currentIndex" >
            <number>0</number>
           </property>
+          <widget class="QWidget" name="page_3" >
+           <attribute name="label" >
+            <string>Select Camera</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_2" >
+            <item>
+             <widget class="QComboBox" name="camera_list_box" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip" >
+               <string>Select the camera to use from this menu.</string>
+              </property>
+              <item>
+               <property name="text" >
+                <string>Scan for camera...</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="grab_check_box" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip" >
+               <string>Check this box to grab the camera for use.</string>
+              </property>
+              <property name="text" >
+               <string>Grab Selected Camera</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_4" >
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>20</width>
+                <height>95</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="page" >
            <property name="geometry" >
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>482</width>
-             <height>227</height>
+             <width>359</width>
+             <height>176</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -178,8 +165,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>358</width>
-             <height>134</height>
+             <width>359</width>
+             <height>176</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -198,6 +185,9 @@
               <property name="enabled" >
                <bool>false</bool>
               </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+              </property>
               <property name="minimumContentsLength" >
                <number>24</number>
               </property>
@@ -214,6 +204,9 @@
              <widget class="QComboBox" name="focus_mode_box" >
               <property name="enabled" >
                <bool>false</bool>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToMinimumContentsLength</enum>
               </property>
               <property name="minimumContentsLength" >
                <number>24</number>
@@ -232,6 +225,9 @@
               <property name="enabled" >
                <bool>false</bool>
               </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+              </property>
               <property name="minimumContentsLength" >
                <number>24</number>
               </property>
@@ -248,6 +244,9 @@
              <widget class="QComboBox" name="white_balance_box" >
               <property name="enabled" >
                <bool>false</bool>
+              </property>
+              <property name="sizeAdjustPolicy" >
+               <enum>QComboBox::AdjustToMinimumContentsLength</enum>
               </property>
               <property name="minimumContentsLength" >
                <number>24</number>
@@ -351,191 +350,6 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5" >
-       <attribute name="title" >
-        <string>(debug)</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4" >
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3" >
-          <item>
-           <widget class="QGroupBox" name="groupBox" >
-            <property name="toolTip" >
-             <string>These buttons cause interesting dumps to be sent to the log file.</string>
-            </property>
-            <property name="title" >
-             <string>Debug Dumps</string>
-            </property>
-            <property name="flat" >
-             <bool>false</bool>
-            </property>
-            <property name="checkable" >
-             <bool>false</bool>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3" >
-             <item>
-              <widget class="QLineEdit" name="dump_generic_entry" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="dump_generic_button" >
-               <property name="text" >
-                <string>...generic...</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_2" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="title" >
-             <string>PTP Property</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_6" >
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_4" >
-               <item>
-                <widget class="QPushButton" name="debug_ptp_get_button" >
-                 <property name="text" >
-                  <string>get</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="debug_ptp_set_button" >
-                 <property name="text" >
-                  <string>set</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="debug_ptp_describe_button" >
-                 <property name="text" >
-                  <string>describe</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_5" >
-               <item>
-                <widget class="QLineEdit" name="debug_ptp_code_entry" >
-                 <property name="sizePolicy" >
-                  <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="toolTip" >
-                  <string>Code for property to get/set.</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QComboBox" name="debug_ptp_type_box" >
-                 <property name="toolTip" >
-                  <string>Type of property to get/set.</string>
-                 </property>
-                 <item>
-                  <property name="text" >
-                   <string>INT8</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>UINT8</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>INT16</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>UINT16</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>INT32</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>UINT32</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>INT64</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>UINT64</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>INT128</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text" >
-                   <string>UINT128</string>
-                  </property>
-                 </item>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="debug_ptp_value_entry" >
-               <property name="toolTip" >
-                <string>Literal value of the property.</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="debug_ptp_rc_entry" >
-               <property name="toolTip" >
-                <string>Return code from get/set.</string>
-               </property>
-               <property name="readOnly" >
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_4" >
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-       <zorder>verticalSpacer_4</zorder>
-       <zorder></zorder>
-      </widget>
      </widget>
     </item>
     <item>
@@ -586,7 +400,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>536</width>
+     <width>413</width>
      <height>22</height>
     </rect>
    </property>
@@ -608,6 +422,8 @@ p, li { white-space: pre-wrap; }
      <string>Tools</string>
     </property>
     <addaction name="tools_preview" />
+    <addaction name="separator" />
+    <addaction name="tools_debug" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuTools" />
@@ -634,6 +450,14 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text" >
     <string>Preview Window</string>
+   </property>
+  </action>
+  <action name="tools_debug" >
+   <property name="text" >
+    <string>(debug)</string>
+   </property>
+   <property name="toolTip" >
+    <string>Window for expert debugging of Camtool</string>
    </property>
   </action>
  </widget>

@@ -1,0 +1,229 @@
+<ui version="4.0" >
+ <class>DebugWindow</class>
+ <widget class="QDialog" name="DebugWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>473</width>
+    <height>318</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3" >
+     <item>
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="toolTip" >
+        <string>These buttons cause interesting dumps to be sent to the log file.</string>
+       </property>
+       <property name="title" >
+        <string>Debug Dumps</string>
+       </property>
+       <property name="flat" >
+        <bool>false</bool>
+       </property>
+       <property name="checkable" >
+        <bool>false</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3" >
+        <item>
+         <widget class="QLineEdit" name="dump_generic_entry" />
+        </item>
+        <item>
+         <widget class="QPushButton" name="dump_generic_button" >
+          <property name="text" >
+           <string>...generic...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title" >
+        <string>PTP Property</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6" >
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4" >
+          <item>
+           <widget class="QPushButton" name="debug_ptp_get_button" >
+            <property name="text" >
+             <string>get</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="debug_ptp_set_button" >
+            <property name="text" >
+             <string>set</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="debug_ptp_describe_button" >
+            <property name="text" >
+             <string>describe</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5" >
+          <item>
+           <widget class="QLineEdit" name="debug_ptp_code_entry" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip" >
+             <string>Code for property to get/set.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="debug_ptp_type_box" >
+            <property name="toolTip" >
+             <string>Type of property to get/set.</string>
+            </property>
+            <item>
+             <property name="text" >
+              <string>INT8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>UINT8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>INT16</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>UINT16</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>INT32</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>UINT32</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>INT64</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>UINT64</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>INT128</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>UINT128</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="debug_ptp_value_entry" >
+          <property name="toolTip" >
+           <string>Literal value of the property.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="debug_ptp_rc_entry" >
+          <property name="toolTip" >
+           <string>Return code from get/set.</string>
+          </property>
+          <property name="readOnly" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <zorder>buttonBox</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>groupBox</zorder>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DebugWindow</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DebugWindow</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

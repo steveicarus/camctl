@@ -10,7 +10,7 @@ ICON = Nikon_D40.icns
 QMAKE_CXXFLAGS += -F/System/Library/Frameworks/Carbon.framework/Frameworks
 
 # User interface files
-FORMS   += camtool.ui aboutbox.ui aboutdevice.ui preferences.ui preview.ui
+FORMS   += camtool.ui aboutbox.ui aboutdevice.ui preferences.ui preview.ui debug.ui
 HEADERS += CamtoolMain.h CamtoolPreferences.h CamtoolAboutBox.h CamtoolAboutDevice.h image_math.h version.h
 SOURCES += main.cpp CamtoolMain.cpp grab_camera.cpp camera_images.cpp
 SOURCES += CamtoolPreferences.cpp
@@ -18,6 +18,8 @@ SOURCES += CamtoolAboutBox.cpp
 SOURCES += CamtoolAboutDevice.cpp
 HEADERS += CamtoolPreview.h
 SOURCES += CamtoolPreview.cpp
+HEADERS += CamtoolDebug.h
+SOURCES += CamtoolDebug.cpp
 SOURCES += ptp_misc.cpp image_math.cpp
 
 # The CameraControl base class

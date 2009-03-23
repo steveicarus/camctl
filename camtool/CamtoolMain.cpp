@@ -23,6 +23,7 @@
 # include  "CamtoolAboutBox.h"
 # include  "CamtoolAboutDevice.h"
 # include  "CamtoolPreview.h"
+# include  "CamtoolDebug.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
 # include  <iostream>
@@ -43,6 +44,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       ui.setupUi(this);
       preferences_ = new CamtoolPreferences(this);
       preview_ = new CamtoolPreview(this);
+      debug_window_ = new CamtoolDebug(this);
 
       CameraControl::set_camera_added_notification(this);
       detect_cameras_();
@@ -81,6 +83,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.tools_preview,
 	      SIGNAL(triggered()),
 	      SLOT(tools_preview_slot_()));
+      connect(ui.tools_debug,
+	      SIGNAL(triggered()),
+	      SLOT(tools_debug_slot_()));
       connect(ui.help_about_action,
 	      SIGNAL(triggered()),
 	      SLOT(help_about_slot_()));
@@ -136,21 +141,6 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(clicked()),
 	      SLOT(images_refresh_slot_()));
 
-	// (debug)
-      connect(ui.dump_generic_button,
-	      SIGNAL(clicked()),
-	      SLOT(dump_generic_slot_()));
-
-      connect(ui.debug_ptp_set_button,
-	      SIGNAL(clicked()),
-	      SLOT(debug_ptp_set_slot_()));
-      connect(ui.debug_ptp_get_button,
-	      SIGNAL(clicked()),
-	      SLOT(debug_ptp_get_slot_()));
-      connect(ui.debug_ptp_describe_button,
-	      SIGNAL(clicked()),
-	      SLOT(debug_ptp_describe_slot_()));
-
       if (preferences_->get_preview_raised()) {
 	    ui.tools_preview->setChecked(true);
 	    tools_preview_slot_();
@@ -162,6 +152,16 @@ CamtoolMain::~CamtoolMain()
       if (about_)
 	    delete about_;
       delete preview_;
+}
+
+CameraControl* CamtoolMain::get_selected_camera(void)
+{
+      if (selected_camera_ == 0) {
+	    no_camera_selected_();
+	    return 0;
+      }
+
+      return selected_camera_;
 }
 
 void CamtoolMain::no_camera_selected_(void)
@@ -284,6 +284,14 @@ void CamtoolMain::close_preview_window(void)
 bool CamtoolMain::preview_window_active(void)
 {
       return ui.tools_preview->isChecked();
+}
+
+void CamtoolMain::tools_debug_slot_(void)
+{
+      assert(debug_window_);
+      debug_window_->show();
+      debug_window_->raise();
+      debug_window_->activateWindow();
 }
 
 void CamtoolMain::help_about_slot_(void)
@@ -473,87 +481,4 @@ void CamtoolMain::camera_capture_complete(CameraControl*)
 {
       if (tethered_in_progress_)
 	    tethered_in_progress_ = false;
-}
-
-void CamtoolMain::dump_generic_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      std::string argument = ui.dump_generic_entry->text().toAscii().data();
-      selected_camera_->debug_dump(CameraControl::debug_log, argument);
-}
-
-void CamtoolMain::debug_ptp_get_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
-      unsigned prop_type = ui.debug_ptp_type_box->currentIndex() + 1;
-      unsigned long value = 0;
-
-      int rc = selected_camera_->debug_property_get(prop_code,prop_type,value);
-
-      QString prop_text;
-      prop_text.setNum(value, 16);
-      ui.debug_ptp_value_entry->setText(prop_text);
-
-      QString rc_text;
-      rc_text.setNum(rc, 16);
-      ui.debug_ptp_rc_entry->setText(rc_text);
-}
-
-void CamtoolMain::debug_ptp_set_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
-      unsigned prop_type = ui.debug_ptp_type_box->currentIndex() + 1;
-      unsigned long value = ui.debug_ptp_value_entry->text().toULong(0,0);
-
-      int rc = selected_camera_->debug_property_get(prop_code,prop_type,value);
-
-      QString rc_text;
-      rc_text.setNum(rc, 16);
-      switch (rc) {
-	  case 0x2001:
-	    rc_text.append(" (OK)");
-	    break;
-	  case 0x2002:
-	    rc_text.append(" (General Error)");
-	    break;
-	  case 0x2003:
-	    rc_text.append(" (Session Not Open)");
-	    break;
-	  case 0x2005:
-	    rc_text.append(" (Operation Not Supported)");
-	    break;
-	  default:
-	    break;
-      }
-
-      ui.debug_ptp_rc_entry->setText(rc_text);
-}
-
-void CamtoolMain::debug_ptp_describe_slot_(void)
-{
-      if (selected_camera_ == 0) {
-	    no_camera_selected_();
-	    return;
-      }
-
-      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
-
-      string desc = selected_camera_->debug_property_describe(prop_code);
-
-      CameraControl::debug_log << "**** Describe 0x" << hex << prop_code << " ****" << endl
-			       << dec << desc << endl;
 }
