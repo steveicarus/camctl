@@ -36,6 +36,10 @@ class CamtoolPreview : public QDialog {
 
       void display_preview_image(const QString&file_name, const char*data, size_t data_len);
 
+	// Override this event to add the ability to let the main
+	// window know that this is closed.
+      virtual void closeEvent(QCloseEvent*event);
+
     private slots:
       void preview_buttons_slot_(QAbstractButton*);
 

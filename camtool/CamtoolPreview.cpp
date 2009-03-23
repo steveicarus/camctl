@@ -27,7 +27,7 @@ using namespace std;
 
 
 CamtoolPreview::CamtoolPreview(CamtoolMain*parent)
-: QDialog(parent), main_window_(parent)
+: QDialog(parent, Qt::WindowMinimizeButtonHint), main_window_(parent)
 {
       ui.setupUi(this);
 
@@ -86,6 +86,12 @@ void CamtoolPreview::display_preview_image(const QString&file_name,
       charts_red_hist_  ->setPixmap(QPixmap::fromImage(red_hist));
       charts_green_hist_->setPixmap(QPixmap::fromImage(gre_hist));
       charts_blue_hist_ ->setPixmap(QPixmap::fromImage(blu_hist));
+}
+
+void CamtoolPreview::closeEvent(QCloseEvent*event)
+{
+      main_window_->close_preview_window();
+      QDialog::closeEvent(event);
 }
 
 void CamtoolPreview::preview_buttons_slot_(QAbstractButton*button)
