@@ -241,4 +241,7 @@ class CameraControl {
       CameraControl& operator= (const CameraControl&);
 };
 
+// Convenient manipulator to write a timestamp.
+extern std::ostream& TIMESTAMP(std::ostream&);
+
 #endif

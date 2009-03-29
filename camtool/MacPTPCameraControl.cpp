@@ -280,7 +280,7 @@ CameraControl::capture_resp_t MacPTPCameraControl::capture_image(void)
       ica_send_message_(ptp_buf, sizeof buf);
       uint32_t result_code = ptp_buf->resultCode;
 
-      debug_log << "InitiateCapture (result_code="
+      debug_log << TIMESTAMP << ": InitiateCapture (result_code="
 		<< hex << result_code << dec << ")" << endl << flush;
 
       return CAP_OK;

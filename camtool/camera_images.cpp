@@ -28,7 +28,6 @@
 
 using namespace std;
 
-
 void CamtoolMain::resync_camera_images_(void)
 {
       assert(selected_camera_);
@@ -148,12 +147,15 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
       QString file_name (file.second.c_str());
       QVariant file_index ((int)cur_key);
 
+      CameraControl::debug_log << TIMESTAMP << ": Add image " << file_name.toStdString() << endl << flush;
+
 	// Add a file entry into the file list.
       QListWidgetItem*item = new QListWidgetItem(file_name);
       item->setData(Qt::UserRole, file_index);
       ui.images_list->addItem(item);
 
 	// Display a thumbnail of the captured image.
+      CameraControl::debug_log << TIMESTAMP << ": Display thumbnail..." << endl << flush;
       display_thumbnail_(camera, cur_key);
 
 	// If tethered capture is in progress, or if the preview
@@ -165,26 +167,33 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
 	    if (tethered_in_progress_)
 		  remove_image_flag = true;
 
+	    CameraControl::debug_log << TIMESTAMP << ": Get image data..." << endl << flush;
 	    camera->get_image_data(cur_key, buf, buf_len, remove_image_flag);
       }
 
 	// If the preview is enabled, then display the image there.
-      if (preview_window_active())
+      if (preview_window_active()) {
+	    CameraControl::debug_log << TIMESTAMP << ": Display_preview..." << endl << flush;
 	    preview_->display_preview_image(file_name, buf, buf_len);
+      }
 
 	// If we are busy with a tethered capture, then immediately
 	// collect the image from the camera and send it to the
 	// tethered capture directory.
-      if (tethered_in_progress_)
+      if (tethered_in_progress_) {
+	    CameraControl::debug_log << TIMESTAMP << ": Write tethered image..." << endl;
 	    write_tethered_image_(file_name, buf, buf_len);
+      }
 
 	// Clean up the allocated image buffer, if any.
       if (buf) delete[]buf;
+
+      CameraControl::debug_log << TIMESTAMP << ": Done with image." << endl;
 }
 
 void CamtoolMain::camera_image_deleted(CameraControl*, const CameraControl::file_key_t&file)
 {
-      CameraControl::debug_log << "CamtoolMain:: delete image?" << endl << flush;
+      CameraControl::debug_log << TIMESTAMP << ": CamtoolMain::camera_image_deleted..." << endl << flush;
       long cur_key = file.first;
 
       QString file_name (file.second.c_str());

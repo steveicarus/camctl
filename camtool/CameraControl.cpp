@@ -23,6 +23,7 @@
 # include  <QString>
 # include  <iostream>
 # include  <iomanip>
+# include  <sys/time.h>
 
 using namespace std;
 
@@ -348,6 +349,8 @@ void CameraControl::set_image_deleted_notification(CameraControl::Notification*t
 
 void CameraControl::mark_image_notification(void)
 {
+      debug_log << TIMESTAMP << ": CameraControl::mark_image_notification..." << endl << flush;
+
 	// Get the current state of the image list from the derived
 	// class.
       list<file_key_t> new_image_list;
@@ -388,7 +391,7 @@ void CameraControl::mark_image_notification(void)
 
 void CameraControl::mark_image_added_(const file_key_t&file)
 {
-      debug_log << "Camera added file " << file.second
+      debug_log << TIMESTAMP << ": Camera added file " << file.second
 		<< " (id=" << file.first << ")"
 		<< endl << flush;
       if (image_added_notification_)
@@ -397,7 +400,7 @@ void CameraControl::mark_image_added_(const file_key_t&file)
 
 void CameraControl::mark_image_deleted_(const file_key_t&file)
 {
-      debug_log << "Camera deleted file " << file.second
+      debug_log << TIMESTAMP << ": Camera deleted file " << file.second
 		<< " (id=" << file.first << ")"
 		<< endl << flush;
       if (image_deleted_notification_)
@@ -412,6 +415,8 @@ void CameraControl::set_capture_complete_notification(CameraControl::Notificatio
 
 void CameraControl::mark_capture_complete(void)
 {
+      debug_log << TIMESTAMP << ": CameraControl::mark_capture_complete..." << endl << flush;
+
       if (capture_complete_notification_)
 	    capture_complete_notification_->camera_capture_complete(this);
 }
@@ -438,4 +443,19 @@ void CameraControl::mark_camera_removed(CameraControl*camera)
 {
       if (camera->removed_notification_)
 	    camera->removed_notification_->camera_removed(camera);
+}
+
+std::ostream& TIMESTAMP (std::ostream&out)
+{
+      struct timeval tp;
+      int rc = gettimeofday(&tp, 0);
+      long secs = tp.tv_sec;
+      unsigned long usecs = tp.tv_usec;
+      while (usecs >= 1000000) {
+	    secs += 1;
+	    usecs -= 1000000;
+      }
+
+      out << secs << "." << setw(6) << usecs;
+      return out;
 }

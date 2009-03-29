@@ -69,7 +69,7 @@ void MacICACameraControl::ica_notification(CFStringRef notification_type,
       char type_buf[1024];
       CFStringGetCString(notification_type, type_buf, sizeof type_buf,
 			 kCFStringEncodingASCII);
-      debug_log << "**** ica_notification: type="
+      debug_log << TIMESTAMP << " **** ica_notification: type="
 		<< type_buf << endl;
       dump_value(debug_log, notification_dict);
       debug_log << "****" << endl << flush;
