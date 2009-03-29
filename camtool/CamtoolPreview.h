@@ -22,6 +22,9 @@
 
 # include  <qapplication.h>
 # include  "ui_preview.h"
+# include  <QThread>
+# include  <QMutex>
+# include  <QWaitCondition>
 
 class CamtoolMain;
 class QString;
@@ -54,8 +57,37 @@ class CamtoolPreview : public QDialog {
       QGraphicsPixmapItem*charts_blue_hist_;
 
     private:
+	// Create a thread to do background image processing and other
+	// number crunching.
+      class CrunchThread : public QThread {
+	  public:
+	    CrunchThread(CamtoolPreview*parent);
+	    ~CrunchThread();
+
+	    void process_preview_data(const QString&file_name,
+				      const char*data, size_t data_len);
+
+	    void clean_up();
+
+	  private:
+	    void run();
+	    void crunch_preview_image_(void);
+
+	  private:
+	    CamtoolPreview*parent_;
+	    QMutex mutex_;
+	    QWaitCondition wait_;
+
+	    QImage image_tmp_;
+	    bool image_tmp_busy_;
+
+	    bool thread_quit_;
+      };
+
+    private:
       CamtoolMain*main_window_;
       Ui::PreviewWindow ui;
+      CrunchThread cruncher_;
 };
 
 #endif
