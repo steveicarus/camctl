@@ -127,6 +127,7 @@ void CamtoolPreview::CrunchThread::crunch_preview_image_()
 {
 	// Load the image into the display.
       parent_->preview_pixmap_->setPixmap(QPixmap::fromImage(image_tmp_));
+      parent_->preview_pixmap_->update();
 
       QImage red_hist (CHART_WID, CHART_HEI, QImage::Format_RGB32);
       QImage gre_hist (CHART_WID, CHART_HEI, QImage::Format_RGB32);
@@ -137,6 +138,9 @@ void CamtoolPreview::CrunchThread::crunch_preview_image_()
       parent_->charts_red_hist_  ->setPixmap(QPixmap::fromImage(red_hist));
       parent_->charts_green_hist_->setPixmap(QPixmap::fromImage(gre_hist));
       parent_->charts_blue_hist_ ->setPixmap(QPixmap::fromImage(blu_hist));
+      parent_->charts_red_hist_  ->update();
+      parent_->charts_green_hist_->update();
+      parent_->charts_blue_hist_ ->update();
 }
 
 /*
