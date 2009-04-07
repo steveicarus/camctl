@@ -21,6 +21,33 @@
 # include  <qapplication.h>
 # include  <QImage>
 
+static void normalize(const int HIST_WID, const int HIST_HEI,
+		      unsigned long*red_hist,
+		      unsigned long*gre_hist,
+		      unsigned long*blu_hist)
+{
+	// Normalize each histogram by finding the maximum histogram
+	// bar and scaling all the bars so that the maximum bar goes
+	// right to the top of the graph.
+
+      unsigned long norm_red = 0;
+      unsigned long norm_gre = 0;
+      unsigned long norm_blu = 0;
+      for (int idx = 0 ; idx < HIST_WID ; idx += 1) {
+	    if (red_hist[idx] > norm_red) norm_red = red_hist[idx];
+	    if (gre_hist[idx] > norm_gre) norm_gre = gre_hist[idx];
+	    if (blu_hist[idx] > norm_blu) norm_blu = blu_hist[idx];
+      }
+      for (int idx = 0 ; idx < HIST_WID ; idx += 1) {
+	    if (norm_red > 0)
+		  red_hist[idx] = red_hist[idx] * HIST_HEI / norm_red;
+	    if (norm_gre > 0)
+		  gre_hist[idx] = gre_hist[idx] * HIST_HEI / norm_gre;
+	    if (norm_blu > 0)
+		  blu_hist[idx] = blu_hist[idx] * HIST_HEI / norm_blu;
+      }
+}
+
 void calculate_histograms(const QImage&ref, QImage&red, QImage&green, QImage&blue,
 			  bool skip_saturated_black)
 {
@@ -64,23 +91,7 @@ void calculate_histograms(const QImage&ref, QImage&red, QImage&green, QImage&blu
 	// Normalize each histogram by finding the maximum histogram
 	// bar and scaling all the bars so that the maximum bar goes
 	// right to the top of the graph.
-
-      unsigned long norm_red = 0;
-      unsigned long norm_gre = 0;
-      unsigned long norm_blu = 0;
-      for (int idx = 0 ; idx < HIST_WID ; idx += 1) {
-	    if (red_hist[idx] > norm_red) norm_red = red_hist[idx];
-	    if (gre_hist[idx] > norm_gre) norm_gre = gre_hist[idx];
-	    if (blu_hist[idx] > norm_blu) norm_blu = blu_hist[idx];
-      }
-      for (int idx = 0 ; idx < HIST_WID ; idx += 1) {
-	    if (norm_red > 0)
-		  red_hist[idx] = red_hist[idx] * HIST_HEI / norm_red;
-	    if (norm_gre > 0)
-		  gre_hist[idx] = gre_hist[idx] * HIST_HEI / norm_gre;
-	    if (norm_blu > 0)
-		  blu_hist[idx] = blu_hist[idx] * HIST_HEI / norm_blu;
-      }
+      normalize(HIST_WID, HIST_HEI, red_hist, gre_hist, blu_hist);
 
 	// Draw the target histograms.
       QRgb pix_black = qRgb(0,0,0);
@@ -94,6 +105,71 @@ void calculate_histograms(const QImage&ref, QImage&red, QImage&green, QImage&blu
 		  red  .setPixel(x,y,red_hist[x] >= thresh? pix_red : pix_black);
 		  green.setPixel(x,y,gre_hist[x] >= thresh? pix_gre : pix_black);
 		  blue .setPixel(x,y,blu_hist[x] >= thresh? pix_blu : pix_black);
+	    }
+      }
+}
+
+void calculate_sharpness(const QImage&ref, QImage&sharp)
+{
+      const int HIST_WID = sharp.width();
+      const int HIST_HEI = sharp.height();
+
+	// The dimensions of the target image must be non-nil, and the
+	// width must be <= 256.
+      assert(HIST_WID > 0 && HIST_HEI > 0 && HIST_WID <= 256);
+
+	// Clear the histogram counts
+      unsigned long red_hist[256];
+      unsigned long gre_hist[256];
+      unsigned long blu_hist[256];
+      for (int idx = 0 ; idx < HIST_WID ; idx += 1) {
+	    red_hist[idx] = 0;
+	    gre_hist[idx] = 0;
+	    blu_hist[idx] = 0;
+      }
+
+
+	// Accumulate level counts for the image.
+      for (int y = 1 ; y < ref.height() ; y += 1) {
+	    for (int x = 1 ; x < ref.width() ; x += 1) {
+		  QRgb pix = ref.pixel(x,y);
+		  QRgb pixu = ref.pixel(x,y-1);
+		  QRgb pixl = ref.pixel(x-1,y);
+
+		  int diffu = abs(qRed(pix) - qRed(pixu));
+		  int diffl = abs(qRed(pix) - qRed(pixl));
+		  red_hist[ diffu / (256/HIST_WID) ] += 1;
+		  red_hist[ diffl / (256/HIST_WID) ] += 1;
+
+		  diffu = abs(qGreen(pix) - qGreen(pixu));
+		  diffl = abs(qGreen(pix) - qGreen(pixl));
+		  gre_hist[ diffu / (256/HIST_WID) ] += 1;
+		  gre_hist[ diffl / (256/HIST_WID) ] += 1;
+
+		  diffu = abs(qBlue(pix) - qBlue(pixu));
+		  diffl = abs(qBlue(pix) - qBlue(pixl));
+		  blu_hist[ diffu / (256/HIST_WID) ] += 1;
+		  blu_hist[ diffl / (256/HIST_WID) ] += 1;
+	    }
+      }
+
+	// kill low bars.
+      for (int idx = 0 ; idx < 4 ; idx += 1) {
+	    red_hist[idx] = 0;
+	    gre_hist[idx] = 0;
+	    blu_hist[idx] = 0;
+      }
+
+      normalize(HIST_WID, HIST_HEI, red_hist, gre_hist, blu_hist);
+
+	// Draw the target chart.
+      for (int y = 0 ; y < HIST_HEI ; y += 1) {
+	    for (int x = 0 ; x < HIST_WID ; x += 1) {
+		  unsigned long thresh = HIST_HEI - y - 1;
+		  int red = red_hist[x] == thresh? 255 : 0;
+		  int gre = gre_hist[x] == thresh? 255 : 0;
+		  int blu = blu_hist[x] == thresh? 255 : 0;
+		  sharp.setPixel(x,y,qRgb(red,gre,blu));
 	    }
       }
 }
