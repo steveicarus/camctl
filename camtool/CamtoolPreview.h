@@ -53,7 +53,7 @@ class CrunchThread : public QThread {
 	// instance will process this data into an internal form, so
 	// the caller need to preserve the data on return.
       void process_preview_data(const QString&file_name,
-				const char*data, size_t data_len);
+				const QByteArray&image_data);
 
       void clean_up();
 
@@ -94,7 +94,7 @@ class CamtoolPreview : public QDialog {
       ~CamtoolPreview();
 
       void display_preview_image(const QString&file_name,
-				 const char*data, size_t data_len);
+				 const QByteArray&image_data);
 
 	// Override this event to add the ability to let the main
 	// window know that this is closed.

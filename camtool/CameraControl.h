@@ -23,6 +23,7 @@
 # include  <vector>
 # include  <string>
 # include  <utility>
+# include  <QByteArray>
 # include  <ostream>
 # include  <fstream>
 # include  <inttypes.h>
@@ -158,7 +159,7 @@ class CameraControl {
 	// fills in the buf pointer and the buffer len. The method
 	// allocates the memory of the buffer, it is up to the caller
 	// to free the buffer when it is done.
-      virtual void get_image_data(long key, char*&buf, size_t&buf_len,
+      virtual void get_image_data(long key, QByteArray&data,
 				  bool delete_image =false);
       virtual void get_image_thumbnail(long key, char*&buf, size_t&buf_len);
 

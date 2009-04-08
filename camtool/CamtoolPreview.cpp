@@ -168,7 +168,7 @@ void CrunchThread::crunch_preview_image_()
  * returns to the caller.
  */
 void CrunchThread::process_preview_data(const QString&file_name,
-					const char*data, size_t data_len)
+					const QByteArray&image_data)
 {
       QMutexLocker lock_image(&mutex_);
 
@@ -177,7 +177,7 @@ void CrunchThread::process_preview_data(const QString&file_name,
 
 	// Load this new image data into the image_tmp_ and start the
 	// thread processing.
-      image_preview_.loadFromData( (const uchar*)data, data_len );
+      image_preview_.loadFromData( image_data );
       image_preview_busy_ = true;
       wait_.wakeAll();
 }
@@ -189,12 +189,12 @@ void CrunchThread::process_preview_data(const QString&file_name,
  * the data pointer.
  */
 void CamtoolPreview::display_preview_image(const QString&file_name,
-					   const char*data, size_t data_len)
+					   const QByteArray&image_data)
 {
       CameraControl::debug_log << TIMESTAMP
 			       << ": CamtoolPreview::display_preview_image"
 				<< endl << flush;
-      cruncher_.process_preview_data(file_name, data, data_len);
+      cruncher_.process_preview_data(file_name, image_data);
 }
 
 void CamtoolPreview::display_preview_image_slot_(QImage*pix)

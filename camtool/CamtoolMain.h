@@ -21,6 +21,7 @@
  */
 
 # include  <qapplication.h>
+# include  <QByteArray>
 # include  <QGraphicsPixmapItem>
 # include  <QGraphicsScene>
 # include  <QTimer>
@@ -77,7 +78,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void ungrab_camera_(void);
 
       void display_thumbnail_(CameraControl*camera, long image_key);
-      void write_tethered_image_(const QString&file_name, const char*data, size_t data_len);
+      void write_tethered_image_(const QString&file_name, const QByteArray&image_data);
 
     private slots:
 	// Slot for the heartbeat timer.

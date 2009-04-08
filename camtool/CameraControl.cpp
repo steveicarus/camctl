@@ -263,10 +263,9 @@ const list<CameraControl::file_key_t>&CameraControl::image_list()
       return image_list_;
 }
 
-void CameraControl::get_image_data(long, char*&buf, size_t&buf_len, bool)
+void CameraControl::get_image_data(long, QByteArray&data, bool)
 {
-      buf = 0;
-      buf_len = 0;
+      data.clear();
       cerr << "CameraControl::get_image_data: Not implemented" << endl;
 }
 
@@ -448,7 +447,7 @@ void CameraControl::mark_camera_removed(CameraControl*camera)
 std::ostream& TIMESTAMP (std::ostream&out)
 {
       struct timeval tp;
-      int rc = gettimeofday(&tp, 0);
+      gettimeofday(&tp, 0);
       long secs = tp.tv_sec;
       unsigned long usecs = tp.tv_usec;
       while (usecs >= 1000000) {

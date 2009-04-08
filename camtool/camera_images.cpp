@@ -85,7 +85,8 @@ void CamtoolMain::display_thumbnail_(CameraControl*camera, long cur_key)
       action_thumbnail_pixmap_->setPixmap(QPixmap::fromImage(image_tmp));
 }
 
-void CamtoolMain::write_tethered_image_(const QString&file_name, const char*data, size_t data_len)
+void CamtoolMain::write_tethered_image_(const QString&file_name,
+					const QByteArray&image_data)
 {
 	// Get the destination directory for tethered images. If the
 	// directory doesn't exist, try to create it in its parent
@@ -136,7 +137,7 @@ void CamtoolMain::write_tethered_image_(const QString&file_name, const char*data
       }
 
       assert(fd);
-      fwrite(data, 1, data_len, fd);
+      fwrite(image_data.constData(), 1, image_data.size(), fd);
       fclose(fd);
 }
 
@@ -160,21 +161,20 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
 
 	// If tethered capture is in progress, or if the preview
 	// window is open, then we need the image data.
-      char*buf = 0;
-      size_t buf_len = 0;
+      QByteArray image_data;
       if (tethered_in_progress_ || preview_window_active()) {
 	    bool remove_image_flag = false;
 	    if (tethered_in_progress_)
 		  remove_image_flag = true;
 
 	    CameraControl::debug_log << TIMESTAMP << ": Get image data..." << endl << flush;
-	    camera->get_image_data(cur_key, buf, buf_len, remove_image_flag);
+	    camera->get_image_data(cur_key, image_data, remove_image_flag);
       }
 
 	// If the preview is enabled, then display the image there.
       if (preview_window_active()) {
 	    CameraControl::debug_log << TIMESTAMP << ": Display_preview..." << endl << flush;
-	    preview_->display_preview_image(file_name, buf, buf_len);
+	    preview_->display_preview_image(file_name, image_data);
       }
 
 	// If we are busy with a tethered capture, then immediately
@@ -182,11 +182,8 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
 	// tethered capture directory.
       if (tethered_in_progress_) {
 	    CameraControl::debug_log << TIMESTAMP << ": Write tethered image..." << endl;
-	    write_tethered_image_(file_name, buf, buf_len);
+	    write_tethered_image_(file_name, image_data);
       }
-
-	// Clean up the allocated image buffer, if any.
-      if (buf) delete[]buf;
 
       CameraControl::debug_log << TIMESTAMP << ": Done with image." << endl;
 }
@@ -226,16 +223,14 @@ void CamtoolMain::images_list_slot_(QListWidgetItem*item)
 					  QMessageBox::Yes|QMessageBox::No,
 					  QMessageBox::No);
 	    bool delete_flag = resp==QMessageBox::Yes;
-	    char*buf;
-	    size_t buf_len;
-	    selected_camera_->get_image_data(file_index.toInt(), buf, buf_len,
+	    QByteArray image_data;
+	    selected_camera_->get_image_data(file_index.toInt(), image_data,
 					     delete_flag);
 
 	    FILE*fd = fopen(path.toAscii(), "wb");
 	    assert(fd);
-	    fwrite(buf, 1, buf_len, fd);
+	    fwrite(image_data.constData(), 1, image_data.size(), fd);
 	    fclose(fd);
-	    delete[]buf;
       }
 }
 

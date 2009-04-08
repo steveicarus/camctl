@@ -199,14 +199,13 @@ static ICAObject ica_image_object_from_dev(CFDictionaryRef dev, long key)
       return image;
 }
 
-void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len,
+void MacICACameraControl::get_image_data(long key, QByteArray&data,
 					 bool delete_image)
 {
       ICAObject image = ica_image_object_from_dev(dev_dict_, key);
 
       if (image == 0) {
-	    buf = 0;
-	    buf_len = 0;
+	    data.clear();
 	    return;
       }
 
@@ -220,16 +219,15 @@ void MacICACameraControl::get_image_data(long key, char*&buf, size_t&buf_len,
       image_data_pb.propertyType = kICAPropertyImageData;
       ICAGetPropertyByType(&image_data_pb, 0);
 
-      buf_len = image_data_pb.propertyInfo.dataSize;
-      buf = new char[buf_len];
-      assert(buf);
+      size_t buf_len = image_data_pb.propertyInfo.dataSize;
+      data.resize(buf_len);
 
       ICAGetPropertyDataPB data_pb;
       memset(&data_pb, 0, sizeof data_pb);
       data_pb.property = image_data_pb.property;
       data_pb.startByte = 0;
       data_pb.requestedSize = buf_len;
-      data_pb.dataPtr = buf;
+      data_pb.dataPtr = data.data();
       ICAGetPropertyData(&data_pb, 0);
 
       if (delete_image) {
