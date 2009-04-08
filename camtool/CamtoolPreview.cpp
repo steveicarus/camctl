@@ -143,7 +143,10 @@ void CrunchThread::clean_up()
 
 void CrunchThread::crunch_preview_image_()
 {
-	// Load the image into the display.
+	// Decompress the image...
+      image_preview_.loadFromData( image_data_ );
+
+	// Send the image to the preview display...
       emit display_preview_image(&image_preview_);
 
       calculate_histograms(image_preview_,
@@ -177,7 +180,7 @@ void CrunchThread::process_preview_data(const QString&file_name,
 
 	// Load this new image data into the image_tmp_ and start the
 	// thread processing.
-      image_preview_.loadFromData( image_data );
+      image_data_ = image_data;
       image_preview_busy_ = true;
       wait_.wakeAll();
 }

@@ -76,6 +76,7 @@ class CrunchThread : public QThread {
       QMutex mutex_;
       QWaitCondition wait_;
 
+      QByteArray image_data_;
       QImage image_preview_;
       QImage image_hist_red_;
       QImage image_hist_gre_;
