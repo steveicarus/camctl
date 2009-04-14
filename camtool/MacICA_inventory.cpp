@@ -29,7 +29,8 @@ using namespace std;
 
 /*
  * To define a new camera, add an entry in the table below. Order
- * doesn't matter, as long as the vendor/device pair is unique.
+ * doesn't matter, as long as the vendor/device pair is unique, but
+ * keeping the table sorted helps for maintenence.
  */
 MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[] = {
 	// Canon (Vendor 0x04a9)
@@ -62,6 +63,7 @@ MacICACameraControl::usb_devices_struct MacICACameraControl::usb_devices_table[]
       { 0x04b0, 0x040e,  "Nikon", "D70s",           MacPTP },
       { 0x04b0, 0x0412,  "Nikon", "D80",            MacPTP },
       { 0x04b0, 0x041a,  "Nikon", "D300",           MacPTP },
+      { 0x04b0, 0x041e,  "Nikon", "D60",            MacPTP },
       { 0x04b0, 0x0421,  "Nikon", "D90",            MacPTP },
 	// Apple (Vendor 0x05ac)
       { 0x05ac, 0x1293,  "Apple", "iPod",           MacBlacklist },
