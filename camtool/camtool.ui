@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>413</width>
-    <height>409</height>
+    <height>437</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -36,6 +36,14 @@
            <number>0</number>
           </property>
           <widget class="QWidget" name="page_3" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>359</width>
+             <height>169</height>
+            </rect>
+           </property>
            <attribute name="label" >
             <string>Select Camera</string>
            </attribute>
@@ -95,7 +103,7 @@
              <x>0</x>
              <y>0</y>
              <width>359</width>
-             <height>176</height>
+             <height>169</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -166,7 +174,7 @@
              <x>0</x>
              <y>0</y>
              <width>359</width>
-             <height>176</height>
+             <height>169</height>
             </rect>
            </property>
            <attribute name="label" >
@@ -255,6 +263,80 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="page_4" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>359</width>
+             <height>169</height>
+            </rect>
+           </property>
+           <attribute name="label" >
+            <string>Sequence/Time Lapse</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout" >
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_9" >
+              <property name="text" >
+               <string>Capture Interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="HMSSpinBox" name="capture_interval" >
+              <property name="minimumSize" >
+               <size>
+                <width>170</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="minimum" >
+               <number>1</number>
+              </property>
+              <property name="maximum" >
+               <number>999999999</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_10" >
+              <property name="text" >
+               <string>Sequence Duration</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="HMSSpinBox" name="sequence_duration" >
+              <property name="minimumSize" >
+               <size>
+                <width>170</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="minimum" >
+               <number>1</number>
+              </property>
+              <property name="maximum" >
+               <number>999999999</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2" >
+             <spacer name="verticalSpacer" >
+              <property name="orientation" >
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>20</width>
+                <height>68</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -268,6 +350,10 @@
          <layout class="QHBoxLayout" name="horizontalLayout_7" >
           <item>
            <widget class="QPushButton" name="action_capture_button" >
+            <property name="toolTip" >
+             <string>Capture image to camera storage. This like just
+pressing the button on the camera.</string>
+            </property>
             <property name="text" >
              <string>Capture</string>
             </property>
@@ -275,6 +361,10 @@
           </item>
           <item>
            <widget class="QPushButton" name="action_tethered_button" >
+            <property name="toolTip" >
+             <string>Capture to the computer. The destination folder and image
+file name are configured in the preferences.</string>
+            </property>
             <property name="whatsThis" >
              <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
@@ -286,6 +376,24 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="text" >
              <string>Tethered</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="action_timelapse_button" >
+            <property name="toolTip" >
+             <string>Start (stop) a time lapse capture. Set up the interval and duration
+in the Camera Settings tab. The images are captured to the computer
+using the settings for tethered capture.</string>
+            </property>
+            <property name="text" >
+             <string>Time Lapse</string>
+            </property>
+            <property name="checkable" >
+             <bool>true</bool>
+            </property>
+            <property name="checked" >
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -461,6 +569,13 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HMSSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>HMSSpinBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

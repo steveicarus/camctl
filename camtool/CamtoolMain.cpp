@@ -46,6 +46,12 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       preview_ = new CamtoolPreview(this);
       debug_window_ = new CamtoolDebug(this);
 
+	// Set the maximum for the various time entry boxes based on
+	// the size of an integer.
+      int max_interval = INT_MAX / 1000;
+      ui.capture_interval->setMaximum(max_interval);
+      ui.sequence_duration->setMaximum(max_interval);
+
       CameraControl::set_camera_added_notification(this);
       detect_cameras_();
 
@@ -132,6 +138,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.action_tethered_button,
 	      SIGNAL(clicked()),
 	      SLOT(action_tethered_slot_()));
+      connect(ui.action_timelapse_button,
+	      SIGNAL(clicked()),
+	      SLOT(action_timelapse_slot_()));
 
 	// Images
       connect(ui.images_list,
@@ -475,6 +484,25 @@ void CamtoolMain::action_tethered_slot_(void)
 	// First, capture to volatile memory on the device
       CameraControl::capture_resp_t rc = selected_camera_->capture_volatile_image();
       display_capture_error_message_(rc);
+}
+
+void CamtoolMain::action_timelapse_slot_(void)
+{
+      if (selected_camera_ == 0) {
+	    no_camera_selected_();
+	    ui.action_timelapse_button->setChecked(false);
+	    return;
+      }
+
+      int lapse_interval = ui.capture_interval->value();
+      int lapse_duration = ui.sequence_duration->value();
+
+      if (ui.action_timelapse_button->isChecked()) {
+	    QMessageBox::information(0, QString("Not Implemented"),
+			       QString("Time lapse is not supported yet."));
+	    return;
+      }
+
 }
 
 void CamtoolMain::camera_capture_complete(CameraControl*)
