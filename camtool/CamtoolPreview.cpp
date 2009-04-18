@@ -143,8 +143,19 @@ void CrunchThread::clean_up()
 
 void CrunchThread::crunch_preview_image_()
 {
-	// Decompress the image...
-      image_preview_.loadFromData( image_data_ );
+      CameraControl::debug_log << TIMESTAMP
+	    << ": CrunchThread::crunch_preview_image_ load image data."
+	    << endl << flush;
+
+	// Decompress the image. If for some reason the decompress
+	// does not work, then ignore it.
+      bool load_rc = image_preview_.loadFromData( image_data_ );
+      if (load_rc == false) {
+	    CameraControl::debug_log << TIMESTAMP
+		  << ": CrunchThread::crunch_preview_image_ failed to load image data."
+		  << endl << flush;
+	    return;
+      }
 
 	// Send the image to the preview display...
       emit display_preview_image(&image_preview_);
@@ -194,9 +205,19 @@ void CrunchThread::process_preview_data(const QString&file_name,
 void CamtoolPreview::display_preview_image(const QString&file_name,
 					   const QByteArray&image_data)
 {
+      if (file_name.endsWith(".NEF")) {
+	    CameraControl::debug_log << TIMESTAMP
+		      << ": CamtoolPreview::display_preview_image: "
+		      << "Skip preview display of .NEF image."
+		      << endl << flush;
+	    return;
+      }
+
       CameraControl::debug_log << TIMESTAMP
-			       << ": CamtoolPreview::display_preview_image"
-				<< endl << flush;
+			       << ": CamtoolPreview::display_preview_image: "
+			       << "Process preview display of "
+			       << file_name.toStdString()
+			       << "." << endl << flush;
       cruncher_.process_preview_data(file_name, image_data);
 }
 
