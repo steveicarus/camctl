@@ -105,6 +105,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void image_size_slot_(int state);
       void white_balance_slot_(int state);
 
+      void capture_interval_slot_(int val);
+      void sequence_duration_slot_(int val);
+
 	// Slots for the Actions page
       void action_capture_slot_(void);
       void action_tethered_slot_(void);
@@ -113,6 +116,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Slots for the Images page
       void images_list_slot_(QListWidgetItem*);
       void images_refresh_slot_(void);
+
+	// Slots for timers
+      void timer_lapse_slot_(void);
 
     private:
 	// Callbacks
@@ -131,5 +137,9 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolDebug*debug_window_;
 
       bool tethered_in_progress_;
+
+	// Timer for generating time-lapse events.
+      unsigned lapse_remaining_;
+      QTimer lapse_timer_;
 };
 #endif

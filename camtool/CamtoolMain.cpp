@@ -40,6 +40,7 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       about_device_ = 0;
       selected_camera_ = 0;
       tethered_in_progress_ = 0;
+      lapse_remaining_ = 0;
 
       ui.setupUi(this);
       preferences_ = new CamtoolPreferences(this);
@@ -131,6 +132,13 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(currentIndexChanged(int)),
 	      SLOT(white_balance_slot_(int)));
 
+      connect(ui.capture_interval,
+	      SIGNAL(valueChanged(int)),
+	      SLOT(capture_interval_slot_(int)));
+      connect(ui.sequence_duration,
+	      SIGNAL(valueChanged(int)),
+	      SLOT(sequence_duration_slot_(int)));
+
 	// Actions
       connect(ui.action_capture_button,
 	      SIGNAL(clicked()),
@@ -149,6 +157,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.refresh_button,
 	      SIGNAL(clicked()),
 	      SLOT(images_refresh_slot_()));
+
+	// Timers
+      connect(&lapse_timer_, SIGNAL(timeout()), SLOT(timer_lapse_slot_()));
 
       if (preferences_->get_preview_raised()) {
 	    ui.tools_preview->setChecked(true);
@@ -437,6 +448,29 @@ void CamtoolMain::white_balance_slot_(int index)
       selected_camera_->set_white_balance_index(index);
 }
 
+void CamtoolMain::capture_interval_slot_(int val)
+{
+      assert(val > 0);
+      ui.sequence_duration->setSingleStep(val);
+      ui.sequence_duration->setMinimum(val);
+
+      int tmp = ui.sequence_duration->value();
+      if (tmp < val) {
+	    ui.sequence_duration->setValue(val);
+      }
+}
+
+void CamtoolMain::sequence_duration_slot_(int val)
+{
+      int interval = ui.capture_interval->value();
+      if (val < interval) {
+	    ui.sequence_duration->setValue(interval);
+      } else if (val%interval != 0) {
+	    int tmp = val / interval;
+	    ui.sequence_duration->setValue(tmp * interval);
+      }
+}
+
 void CamtoolMain::display_capture_error_message_(CameraControl::capture_resp_t rc)
 {
       switch (rc) {
@@ -465,6 +499,12 @@ void CamtoolMain::action_capture_slot_(void)
 	    return;
       }
 
+      if (lapse_remaining_ > 0) {
+	    QMessageBox::information(0, QString("Camera Busy"),
+				     QString("Camera is busy with a time lapse sequence."));
+	    return;
+      }
+
       tethered_in_progress_ = false;
       CameraControl::capture_resp_t rc = selected_camera_->capture_image();
       display_capture_error_message_(rc);
@@ -474,6 +514,12 @@ void CamtoolMain::action_tethered_slot_(void)
 {
       if (selected_camera_ == 0) {
 	    no_camera_selected_();
+	    return;
+      }
+
+      if (lapse_remaining_ > 0) {
+	    QMessageBox::information(0, QString("Camera Busy"),
+				     QString("Camera is busy with a time lapse sequence."));
 	    return;
       }
 
@@ -498,11 +544,56 @@ void CamtoolMain::action_timelapse_slot_(void)
       int lapse_duration = ui.sequence_duration->value();
 
       if (ui.action_timelapse_button->isChecked()) {
-	    QMessageBox::information(0, QString("Not Implemented"),
-			       QString("Time lapse is not supported yet."));
+	    if (lapse_interval == 0) {
+		  QMessageBox::information(0, QString("Bad Parameter"),
+					   QString("Time lapse interval is zero."));
+		  return;
+	    }
+
+	      // Calculate the number of captures needed to run the duration.
+	    lapse_remaining_ = lapse_duration / lapse_interval;
+	    if (lapse_duration % lapse_interval != 0)
+		  lapse_remaining_ += 1;
+
+	      // Start the time lapse sequence with a initial
+	      // capture. This is the time-0 capture, which the math
+	      // above didn't count.
+	    lapse_remaining_ += 1;
+	    timer_lapse_slot_();
+
+	      // The lapse interval is in seconds. Convert it to ms
+	      // and start the interval timer.
+	    lapse_timer_.start(lapse_interval * 1000);
+
+      } else {
+	      // Make certain any existing time lapse capture is cancelled.
+	    lapse_remaining_ = 0;
+	    lapse_timer_.stop();
+      }
+
+}
+
+void CamtoolMain::timer_lapse_slot_(void)
+{
+      if (selected_camera_ == 0) {
+	    lapse_timer_.stop();
+	    lapse_remaining_ = 0;
 	    return;
       }
 
+      if (lapse_remaining_ <= 1)
+	    lapse_timer_.stop();
+
+      if (lapse_remaining_ == 0)
+	    return;
+
+	// One less lapse event to go...
+      lapse_remaining_ -= 1;
+
+	// Capture a time lapse image just like a tethered image.
+      tethered_in_progress_ = true;
+      CameraControl::capture_resp_t rc = selected_camera_->capture_image();
+      display_capture_error_message_(rc);
 }
 
 void CamtoolMain::camera_capture_complete(CameraControl*)
