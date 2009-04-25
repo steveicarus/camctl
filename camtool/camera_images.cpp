@@ -110,7 +110,8 @@ void CamtoolMain::write_tethered_image_(const QString&file_name,
 
 	// Look for a file name to use for the output image.
       QString path;
-      for (;;) {
+      int retry_limit;
+      for (retry_limit = 1000 ; retry_limit > 0 ; retry_limit -= 1) {
 	      // Get the next file name to use.
 	    QString use_name = preferences_->get_tethered_file();
 
@@ -126,6 +127,16 @@ void CamtoolMain::write_tethered_image_(const QString&file_name,
 	    QFile tmpfile(path);
 	    if (! tmpfile.exists())
 		  break;
+
+	      // If the file name is taken, then try again with
+	      // another tethered number.
+	    preferences_->step_tethered_number();
+      }
+
+      if (retry_limit == 0) {
+	    QMessageBox::information(this, tr("Write Error"),
+			     tr("Unable to find an available file name."));
+	    return;
       }
 
 	// Create the file and write the image data.

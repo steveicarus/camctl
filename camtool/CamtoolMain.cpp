@@ -601,6 +601,8 @@ void CamtoolMain::timer_lapse_slot_(void)
 
 void CamtoolMain::camera_capture_complete(CameraControl*)
 {
-      if (tethered_in_progress_)
+      if (tethered_in_progress_) {
+	    preferences_->step_tethered_number();
 	    tethered_in_progress_ = false;
+      }
 }

@@ -115,7 +115,6 @@ QString CamtoolPreferences::get_tethered_file()
       QString tmp (ui.tethered_name->text());
 
       int file_number = ui.tethered_number->value();
-      ui.tethered_number->setValue(file_number+1);
       QString file_number_string (QString("%1").arg(file_number,5,10,QChar('0')));
 
       for (int idx = tmp.indexOf("%N") ; idx >= 0 ; idx = tmp.indexOf("%N")) {
@@ -123,6 +122,12 @@ QString CamtoolPreferences::get_tethered_file()
       }
 
       return tmp;
+}
+
+void CamtoolPreferences::step_tethered_number()
+{
+      int file_number = ui.tethered_number->value();
+      ui.tethered_number->setValue(file_number+1);
 }
 
 bool CamtoolPreferences::get_preview_raised(void)

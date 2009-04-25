@@ -41,6 +41,11 @@ class CamtoolPreferences : public QDialog {
 	// name string and increment the counter.
       QString get_tethered_file();
 
+	// Increment the number to use for the tethered file
+	// name. Call this after each capture completes so that the
+	// next tethered_file has a different name.
+      void step_tethered_number();
+
 	// Remember the state of the preview window, raised(true) or
 	// closed(false).
       bool get_preview_raised();
