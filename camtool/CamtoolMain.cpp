@@ -576,13 +576,16 @@ void CamtoolMain::action_timelapse_slot_(void)
 void CamtoolMain::timer_lapse_slot_(void)
 {
       if (selected_camera_ == 0) {
+	    ui.action_timelapse_button->setChecked(false);
 	    lapse_timer_.stop();
 	    lapse_remaining_ = 0;
 	    return;
       }
 
-      if (lapse_remaining_ <= 1)
+      if (lapse_remaining_ <= 1) {
+	    ui.action_timelapse_button->setChecked(false);
 	    lapse_timer_.stop();
+      }
 
       if (lapse_remaining_ == 0)
 	    return;
