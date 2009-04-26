@@ -29,6 +29,8 @@ using namespace std;
 /*
  * These are constants for the settings keys
  */
+static const char KEY_SEQUENCE_INTERVAL[] = "sequence/capture_interval";
+static const char KEY_SEQUENCE_DURATION[] = "sequence/sequence_duration";
 static const char KEY_TETHERED_PATH[] = "images/tethered_path";
 static const char KEY_TETHERED_NAME[] = "images/tethered_name";
 static const char KEY_TETHERED_NUMBER[] = "image/tethered_number";
@@ -103,6 +105,26 @@ CamtoolPreferences::CamtoolPreferences(QWidget*parent)
 
 CamtoolPreferences::~CamtoolPreferences()
 {
+}
+
+void CamtoolPreferences::set_capture_interval(int val)
+{
+      settings_.setValue(KEY_SEQUENCE_INTERVAL, val);
+}
+
+int CamtoolPreferences::get_capture_interval(void)
+{
+      return settings_.value(KEY_SEQUENCE_INTERVAL, 5).toInt();
+}
+
+void CamtoolPreferences::set_sequence_duration(int val)
+{
+      settings_.setValue(KEY_SEQUENCE_DURATION, val);
+}
+
+int CamtoolPreferences::get_sequence_duration(void)
+{
+      return settings_.value(KEY_SEQUENCE_DURATION, 5).toInt();
 }
 
 QString CamtoolPreferences::get_tethered_path() const

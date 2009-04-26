@@ -161,9 +161,17 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	// Timers
       connect(&lapse_timer_, SIGNAL(timeout()), SLOT(timer_lapse_slot_()));
 
+	// Recover stored preferences
+
       if (preferences_->get_preview_raised()) {
 	    ui.tools_preview->setChecked(true);
 	    tools_preview_slot_();
+      }
+
+      { int interval = preferences_->get_capture_interval();
+	int duration = preferences_->get_sequence_duration();
+	ui.capture_interval ->setValue(interval);
+	ui.sequence_duration->setValue(duration);
       }
 }
 
@@ -454,21 +462,29 @@ void CamtoolMain::capture_interval_slot_(int val)
       ui.sequence_duration->setSingleStep(val);
       ui.sequence_duration->setMinimum(val);
 
-      int tmp = ui.sequence_duration->value();
-      if (tmp < val) {
+      int dur = ui.sequence_duration->value();
+      if (dur < val) {
+	    dur = val;
 	    ui.sequence_duration->setValue(val);
       }
+
+      preferences_->set_capture_interval(val);
+      preferences_->set_sequence_duration(dur);
 }
 
 void CamtoolMain::sequence_duration_slot_(int val)
 {
       int interval = ui.capture_interval->value();
       if (val < interval) {
-	    ui.sequence_duration->setValue(interval);
+	    val = interval;
+	    ui.sequence_duration->setValue(val);
       } else if (val%interval != 0) {
 	    int tmp = val / interval;
-	    ui.sequence_duration->setValue(tmp * interval);
+	    val = tmp * interval;
+	    ui.sequence_duration->setValue(val);
       }
+
+      preferences_->set_sequence_duration(val);
 }
 
 void CamtoolMain::display_capture_error_message_(CameraControl::capture_resp_t rc)

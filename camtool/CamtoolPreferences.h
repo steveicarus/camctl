@@ -32,6 +32,15 @@ class CamtoolPreferences : public QDialog {
       CamtoolPreferences(QWidget*parent);
       ~CamtoolPreferences();
 
+    public: // "Time Lapse" settings
+      void set_capture_interval(int);
+      int  get_capture_interval(void);
+
+      void set_sequence_duration(int);
+      int  get_sequence_duration(void);
+      
+    public: // "Tethered" settings
+
 	// Get the preferred tethered path directory. This method will
 	// make sure that the path exists, is a directory, and is writable.
       QString get_tethered_path() const;
@@ -45,6 +54,8 @@ class CamtoolPreferences : public QDialog {
 	// name. Call this after each capture completes so that the
 	// next tethered_file has a different name.
       void step_tethered_number();
+
+    public: // "Preview" settings
 
 	// Remember the state of the preview window, raised(true) or
 	// closed(false).
