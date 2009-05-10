@@ -24,7 +24,7 @@ SOURCES += ptp_misc.cpp image_math.cpp
 
 # The CameraControl base class
 HEADERS += CameraControl.h
-SOURCES += CameraControl.cpp
+SOURCES += CameraControl.cpp CameraControl_inventory.cpp
 
 # The Mac ICA implementation of CameraControl
 HEADERS += MacICACameraControl.h

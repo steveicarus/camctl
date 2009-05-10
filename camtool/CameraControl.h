@@ -21,6 +21,7 @@
 
 # include  <list>
 # include  <vector>
+# include  <map>
 # include  <string>
 # include  <utility>
 # include  <QByteArray>
@@ -236,6 +237,41 @@ class CameraControl {
       Notification*capture_complete_notification_;
       static Notification*added_notification_;
       Notification*removed_notification_;
+
+	// Support for device inventories. These are generic tables
+	// and types that derived camera control platforms use.
+    protected:
+	// A USB id is a Vendor/Device pair
+      typedef std::pair<uint16_t,uint16_t> usb_id_t;
+	// A Device name is a Vendor/Device string pair
+      typedef std::pair<std::string,std::string> dev_name_t;
+	// A device class is the derived class that supports this device.
+      enum dev_class_t {
+	    MacGeneric = 0, // Supported by default ICA basics.
+	    MacBlacklist,   // Positively not supported
+	    MacPTP          // Supported through standard PTP
+      };
+
+      static void load_usb_map(void);
+      static const dev_name_t&id_to_name(const usb_id_t&id);
+      static const dev_class_t id_to_class(const usb_id_t&id);
+
+    private:
+	// The id_to_* functions use maps of device ids to the desired
+	// type. These methods provide the infrastructure for mapping
+	// device identification to the proper implementation.
+      static std::map <usb_id_t,dev_name_t>  usb_map_names;
+      static std::map <usb_id_t,dev_class_t> usb_map_classes;
+
+      struct usb_devices_struct {
+	    uint16_t vendor_id;
+	    uint16_t device_id;
+	    const char*vendor_name;
+	    const char*device_name;
+	    dev_class_t device_class;
+      };
+      static struct usb_devices_struct usb_devices_table[];
+
 
     private: // Not implemented
       CameraControl(const CameraControl&);
