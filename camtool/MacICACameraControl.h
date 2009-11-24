@@ -31,6 +31,7 @@
 # include  <QString>
 # include  <map>
 # include  <vector>
+# include  <string>
 # include  <inttypes.h>
 
 class MacICACameraControl : public CameraControl {
@@ -63,8 +64,8 @@ class MacICACameraControl : public CameraControl {
       void debug_dump(std::ostream&, const std::string&) const;
 
     protected:
-      static long get_dict_long_value(CFDictionaryRef, const char*key);
-      static std::string get_dict_string_value(CFDictionaryRef, const char*key);
+      static usb_id_t get_usb_id_from_dict_(CFDictionaryRef);
+
 
       ICAError ica_send_message_(void*buf, size_t buf_len);
 
@@ -89,6 +90,7 @@ class MacICACameraControl : public CameraControl {
 
     private:
       void scan_images(std::list<file_key_t>&);
+      ICAObject ica_image_object_from_dev_(long key);
 
       void debug_dump_default_(std::ostream&) const;
       static std::ostream& dump_value(std::ostream&out, CFTypeRef ref);

@@ -25,36 +25,6 @@
 
 using namespace std;
 
-/*
- * Convenience function to get a C-long value from a dictionary.
- */
-long MacICACameraControl::get_dict_long_value(CFDictionaryRef dict, const char*key)
-{
-      CFStringRef key_ref = CFStringCreateWithCString(0, key, kCFStringEncodingASCII);
-      CFNumberRef ref = (CFNumberRef)CFDictionaryGetValue(dict, key_ref);
-      CFRelease(key_ref);
-
-      long val;
-      CFNumberGetValue(ref, kCFNumberLongType, &val);
-
-      return val;
-}
-
-string MacICACameraControl::get_dict_string_value(CFDictionaryRef dict, const char*key)
-{
-      CFStringRef key_ref = CFStringCreateWithCString(0, key, kCFStringEncodingASCII);
-      CFStringRef ref = (CFStringRef)CFDictionaryGetValue(dict, key_ref);
-      CFRelease(key_ref);
-
-      CFIndex buf_len = CFStringGetLength(ref);
-      char*buf = new char [buf_len + 1];
-      CFStringGetCString(ref, buf, buf_len+1, kCFStringEncodingASCII);
-
-      string val (buf);
-      delete[]buf;
-
-      return val;
-}
 
 /*
  * Create a Mac ICA camera from an ICAObject. That object should
@@ -68,10 +38,7 @@ MacICACameraControl::MacICACameraControl(ICAObject dev)
       dev_dict_ = 0;
       refresh_dev_dict_();
 
-      long idVendor  = get_dict_long_value(dev_dict_, "idVendor");
-      long idProduct = get_dict_long_value(dev_dict_, "idProduct");
-
-      make_model_ = id_to_name(usb_id_t(idVendor,idProduct));
+      make_model_ = id_to_name(get_usb_id_from_dict_(dev_dict_));
 }
 
 MacICACameraControl::~MacICACameraControl()
@@ -151,58 +118,11 @@ CameraControl::capture_resp_t MacICACameraControl::capture_image(void)
  * and getting the "data" array from the device. This is an array of
  * images that I format into the file list for the caller.
  */
-void MacICACameraControl::scan_images(std::list<file_key_t>&dst)
-{
-      CFArrayRef aref = (CFArrayRef)CFDictionaryGetValue(dev_dict_, CFSTR("data"));
-      assert(aref);
-      CFIndex asiz = CFArrayGetCount(aref);
-
-      for (CFIndex idx = 0 ; idx < asiz ; idx += 1) {
-	    CFDictionaryRef cur = (CFDictionaryRef)CFArrayGetValueAtIndex(aref,idx);
-	    assert(cur);
-
-	    CFStringRef nam = (CFStringRef)CFDictionaryGetValue(cur,CFSTR("ifil"));
-	    assert(nam);
-
-	    char buf[128];
-	    CFStringGetCString(nam, buf, sizeof buf, kCFStringEncodingASCII);
-	    string nam_str = buf;
-
-	    dst.push_back( file_key_t(idx,nam_str) );
-      }
-}
-
-static ICAObject ica_image_object_from_dev(CFDictionaryRef dev, long key)
-{
-	// The images are listed as an array in the dev
-	// dictionary. Get a ref to that array, and make sure the key fits.
-      CFArrayRef aref = (CFArrayRef)CFDictionaryGetValue(dev, CFSTR("data"));
-      assert(aref);
-      CFIndex asiz = CFArrayGetCount(aref);
-
-      if (key >= asiz)
-	    return 0;
-
-	// The file we are after is itself another dictionary within
-	// the "data" array.
-      CFDictionaryRef cur = (CFDictionaryRef)CFArrayGetValueAtIndex(aref,key);
-      assert(cur);
-
-	// The ICAObject key ("icao") key gets for us the image
-	// object. It is a NumberRef that I can convert into an ICAObject.
-      CFNumberRef icao = (CFNumberRef) CFDictionaryGetValue(cur, CFSTR("icao"));
-      assert(icao);
-
-      ICAObject image;
-      CFNumberGetValue(icao, kCFNumberLongType, &image);
-
-      return image;
-}
 
 void MacICACameraControl::get_image_data(long key, QByteArray&data,
 					 bool delete_image)
 {
-      ICAObject image = ica_image_object_from_dev(dev_dict_, key);
+      ICAObject image = ica_image_object_from_dev_(key);
 
       if (image == 0) {
 	    data.clear();
@@ -244,7 +164,7 @@ void MacICACameraControl::get_image_data(long key, QByteArray&data,
 
 void MacICACameraControl::get_image_thumbnail(long key, char*&buf, size_t&buf_len)
 {
-      ICAObject image = ica_image_object_from_dev(dev_dict_, key);
+      ICAObject image = ica_image_object_from_dev_(key);
       CFDataRef data;
 
       ICACopyObjectThumbnailPB pb;

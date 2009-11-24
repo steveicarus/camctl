@@ -97,10 +97,10 @@ void MacICACameraControl::scan_devices_(void)
 	    dev_dict_pb.object = obj;
 	    dev_dict_pb.theDict = &dev_dict;
 	    ICACopyObjectPropertyDictionary(&dev_dict_pb, 0);
-	    long idVendor  = get_dict_long_value(dev_dict, "idVendor");
-	    long idProduct = get_dict_long_value(dev_dict, "idProduct");
 
-	    switch (id_to_class(usb_id_t(idVendor,idProduct))) {
+	    usb_id_t usb_id = get_usb_id_from_dict_(dev_dict);
+
+	    switch (id_to_class(usb_id)) {
 
 		case MacPTP:
 		  info.dev = new MacPTPCameraControl(obj);
