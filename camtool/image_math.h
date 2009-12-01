@@ -28,6 +28,4 @@ extern void calculate_histograms(const QImage&reference,
 				 QImage&blue_histogram,
 				 bool skip_saturated_black =false);
 
-extern void calculate_sharpness(const QImage&ref, QImage&sharp);
-
 #endif

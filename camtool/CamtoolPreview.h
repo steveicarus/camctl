@@ -65,8 +65,6 @@ class CrunchThread : public QThread {
       void display_preview_image(QImage*pix);
 	// ... RGB hitograms
       void display_rgb_hist_image(QImage*r, QImage*g, QImage*b);
-	// ... sharpness chart
-      void display_sharp_hist_image(QImage*pix);
 
     private:
       void run();
@@ -81,7 +79,6 @@ class CrunchThread : public QThread {
       QImage image_hist_red_;
       QImage image_hist_gre_;
       QImage image_hist_blu_;
-      QImage image_hist_sharp_;
       bool image_preview_busy_;
       bool thread_quit_;
 };
@@ -109,7 +106,6 @@ class CamtoolPreview : public QDialog {
 	// the cruncher thread.
       void display_preview_image_slot_(QImage*pix);
       void display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage*blu);
-      void display_sharp_hist_image_slot_(QImage*pix);
 
     private:
       QGraphicsScene* preview_scene_;
@@ -119,7 +115,6 @@ class CamtoolPreview : public QDialog {
       QGraphicsPixmapItem*charts_red_hist_;
       QGraphicsPixmapItem*charts_green_hist_;
       QGraphicsPixmapItem*charts_blue_hist_;
-      QGraphicsPixmapItem*charts_sharp_hist_;
 
     private:
       CamtoolMain*main_window_;

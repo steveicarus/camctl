@@ -48,9 +48,6 @@ CamtoolPreview::CamtoolPreview(CamtoolMain*parent)
       connect(&cruncher_,
 	      SIGNAL(display_rgb_hist_image(QImage*,QImage*,QImage*)),
 	      SLOT(display_rgb_hist_image_slot_(QImage*,QImage*,QImage*)));
-      connect(&cruncher_,
-	      SIGNAL(display_sharp_hist_image(QImage*)),
-	      SLOT(display_sharp_hist_image_slot_(QImage*)));
 
       preview_scene_ = new QGraphicsScene;
       preview_pixmap_ = new QGraphicsPixmapItem;
@@ -61,18 +58,15 @@ CamtoolPreview::CamtoolPreview(CamtoolMain*parent)
       charts_red_hist_ = new QGraphicsPixmapItem;
       charts_green_hist_ = new QGraphicsPixmapItem;
       charts_blue_hist_ = new QGraphicsPixmapItem;
-      charts_sharp_hist_ = new QGraphicsPixmapItem;
 
       charts_scene_->setBackgroundBrush(QBrush(QColor(0,0,0)));
       charts_scene_->addItem(charts_red_hist_);
       charts_scene_->addItem(charts_green_hist_);
       charts_scene_->addItem(charts_blue_hist_);
-      charts_scene_->addItem(charts_sharp_hist_);
 
       charts_red_hist_  ->setPos(0, 0);
       charts_green_hist_->setPos(0, 1*(CrunchThread::CHART_HEI+10));
       charts_blue_hist_ ->setPos(0, 2*(CrunchThread::CHART_HEI+10));
-      charts_sharp_hist_->setPos(0, 4*(CrunchThread::CHART_HEI+10));
 
       ui.preview_charts->setScene(charts_scene_);
 
@@ -90,15 +84,13 @@ CamtoolPreview::~CamtoolPreview()
       delete charts_red_hist_;
       delete charts_green_hist_;
       delete charts_blue_hist_;
-      delete charts_sharp_hist_;
       delete charts_scene_;
 }
 
 CrunchThread::CrunchThread()
 : image_hist_red_(CHART_WID, CHART_HEI, QImage::Format_RGB32),
   image_hist_gre_(CHART_WID, CHART_HEI, QImage::Format_RGB32),
-  image_hist_blu_(CHART_WID, CHART_HEI, QImage::Format_RGB32),
-  image_hist_sharp_(CHART_WID, CHART_HEI, QImage::Format_RGB32)
+  image_hist_blu_(CHART_WID, CHART_HEI, QImage::Format_RGB32)
 {
       image_preview_busy_ = false;
       thread_quit_ = false;
@@ -172,10 +164,6 @@ void CrunchThread::crunch_preview_image_()
       emit display_rgb_hist_image(&image_hist_red_,
 				  &image_hist_gre_,
 				  &image_hist_blu_);
-
-      calculate_sharpness(image_preview_, image_hist_sharp_);
-
-      emit display_sharp_hist_image(&image_hist_sharp_);
 }
 
 /*
@@ -252,12 +240,6 @@ void CamtoolPreview::display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage
       charts_red_hist_  ->update();
       charts_green_hist_->update();
       charts_blue_hist_ ->update();
-}
-
-void CamtoolPreview::display_sharp_hist_image_slot_(QImage*pix)
-{
-      charts_sharp_hist_->setPixmap(QPixmap::fromImage(*pix));
-      charts_sharp_hist_->update();
 }
 
 void CamtoolPreview::closeEvent(QCloseEvent*event)
