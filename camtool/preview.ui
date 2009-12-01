@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>PreviewWindow</class>
- <widget class="QDialog" name="PreviewWindow" >
-  <property name="geometry" >
+ <widget class="QDialog" name="PreviewWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,61 +10,61 @@
     <height>716</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Preview</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QGraphicsView" name="preview_image" >
-       <property name="backgroundBrush" >
-        <brush brushstyle="SolidPattern" >
-         <color alpha="255" >
+      <widget class="QGraphicsView" name="preview_image">
+       <property name="backgroundBrush">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
           <red>0</red>
           <green>0</green>
           <blue>0</blue>
          </color>
         </brush>
        </property>
-       <property name="alignment" >
+       <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QGraphicsView" name="preview_charts" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="MinimumExpanding" hsizetype="Preferred" >
+      <widget class="QGraphicsView" name="preview_charts">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize" >
+       <property name="minimumSize">
         <size>
          <width>144</width>
          <height>0</height>
         </size>
        </property>
-       <property name="maximumSize" >
+       <property name="maximumSize">
         <size>
          <width>144</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="horizontalScrollBarPolicy" >
+       <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOff</enum>
        </property>
-       <property name="backgroundBrush" >
-        <brush brushstyle="SolidPattern" >
-         <color alpha="255" >
+       <property name="backgroundBrush">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
           <red>0</red>
           <green>0</green>
           <blue>0</blue>
          </color>
         </brush>
        </property>
-       <property name="alignment" >
+       <property name="alignment">
         <set>Qt::AlignHCenter|Qt::AlignTop</set>
        </property>
       </widget>
@@ -71,14 +72,25 @@
     </layout>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="preview_buttons" >
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons" >
-      <set>QDialogButtonBox::Close</set>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="zoom_check">
+       <property name="text">
+        <string>Zoom 1:1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="preview_buttons">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -90,11 +102,11 @@
    <receiver>PreviewWindow</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -106,11 +118,11 @@
    <receiver>PreviewWindow</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

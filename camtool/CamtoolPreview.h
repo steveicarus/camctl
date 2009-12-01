@@ -103,6 +103,7 @@ class CamtoolPreview : public QDialog {
 
     private slots:
       void preview_buttons_slot_(QAbstractButton*);
+      void zoom_check_slot_(int);
 
 	// These slots are for receiving the processing results from
 	// the cruncher thread.

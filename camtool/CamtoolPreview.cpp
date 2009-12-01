@@ -36,6 +36,10 @@ CamtoolPreview::CamtoolPreview(CamtoolMain*parent)
 	      SIGNAL(clicked(QAbstractButton*)),
 	      SLOT(preview_buttons_slot_(QAbstractButton*)));
 
+      connect(ui.zoom_check,
+	      SIGNAL(stateChanged(int)),
+	      SLOT(zoom_check_slot_(int)));
+
 	// The Cruncher thread sends results back to me by sending
 	// signals. Connect those signals to slots in this class.
       connect(&cruncher_,
@@ -229,6 +233,15 @@ void CamtoolPreview::display_preview_image_slot_(QImage*pix)
 
       preview_pixmap_->setPixmap(QPixmap::fromImage(*pix));
       preview_pixmap_->update();
+
+	// If the "Zoom 1:1" button is checked, then set the display
+	// to 1-to-1. Otherwise, fit the image into the view.
+      if (ui.zoom_check->isChecked()) {
+	    ui.preview_image->setMatrix(QMatrix());
+      } else {
+	    ui.preview_image->fitInView(preview_pixmap_,
+					Qt::KeepAspectRatioByExpanding);
+      }
 }
 
 void CamtoolPreview::display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage*blu)
@@ -265,4 +278,14 @@ void CamtoolPreview::preview_buttons_slot_(QAbstractButton*button)
 	    break;
       }
 
+}
+
+void CamtoolPreview::zoom_check_slot_(int state)
+{
+      if (state) {
+	    ui.preview_image->setMatrix(QMatrix());
+      } else {
+	    ui.preview_image->fitInView(preview_pixmap_,
+					Qt::KeepAspectRatioByExpanding);
+      }
 }
