@@ -112,6 +112,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void action_capture_slot_(void);
       void action_tethered_slot_(void);
       void action_timelapse_slot_(void);
+      void action_file_slot_(void);
 
 	// Slots for the Images page
       void images_list_slot_(QListWidgetItem*);

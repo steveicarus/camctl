@@ -149,6 +149,9 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       connect(ui.action_timelapse_button,
 	      SIGNAL(clicked()),
 	      SLOT(action_timelapse_slot_()));
+      connect(ui.action_file_button,
+	      SIGNAL(clicked()),
+	      SLOT(action_file_slot_()));
 
 	// Images
       connect(ui.images_list,
@@ -587,6 +590,17 @@ void CamtoolMain::action_timelapse_slot_(void)
 	    lapse_timer_.stop();
       }
 
+}
+
+void CamtoolMain::action_file_slot_(void)
+{
+      QString file_name = QFileDialog::getOpenFileName(this);
+      if (preview_window_active()) {
+	    QFile image_file (file_name);
+	    image_file.open(QIODevice::ReadOnly);
+	    QByteArray image_data = image_file.readAll();
+	    preview_->display_preview_image(file_name, image_data);
+      }
 }
 
 void CamtoolMain::timer_lapse_slot_(void)
