@@ -25,6 +25,7 @@
 # include  <QThread>
 # include  <QMutex>
 # include  <QWaitCondition>
+# include  "LibRawQt.h"
 
 class CamtoolPreview;
 class CamtoolMain;
@@ -81,6 +82,8 @@ class CrunchThread : public QThread {
       QImage image_hist_blu_;
       bool image_preview_busy_;
       bool thread_quit_;
+
+      LibRawQt libraw_;
 };
 
 class CamtoolPreview : public QDialog {
