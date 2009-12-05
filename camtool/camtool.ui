@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1087</width>
-    <height>719</height>
+    <width>1144</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Icarus Camera Control</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -80,13 +80,6 @@ using the settings for tethered capture.</string>
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="action_file_button">
-        <property name="text">
-         <string>View File</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="zoom_check">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -99,41 +92,80 @@ using the settings for tethered capture.</string>
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="action_file_button">
+        <property name="text">
+         <string>View File</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QGraphicsView" name="action_thumbnail_view">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QGraphicsView" name="action_thumbnail_view">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>236</horstretch>
+                <verstretch>140</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>236</width>
+                <height>140</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>236</width>
+                <height>140</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Minimum</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>28</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QGraphicsView" name="preview_charts">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>130</horstretch>
+              <verstretch>180</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>144</width>
-              <height>0</height>
+              <width>130</width>
+              <height>180</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>144</width>
+              <width>130</width>
               <height>16777215</height>
              </size>
             </property>
@@ -182,8 +214,8 @@ using the settings for tethered capture.</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>169</height>
+                 <width>350</width>
+                 <height>177</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -244,8 +276,8 @@ using the settings for tethered capture.</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>169</height>
+                 <width>350</width>
+                 <height>177</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -315,8 +347,8 @@ using the settings for tethered capture.</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>169</height>
+                 <width>359</width>
+                 <height>162</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -410,8 +442,8 @@ using the settings for tethered capture.</string>
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>382</width>
-                 <height>169</height>
+                 <width>350</width>
+                 <height>177</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -594,7 +626,7 @@ using the settings for tethered capture.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1087</width>
+     <width>1144</width>
      <height>22</height>
     </rect>
    </property>
