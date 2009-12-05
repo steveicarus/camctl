@@ -21,14 +21,12 @@
  */
 
 # include  <qapplication.h>
-# include  "ui_preview.h"
 # include  <QThread>
 # include  <QMutex>
 # include  <QWaitCondition>
+# include  <QImage>
 # include  "LibRawQt.h"
 
-class CamtoolPreview;
-class CamtoolMain;
 class QString;
 
  /*
@@ -84,45 +82,6 @@ class CrunchThread : public QThread {
       bool thread_quit_;
 
       LibRawQt libraw_;
-};
-
-class CamtoolPreview : public QDialog {
-
-      Q_OBJECT
-
-    public:
-      CamtoolPreview(CamtoolMain*parent);
-      ~CamtoolPreview();
-
-      void display_preview_image(const QString&file_name,
-				 const QByteArray&image_data);
-
-	// Override this event to add the ability to let the main
-	// window know that this is closed.
-      virtual void closeEvent(QCloseEvent*event);
-
-    private slots:
-      void preview_buttons_slot_(QAbstractButton*);
-      void zoom_check_slot_(int);
-
-	// These slots are for receiving the processing results from
-	// the cruncher thread.
-      void display_preview_image_slot_(QImage*pix);
-      void display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage*blu);
-
-    private:
-      QGraphicsScene* preview_scene_;
-      QGraphicsPixmapItem*preview_pixmap_;
-
-      QGraphicsScene*     charts_scene_;
-      QGraphicsPixmapItem*charts_red_hist_;
-      QGraphicsPixmapItem*charts_green_hist_;
-      QGraphicsPixmapItem*charts_blue_hist_;
-
-    private:
-      CamtoolMain*main_window_;
-      Ui::PreviewWindow ui;
-      CrunchThread cruncher_;
 };
 
 #endif

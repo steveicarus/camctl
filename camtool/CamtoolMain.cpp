@@ -22,7 +22,6 @@
 # include  "CamtoolPreferences.h"
 # include  "CamtoolAboutBox.h"
 # include  "CamtoolAboutDevice.h"
-# include  "CamtoolPreview.h"
 # include  "CamtoolDebug.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
@@ -44,7 +43,6 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 
       ui.setupUi(this);
       preferences_ = new CamtoolPreferences(this);
-      preview_ = new CamtoolPreview(this);
       debug_window_ = new CamtoolDebug(this);
 
 	// Set the maximum for the various time entry boxes based on
@@ -77,6 +75,27 @@ CamtoolMain::CamtoolMain(QWidget*parent)
       action_thumbnail_hist_blue_ ->setPos(THUMB_WID+10, 68);
 
       ui.action_thumbnail_view->setScene(action_thumbnail_scene_);
+
+      preview_scene_ = new QGraphicsScene;
+      preview_pixmap_ = new QGraphicsPixmapItem;
+      preview_scene_->addItem(preview_pixmap_);
+      ui.preview_image->setScene(preview_scene_);
+
+      charts_scene_ = new QGraphicsScene;
+      charts_red_hist_ = new QGraphicsPixmapItem;
+      charts_green_hist_ = new QGraphicsPixmapItem;
+      charts_blue_hist_ = new QGraphicsPixmapItem;
+
+      charts_scene_->setBackgroundBrush(QBrush(QColor(0,0,0)));
+      charts_scene_->addItem(charts_red_hist_);
+      charts_scene_->addItem(charts_green_hist_);
+      charts_scene_->addItem(charts_blue_hist_);
+
+      charts_red_hist_  ->setPos(0, 0);
+      charts_green_hist_->setPos(0, 1*(CrunchThread::CHART_HEI+10));
+      charts_blue_hist_ ->setPos(0, 2*(CrunchThread::CHART_HEI+10));
+
+      ui.preview_charts->setScene(charts_scene_);
 
 	// Heartbeat timer
       connect(&heartbeat_timer_,
@@ -161,6 +180,20 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	      SIGNAL(clicked()),
 	      SLOT(images_refresh_slot_()));
 
+	// Preview
+      connect(ui.zoom_check,
+	      SIGNAL(stateChanged(int)),
+	      SLOT(zoom_check_slot_(int)));
+
+	// The Cruncher thread sends results back to me by sending
+	// signals. Connect those signals to slots in this class.
+      connect(&cruncher_,
+	      SIGNAL(display_preview_image(QImage*)),
+	      SLOT(display_preview_image_slot_(QImage*)));
+      connect(&cruncher_,
+	      SIGNAL(display_rgb_hist_image(QImage*,QImage*,QImage*)),
+	      SLOT(display_rgb_hist_image_slot_(QImage*,QImage*,QImage*)));
+
 	// Timers
       connect(&lapse_timer_, SIGNAL(timeout()), SLOT(timer_lapse_slot_()));
 
@@ -176,13 +209,23 @@ CamtoolMain::CamtoolMain(QWidget*parent)
 	ui.capture_interval ->setValue(interval);
 	ui.sequence_duration->setValue(duration);
       }
+
+      cruncher_.start();
 }
 
 CamtoolMain::~CamtoolMain()
 {
+      cruncher_.wait();
+
+      delete preview_pixmap_;
+      delete preview_scene_;
+
+      delete charts_red_hist_;
+      delete charts_green_hist_;
+      delete charts_blue_hist_;
+      delete charts_scene_;
       if (about_)
 	    delete about_;
-      delete preview_;
 }
 
 CameraControl* CamtoolMain::get_selected_camera(void)
@@ -294,22 +337,11 @@ void CamtoolMain::preferences_slot_(void)
 
 void CamtoolMain::tools_preview_slot_(void)
 {
-      assert(preview_);
       if (ui.tools_preview->isChecked()) {
-	    preview_->show();
-	    preview_->raise();
-	    preview_->activateWindow();
 	    preferences_->set_preview_raised(true);
       } else {
-	    preview_->close();
 	    preferences_->set_preview_raised(false);
       }
-}
-
-void CamtoolMain::close_preview_window(void)
-{
-      ui.tools_preview->setChecked(false);
-      preferences_->set_preview_raised(false);
 }
 
 bool CamtoolMain::preview_window_active(void)
@@ -599,7 +631,7 @@ void CamtoolMain::action_file_slot_(void)
 	    QFile image_file (file_name);
 	    image_file.open(QIODevice::ReadOnly);
 	    QByteArray image_data = image_file.readAll();
-	    preview_->display_preview_image(file_name, image_data);
+	    display_preview_image(file_name, image_data);
       }
 }
 
@@ -634,5 +666,62 @@ void CamtoolMain::camera_capture_complete(CameraControl*)
       if (tethered_in_progress_) {
 	    preferences_->step_tethered_number();
 	    tethered_in_progress_ = false;
+      }
+}
+
+/*
+ * The main thread calls this method when it has a preview image to
+ * process. Pass the data directly back to the cruncher thread. The
+ * "process_preview_data" method will return when it no longer needs
+ * the data pointer.
+ */
+void CamtoolMain::display_preview_image(const QString&file_name,
+					   const QByteArray&image_data)
+{
+      CameraControl::debug_log << TIMESTAMP
+			       << ": CamtoolMain::display_preview_image: "
+			       << "Process preview display of "
+			       << file_name.toStdString()
+			       << "." << endl << flush;
+
+      cruncher_.process_preview_data(file_name, image_data);
+}
+
+void CamtoolMain::display_preview_image_slot_(QImage*pix)
+{
+      CameraControl::debug_log << TIMESTAMP
+			       << ": CamtoolMain::display_preview_image_slot_"
+			       << endl << flush;
+
+      preview_pixmap_->setPixmap(QPixmap::fromImage(*pix));
+      preview_pixmap_->update();
+
+	// If the "Zoom 1:1" button is checked, then set the display
+	// to 1-to-1. Otherwise, fit the image into the view.
+      if (ui.zoom_check->isChecked()) {
+	    ui.preview_image->setMatrix(QMatrix());
+      } else {
+	    ui.preview_image->fitInView(preview_pixmap_,
+					Qt::KeepAspectRatioByExpanding);
+      }
+}
+
+void CamtoolMain::display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage*blu)
+{
+      charts_red_hist_  ->setPixmap(QPixmap::fromImage(*red));
+      charts_green_hist_->setPixmap(QPixmap::fromImage(*gre));
+      charts_blue_hist_ ->setPixmap(QPixmap::fromImage(*blu));
+      charts_red_hist_  ->update();
+      charts_green_hist_->update();
+      charts_blue_hist_ ->update();
+}
+
+void CamtoolMain::zoom_check_slot_(int state)
+{
+      if (state) {
+	    ui.preview_image->setMatrix(QMatrix());
+      } else {
+	    ui.preview_image->fitInView(preview_pixmap_,
+					Qt::KeepAspectRatioByExpanding);
       }
 }

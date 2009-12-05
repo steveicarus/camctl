@@ -27,12 +27,12 @@
 # include  <QTimer>
 # include  "ui_camtool.h"
 # include  <CameraControl.h>
+# include  "CrunchThread.h"
 # include  <fstream>
 
 class CamtoolPreferences;
 class CamtoolAboutBox;
 class CamtoolAboutDevice;
-class CamtoolPreview;
 class CamtoolDebug;
 
 class CamtoolMain : public QMainWindow, private CameraControl::Notification {
@@ -43,12 +43,12 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolMain(QWidget *parent =0);
       ~CamtoolMain();
 
-	// The Preview window uses this to uncheck the preview window action
-      void close_preview_window();
-	// Return true if the preview window is active.
-      bool preview_window_active();
-
       CameraControl* get_selected_camera(void);
+
+      bool preview_window_active(void);
+
+      void display_preview_image(const QString&file_name,
+				 const QByteArray&image_data);
 
     private:
 	// Hold on to the camera that the user grabs.
@@ -63,6 +63,14 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       QGraphicsPixmapItem*action_thumbnail_hist_red_;
       QGraphicsPixmapItem*action_thumbnail_hist_green_;
       QGraphicsPixmapItem*action_thumbnail_hist_blue_;
+
+      QGraphicsScene* preview_scene_;
+      QGraphicsPixmapItem*preview_pixmap_;
+
+      QGraphicsScene*     charts_scene_;
+      QGraphicsPixmapItem*charts_red_hist_;
+      QGraphicsPixmapItem*charts_green_hist_;
+      QGraphicsPixmapItem*charts_blue_hist_;
 
     private:
 	// Helper methods.
@@ -114,6 +122,14 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       void action_timelapse_slot_(void);
       void action_file_slot_(void);
 
+	// Slots for preview
+      void zoom_check_slot_(int);
+
+	// These slots are for receiving the processing results from
+	// the cruncher thread.
+      void display_preview_image_slot_(QImage*pix);
+      void display_rgb_hist_image_slot_(QImage*red, QImage*gre, QImage*blu);
+
 	// Slots for the Images page
       void images_list_slot_(QListWidgetItem*);
       void images_refresh_slot_(void);
@@ -134,7 +150,6 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
       CamtoolPreferences*preferences_;
       CamtoolAboutBox*about_;
       CamtoolAboutDevice*about_device_;
-      CamtoolPreview*preview_;
       CamtoolDebug*debug_window_;
 
       bool tethered_in_progress_;
@@ -142,5 +157,7 @@ class CamtoolMain : public QMainWindow, private CameraControl::Notification {
 	// Timer for generating time-lapse events.
       unsigned lapse_remaining_;
       QTimer lapse_timer_;
+
+      CrunchThread cruncher_;
 };
 #endif

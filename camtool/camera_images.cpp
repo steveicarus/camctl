@@ -20,7 +20,6 @@
 # include  <qapplication.h>
 # include  "CamtoolMain.h"
 # include  "CamtoolPreferences.h"
-# include  "CamtoolPreview.h"
 # include  "image_math.h"
 # include  <QFileDialog>
 # include  <QMessageBox>
@@ -185,7 +184,7 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
 	// If the preview is enabled, then display the image there.
       if (preview_window_active()) {
 	    CameraControl::debug_log << TIMESTAMP << ": Display_preview..." << endl << flush;
-	    preview_->display_preview_image(file_name, image_data);
+	    display_preview_image(file_name, image_data);
       }
 
 	// If we are busy with a tethered capture, then immediately

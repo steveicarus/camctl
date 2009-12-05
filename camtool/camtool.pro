@@ -13,14 +13,14 @@ LIBS += ../LibRaw-0.8.4/lib/libraw_r.a
 INCLUDEPATH += ../LibRaw-0.8.4
 
 # User interface files
-FORMS   += camtool.ui aboutbox.ui aboutdevice.ui preferences.ui preview.ui debug.ui
+FORMS   += camtool.ui aboutbox.ui aboutdevice.ui preferences.ui debug.ui
 HEADERS += CamtoolMain.h CamtoolPreferences.h CamtoolAboutBox.h CamtoolAboutDevice.h image_math.h version.h
 SOURCES += main.cpp CamtoolMain.cpp grab_camera.cpp camera_images.cpp
 SOURCES += CamtoolPreferences.cpp
 SOURCES += CamtoolAboutBox.cpp
 SOURCES += CamtoolAboutDevice.cpp
-HEADERS += CamtoolPreview.h HMSSpinBox.h
-SOURCES += CamtoolPreview.cpp HMSSpinBox.cpp
+HEADERS += CrunchThread.h HMSSpinBox.h
+SOURCES += CrunchThread.cpp HMSSpinBox.cpp
 HEADERS += CamtoolDebug.h
 SOURCES += CamtoolDebug.cpp
 SOURCES += ptp_misc.cpp image_math.cpp
