@@ -158,7 +158,7 @@ void CamtoolMain::camera_image_added(CameraControl*camera, const CameraControl::
       QString file_name (file.second.c_str());
       QVariant file_index ((int)cur_key);
 
-      CameraControl::debug_log << TIMESTAMP << ": Add image " << file_name.toStdString() << endl << flush;
+      CameraControl::debug_log << TIMESTAMP << ": Add image <" << file_name.toStdString() << ">" << endl << flush;
 
 	// Add a file entry into the file list.
       QListWidgetItem*item = new QListWidgetItem(file_name);

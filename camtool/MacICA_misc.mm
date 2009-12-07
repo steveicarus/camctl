@@ -34,12 +34,8 @@ static NSString*idProduct_key = (NSString*) CFSTR("idProduct");
 // std::string C++ object.
 static std::string to_string(NSString*src)
 {
-      size_t nbuf = [src length] + 1;
-      char*buf = new char[nbuf];
-      [src getCString:buf maxLength:nbuf encoding:NSUnicodeStringEncoding];
-      std::string res_str = buf;
-      delete[]buf;
-
+      const char*str = [src cStringUsingEncoding:NSUTF8StringEncoding];
+      std::string res_str = str;
       return res_str;
 }
 
