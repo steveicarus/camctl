@@ -123,32 +123,38 @@ void MacICACameraControl::get_image_data(long key, QByteArray&data,
 					 bool delete_image)
 {
       ICAObject image = ica_image_object_from_dev_(key);
-
       if (image == 0) {
 	    data.clear();
 	    return;
       }
 
-	// Given the image object, we can get the image data itself by
+	// Given the image object, we first get the image details by
 	// getting the kICAPropertyImageData property. That will have
-	// the size of the image data, that I can in turn retrieve
-	// with the ICAGetPropertyData function.
+	// the size of the image data, which I can in turn use to
+	// retrieve the full image via the ICACopyObjectData function.
       ICAGetPropertyByTypePB image_data_pb;
       memset(&image_data_pb, 0, sizeof image_data_pb);
       image_data_pb.object = image;
       image_data_pb.propertyType = kICAPropertyImageData;
       ICAGetPropertyByType(&image_data_pb, 0);
-
       size_t buf_len = image_data_pb.propertyInfo.dataSize;
-      data.resize(buf_len);
 
-      ICAGetPropertyDataPB data_pb;
+	// Now get the image data directly from the image object.
+      CFDataRef dataRef;
+      ICACopyObjectDataPB data_pb;
       memset(&data_pb, 0, sizeof data_pb);
-      data_pb.property = image_data_pb.property;
+      data_pb.object = image;
       data_pb.startByte = 0;
       data_pb.requestedSize = buf_len;
-      data_pb.dataPtr = data.data();
-      ICAGetPropertyData(&data_pb, 0);
+      data_pb.data = &dataRef;
+      ICAError rc = ICACopyObjectData(&data_pb, 0);
+      assert(rc == 0);
+
+	// Put the image data into the QByteArray that the caller
+	// passed in.
+      data.resize(CFDataGetLength(dataRef));
+      CFDataGetBytes(dataRef, CFRangeMake(0, buf_len), (UInt8*)data.data());
+      CFRelease(dataRef);
 
       if (delete_image) {
 	    ICAObjectSendMessagePB send_pb;
