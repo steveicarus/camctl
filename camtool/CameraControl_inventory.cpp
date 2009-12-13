@@ -31,6 +31,8 @@ using namespace std;
  */
 CameraControl::usb_devices_struct CameraControl::usb_devices_table[] = {
 	// Canon (Vendor 0x04a9)
+      { 0x04a9, 0x3074,  "Canon", "PowerShot A60",  MacPTP },
+      { 0x04a9, 0x309a,  "Canon", "PowerShot A80",  MacPTP },
       { 0x04a9, 0x30b7,  "Canon", "PowerShot A400", MacPTP },
       { 0x04a9, 0x30b8,  "Canon", "PowerShot A310", MacPTP },
       { 0x04a9, 0x30c0,  "Canon", "PowerShot SD200",MacPTP },

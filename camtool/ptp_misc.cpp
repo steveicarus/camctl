@@ -215,6 +215,83 @@ static string ptp_standard_properties[] = {
       "CopyrightInfo"       // 0x501f
 };
 
+static string ptp_vendor_canon_properties[] = {
+      "Undefined",          // 0xd000
+      "BeepMode",           // 0xd001
+      "BatteryKind",        // 0xd002
+      "BatteryStatus",      // 0xd003
+      "UILockType",         // 0xd004
+      "CameraMode",         // 0xd005
+      "ImageQuality",       // 0xd006
+      "FullViewFileFormat", // 0xd007
+      "ImageSize",          // 0xd008
+      "SelfTime",           // 0xd009
+      "FlashMode",          // 0xd00a
+      "Beep",               // 0xd00b
+      "ShootingMode",       // 0xd00c
+      "ImageMode",          // 0xd00d
+      "DriveMode",          // 0xd00e
+      "EZoom",              // 0xd00f
+      "MeteringMode",       // 0xd010
+      "AFDistance",         // 0xd011
+      "FocusingPoint",      // 0xd012
+      "WhiteBalance",       // 0xd013
+      "SlowShutterSetting", // 0xd014
+      "AFMode",             // 0xd015
+      "ImageStabilization", // 0xd016
+      "Contrast",           // 0xd017
+      "ColorGain",          // 0xd018
+      "Sharpness",          // 0xd019
+      "Sensitivity",        // 0xd01a
+      "ParameterSet",       // 0xd01b
+      "ISOSpeed",           // 0xd01c
+      "Aperture",           // 0xd01d
+      "ShutterSpeed",       // 0xd01e
+      "ExpCompensation",    // 0xd01f
+      "FlashCompensation",  // 0xd020
+      "AEBExposureCompensation", // 0xd021
+      "0xd022",             // 0xd022
+      "AvOpen",             // 0xd023
+      "AvMax",              // 0xd024
+      "FocalLength",        // 0xd025
+      "FocalLengthTele",    // 0xd026
+      "FocalLengthWide",    // 0xd027
+      "FocalLengthDenominator", // 0xd028
+      "CaptureTransferMode",// 0xd029
+      "Zoom",               // 0xd02a
+      "NamePrefix",         // 0xd02b
+      "SizeQualityMode",    // 0xd02c
+      "SupportedThumbSize", // 0xd02d
+      "SizeOfOutputDataFromCamera", // 0xd02e
+      "SizeOfInputDataToCamera",    // 0xd02f
+      "RemoteAPIVersion",   // 0xd030
+      "FirmwareVersion",    // 0xd031
+      "CameraModel",        // 0xd032
+      "CameraOwner",        // 0xd033
+      "UnixTime",           // 0xd034
+      "CameraBodyID",       // 0xd035
+      "CameraOutput",       // 0xd036
+      "DispAv",             // 0xd037
+      "AvOpenApex",         // 0xd038
+      "DZoomMagnification", // 0xd039
+      "MlSpotPos",          // 0xd03a
+      "DispAvMax",          // 0xd03b
+      "AvMaxApex",          // 0xd03c
+      "EZoomStartPosition", // 0xd03d
+      "FocalLengthOfTele",  // 0xd03e
+      "EZoomSizeOfTele",    // 0xd03f
+      "PhotoEffect",        // 0xd040
+      "AssistLight",        // 0xd041
+      "FlashQuantityCount", // 0xd042
+      "RotationAngle",      // 0xd043
+      "RotationScene",      // 0xd044
+      "EventEmulationMode", // 0xd045
+      "DPOFVersion",        // 0xd046
+      "TypeOfSupportedSlideShow", // 0xd047
+      "AverageFilesizes",   // 0xd048
+      "ModelID"             // 0xd049
+};
+
 /*
  * Various properties with integer values are mapped to values. Keep
  * all the property-value maps to this single sorted
@@ -340,7 +417,7 @@ string ptp_event_string(uint16_t code, uint32_t extension_id)
       return tmp.str();
 }
 
-string ptp_property_string(uint16_t code, uint32_t)
+string ptp_property_string(uint16_t code, uint32_t vend)
 {
       if ( (code&0xf000) == 0x5000 ) { // PTP Standard Properties
 
@@ -350,6 +427,11 @@ string ptp_property_string(uint16_t code, uint32_t)
 	    ostringstream tmp;
 	    tmp << "Reserved-" << hex << code << ends;
 	    return tmp.str();
+      }
+
+      if ( (code&0xf000) == 0xd000 && vend==0x0000000b
+	   && (code&0x0fff) < array_count(ptp_vendor_canon_properties)) {
+	    return ptp_vendor_canon_properties[code&0x0fff];
       }
 
       if ( (code&0xf000) == 0xd000 ) { // Vendor Properties
