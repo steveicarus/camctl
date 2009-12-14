@@ -40,7 +40,7 @@ MacPTPCameraControl::MacPTPCameraControl(ICAObject dev)
 {
       uint32_t result_code;
 
-      ptp_get_device_info_(result_code);
+      result_code = ptp_get_device_info();
 
       ptp_get_property_desc_(battery_level_, result_code);
       ptp_get_property_desc_(image_size_, result_code);
@@ -57,23 +57,8 @@ MacPTPCameraControl::~MacPTPCameraControl()
 {
 }
 
-uint32_t MacPTPCameraControl::ptp_extension_vendor_() const
-{
-      uint32_t use_extension_id = vendor_extension_id_;
-	// Some Nikon cameras forgot to set their vendor extension ID
-	// to Nikon, and instead report themselves as "Microsoft." So
-	// define a practical extension id to use.
-      if (use_extension_id == 0x006 && camera_make() == "Nikon") {
-	    use_extension_id = 0x000a;
-      }
-
-      return use_extension_id;
-}
-
 QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
 {
-      uint32_t use_extension_id = ptp_extension_vendor_();
-
       QTreeWidgetItem*item;
       QTreeWidgetItem*root = new QTreeWidgetItem;
       root->setText(0, "MacPTPCameraControl");
@@ -82,30 +67,30 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       item = new QTreeWidgetItem;
       item->setText(0, "StandardVersion");
       item->setText(1, QString("%1 (0x%2)")
-		    .arg(standard_version_/100.0, 0, 'f', 2)
-		    .arg(standard_version_, 4, 16, QLatin1Char('0')));
+		    .arg(ptp_standard_version()/100.0, 0, 'f', 2)
+		    .arg(ptp_standard_version(), 4, 16, QLatin1Char('0')));
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "VendorExtensionID");
-      item->setText(1, QString("0x%1").arg(vendor_extension_id_, 8, 16, QLatin1Char('0')));
+      item->setText(1, QString("0x%1").arg(ptp_extension_vendor(true), 8, 16, QLatin1Char('0')));
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "VendorExtensionVersion");
       item->setText(1, QString("%1 (0x%2)")
-		    .arg(vendor_extension_vers_/100.0, 0, 'f', 2)
-		    .arg(vendor_extension_vers_, 4, 16, QLatin1Char('0')));
+		    .arg(ptp_extension_version()/100.0, 0, 'f', 2)
+		    .arg(ptp_extension_version(), 4, 16, QLatin1Char('0')));
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "VendorExtensionDesc");
-      item->setText(1, vendor_extension_desc_);
+      item->setText(1, ptp_extension_desc());
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "FunctionalMode");
-      switch (functional_mode_) {
+      switch (ptp_FunctionalMode()) {
 	  case 0x0000:
 	    item->setText(1, "Standard Mode");
 	    break;
@@ -113,138 +98,86 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
 	    item->setText(1, "Sleep Mode");
 	    break;
 	  default:
-	    item->setText(1, QString("0x%1").arg(functional_mode_, 4, 16, QLatin1Char('0')));
+	    item->setText(1, QString("0x%1").arg(ptp_FunctionalMode(), 4, 16, QLatin1Char('0')));
 	    break;
       }
       root->addChild(item);
 
+      std::vector<QString>res;
+
       item = new QTreeWidgetItem;
       item->setText(0, "OperationsSupported");
-      for (unsigned idx = 0 ; idx < operations_supported_.size() ; idx += 1) {
+
+      res = ptp_operations_list();
+      for (unsigned idx = 0 ; idx < res.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    string opcode_string = ptp_opcode_string(operations_supported_[idx],
-						     use_extension_id);
-	    tmp->setText(1, opcode_string.c_str());
+	    tmp->setText(1, res[idx]);
 	    item->addChild(tmp);
       }
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "EventsSupported");
-      for (unsigned idx = 0 ; idx < events_supported_.size() ; idx += 1) {
+
+      res = ptp_events_list();
+      for (unsigned idx = 0 ; idx < res.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    string event_string = ptp_event_string(events_supported_[idx],
-						   use_extension_id);
-	    tmp->setText(1, event_string.c_str());
+	    tmp->setText(1, res[idx]);
 	    item->addChild(tmp);
       }
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "DevicePropertiesSupported");
-      for (size_t idx = 0 ; idx < device_properties_supported_.size() ; idx += 1) {
+
+      res = ptp_properties_list();
+      for (size_t idx = 0 ; idx < res.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    string prop_string =  ptp_property_string(device_properties_supported_[idx],
-						      use_extension_id);
-	    tmp->setText(0, prop_string.c_str());
+	    tmp->setText(0, res[idx]);
 	    item->addChild(tmp);
       }
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "CaptureFormats");
-      for (size_t idx = 0 ; idx < capture_formats_.size() ; idx += 1) {
+
+      res = ptp_capture_formats_list();
+      for (size_t idx = 0 ; idx < res.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    switch (image_formats_[idx]) {
-		case 0x3000:
-		  tmp->setText(1, "Undefined non-image object");
-		  break;
-		case 0x3001:
-		  tmp->setText(1, "Association (e.g. directory)");
-		  break;
-		case 0x3002:
-		  tmp->setText(1, "Script (device-model specific)");
-		  break;
-		case 0x3006:
-		  tmp->setText(1, "Digital Print Order Format (text)");
-		  break;
-		case 0x3800:
-		  tmp->setText(1, "Unknown image object");
-		  break;
-		case 0x3801:
-		  tmp->setText(1, "EXIF/JPEG");
-		  break;
-		case 0x3808:
-		  tmp->setText(1, "JFIF");
-		  break;
-		case 0x380d:
-		  tmp->setText(1, "TIFF");
-		  break;
-		default:
-		  tmp->setText(1, QString("0x%1")
-			       .arg(image_formats_[idx],4,16));
-		  break;
-	    }
+	    tmp->setText(0, res[idx]);
 	    item->addChild(tmp);
       }
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "ImageFormats");
-      for (size_t idx = 0 ; idx < image_formats_.size() ; idx += 1) {
+
+      res = ptp_image_formats_list();
+      for (size_t idx = 0 ; idx < res.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    switch (image_formats_[idx]) {
-		case 0x3000:
-		  tmp->setText(1, "Undefined non-image object");
-		  break;
-		case 0x3001:
-		  tmp->setText(1, "Association (e.g. directory)");
-		  break;
-		case 0x3002:
-		  tmp->setText(1, "Script (device-model specific)");
-		  break;
-		case 0x3006:
-		  tmp->setText(1, "Digital Print Order Format (text)");
-		  break;
-		case 0x3800:
-		  tmp->setText(1, "Unknown image object");
-		  break;
-		case 0x3801:
-		  tmp->setText(1, "EXIF/JPEG");
-		  break;
-		case 0x3808:
-		  tmp->setText(1, "JFIF");
-		  break;
-		case 0x380d:
-		  tmp->setText(1, "TIFF");
-		  break;
-		default:
-		  tmp->setText(1, QString("0x%1")
-			       .arg(image_formats_[idx],4,16));
-		  break;
-	    }
+	    tmp->setText(0, res[idx]);
 	    item->addChild(tmp);
       }
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "Manufacturer");
-      item->setText(1, ptp_manufacturer_);
+      item->setText(1, ptp_Manufacturer());
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "Model");
-      item->setText(1, ptp_model_);
+      item->setText(1, ptp_Model());
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "DeviceVersion");
-      item->setText(1, device_version_);
+      item->setText(1, ptp_DeviceVersion());
       root->addChild(item);
 
       item = new QTreeWidgetItem;
       item->setText(0, "SerialNumber");
-      item->setText(1, serial_number_);
+      item->setText(1, ptp_SerialNumber());
       root->addChild(item);
 
       root->addChild(MacICACameraControl::describe_camera());
@@ -252,18 +185,9 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       return root;
 }
 
-bool MacPTPCameraControl::operation_is_supported_(uint16_t code) const
-{
-      for (size_t idx = 0 ; idx < operations_supported_.size() ; idx += 1)
-	    if (code == operations_supported_[idx])
-		  return true;
-
-      return false;
-}
-
 CameraControl::capture_resp_t MacPTPCameraControl::capture_image(void)
 {
-      if (!operation_is_supported_(0x100e))
+      if (!ptp_operation_is_supported(0x100e))
 	    return CAP_NOT_SUPPORTED;
 
       unsigned char buf[sizeof(ICAPTPPassThroughPB) + 0];
@@ -370,6 +294,45 @@ template<> static QString val_from_bytes<QString>(UInt8*&buf)
       return result;
 }
 
+uint32_t MacPTPCameraControl::ptp_command(uint16_t command,
+				      const std::vector<uint32_t>&parms,
+				      const unsigned char*send, size_t nsend,
+				      unsigned char*recv, size_t nrecv)
+{
+      size_t pb_size = sizeof(ICAPTPPassThroughPB);
+      uint32_t usage_mode = kICACameraPassThruNotUsed;
+
+      if (nsend > 0) {
+	    usage_mode = kICACameraPassThruSend;
+	    pb_size += nsend - 1;
+      } else if (nrecv > 0) {
+	    usage_mode = kICACameraPassThruReceive;
+	    pb_size += nrecv - 1;
+      }
+
+      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)malloc(pb_size);
+      memset(ptp_buf, 0, pb_size);
+      ptp_buf->commandCode = command;
+      ptp_buf->numOfInputParams = parms.size();
+      for (size_t idx = 0 ; idx < parms.size() ; idx += 1) {
+	    ptp_buf->params[idx] = parms[idx];
+      }
+      ptp_buf->numOfOutputParams = 0;
+      ptp_buf->dataUsageMode = usage_mode;
+      ptp_buf->dataSize = nsend + nrecv;
+
+      /* ICAError irc = */ ica_send_message_(ptp_buf, pb_size);
+
+      uint32_t result_code = ptp_buf->resultCode;
+      if (nrecv > 0) {
+	    memcpy(recv, ptp_buf->data, nrecv);
+      }
+
+      free(ptp_buf);
+
+      return result_code;
+}
+
 ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
 {
       ICAObjectSendMessagePB msg;
@@ -383,135 +346,6 @@ ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataType = kICATypeData;
 
       return ICAObjectSendMessage(&msg, 0);
-}
-
-void MacPTPCameraControl::ptp_get_device_info_(uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 1024-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1001; // GetDeviceInfo
-      ptp_buf->numOfInputParams = 0;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
-      ptp_buf->dataSize = 1024;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-
-	// now the data[] has the DeviceInfo dataset
-      UInt8*dptr = ptp_buf->data;
-
-      standard_version_ = val_from_bytes<uint16_t>(dptr);
-      vendor_extension_id_ = val_from_bytes<uint32_t>(dptr);
-      vendor_extension_vers_ = val_from_bytes<uint16_t>(dptr);
-      vendor_extension_desc_ = val_from_bytes<QString>(dptr);
-      functional_mode_ = val_from_bytes<uint16_t>(dptr);
-      operations_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
-      events_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
-      device_properties_supported_ = val_from_bytes< vector<uint16_t> >(dptr);
-      capture_formats_ = val_from_bytes< vector<uint16_t> >(dptr);
-      image_formats_ = val_from_bytes< vector<uint16_t> >(dptr);
-      ptp_manufacturer_ = val_from_bytes<QString>(dptr);
-      ptp_model_ = val_from_bytes<QString>(dptr);
-      device_version_ = val_from_bytes<QString>(dptr);
-      serial_number_ = val_from_bytes<QString>(dptr);
-}
-
-uint8_t MacPTPCameraControl::ptp_get_property_u8_(unsigned prop_code,
-						  uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 1-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1015; // GetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
-      ptp_buf->dataSize = 1;
-      ptp_buf->data[0] = 0;
-      ptp_buf->data[1] = 0;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-
-      uint8_t val = ptp_buf->data[0];
-      return val;
-}
-
-uint16_t MacPTPCameraControl::ptp_get_property_u16_(unsigned prop_code,
-						    uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 2-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1015; // GetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
-      ptp_buf->dataSize = 2;
-      ptp_buf->data[0] = 0;
-      ptp_buf->data[1] = 0;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-
-      uint16_t val = ptp_buf->data[1];
-      val <<= 8; val |= ptp_buf->data[0];
-      return val;
-}
-
-uint32_t MacPTPCameraControl::ptp_get_property_u32_(unsigned prop_code,
-						    uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 4-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1015; // GetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
-      ptp_buf->dataSize = 4;
-      ptp_buf->data[0] = 0;
-      ptp_buf->data[1] = 0;
-      ptp_buf->data[2] = 0;
-      ptp_buf->data[3] = 0;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-
-      uint32_t val = ptp_buf->data[3];
-      val <<= 8; val |= ptp_buf->data[2];
-      val <<= 8; val |= ptp_buf->data[1];
-      val <<= 8; val |= ptp_buf->data[0];
-      return val;
-}
-
-QString MacPTPCameraControl::ptp_get_property_string_(unsigned prop_code,
-						      uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 512-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1015; // GetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruReceive;
-      ptp_buf->dataSize = 512;
-      ptp_buf->data[0] = 0;
-      ptp_buf->data[1] = 0;
-      ptp_buf->data[2] = 0;
-      ptp_buf->data[3] = 0;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-
-      UInt8*dptr = ptp_buf->data;
-      return val_from_bytes<QString>(dptr);
 }
 
 void MacPTPCameraControl::ptp_set_property_u16_(unsigned prop_code,
@@ -1136,7 +970,7 @@ float MacPTPCameraControl::battery_level(void)
       assert(battery_level_.get_type_code() == 2);
 
       uint32_t rc;
-      uint8_t val = ptp_get_property_u8_(battery_level_.get_property_code(),rc);
+      uint8_t val = ptp_get_property_u8(battery_level_.get_property_code(),rc);
       uint8_t val_min, val_max;
       if (battery_level_.is_range()) {
 	    uint8_t val_stp;
@@ -1229,7 +1063,7 @@ void MacPTPCameraControl::get_exposure_program_index(vector<string>&values)
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
 	    uint16_t value = exposure_program_.get_enum_index<uint16_t>(idx);
 	    values[idx] = ptp_property_value16_string(use_code, value,
-						      ptp_extension_vendor_());
+						      ptp_extension_vendor());
       }
 }
 
@@ -1457,7 +1291,7 @@ void MacPTPCameraControl::get_flash_mode_index(vector<string>&values)
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
 	    uint16_t val_code = flash_mode_.get_enum_index<uint16_t>(idx);
 	    values[idx] = ptp_property_value16_string(prop_code, val_code,
-						      ptp_extension_vendor_());
+						      ptp_extension_vendor());
       }
 }
 
@@ -1512,7 +1346,7 @@ void MacPTPCameraControl::get_focus_mode_index(vector<string>&values)
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
 	    uint16_t val_code = focus_mode_.get_enum_index<uint16_t>(idx);
 	    values[idx] = ptp_property_value16_string(prop_code, val_code,
-						      ptp_extension_vendor_());
+						      ptp_extension_vendor());
       }
 }
 
@@ -1567,7 +1401,7 @@ void MacPTPCameraControl::get_white_balance_index(vector<string>&values)
       for (unsigned idx = 0 ; idx < values.size() ; idx += 1) {
 	    uint16_t val_code = white_balance_.get_enum_index<uint16_t>(idx);
 	    values[idx] = ptp_property_value16_string(prop_code, val_code,
-						      ptp_extension_vendor_());
+						      ptp_extension_vendor());
       }
 }
 
@@ -1610,10 +1444,10 @@ int MacPTPCameraControl::debug_property_get(unsigned prop,
       uint32_t rc = 0;
       switch (dtype) {
 	  case 0x0004: // UINT16
-	    value = ptp_get_property_u16_(prop, rc);
+	    value = ptp_get_property_u16(prop, rc);
 	    break;
 	  case 0x0006: // UINT32
-	    value = ptp_get_property_u32_(prop, rc);
+	    value = ptp_get_property_u32(prop, rc);
 	    break;
 	  default:
 	    return -1;

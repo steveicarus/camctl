@@ -26,8 +26,8 @@ SOURCES += CamtoolDebug.cpp
 SOURCES += ptp_misc.cpp image_math.cpp
 
 # The CameraControl base class
-HEADERS += CameraControl.h
-SOURCES += CameraControl.cpp CameraControl_inventory.cpp
+HEADERS += CameraControl.h PTPCamera.h
+SOURCES += CameraControl.cpp CameraControl_inventory.cpp PTPCamera.cpp
 
 # LibRaw interface
 HEADERS += LibRawQt.h

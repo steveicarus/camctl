@@ -27,6 +27,7 @@
  */
 
 # include  "CameraControl.h"
+# include  "PTPCamera.h"
 # include  <ImageCapture/ICAApplication.h>
 # include  <QString>
 # include  <map>
@@ -122,7 +123,7 @@ class MacICABlacklist : public MacICACameraControl {
  * but also uses PTP commands that are passed through via ICA
  * functions.
  */
-class MacPTPCameraControl  : public MacICACameraControl {
+class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
 
     private:
 	// The camera_inventory function from MacICACameraControl
@@ -189,22 +190,17 @@ class MacPTPCameraControl  : public MacICACameraControl {
       virtual std::string debug_property_describe(unsigned prop);
 
     private:
-	// Return the vendor extension ID, possibly fixed up for bogus
-	// camera behavior.
-      uint32_t ptp_extension_vendor_() const;
+	// Implement this for the PTPCamera base class.
+      uint32_t ptp_command(uint16_t command,
+			   const std::vector<uint32_t>&parms,
+			   const unsigned char*send, size_t nsend,
+			   unsigned char*recv, size_t nrecv);
+
 
     private:
-      void ptp_get_device_info_(void);
-
       void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
       void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
       void ptp_set_property_string_(unsigned prop_code, const QString&val, uint32_t&rc);
-      uint8_t  ptp_get_property_u8_(unsigned prop_code, uint32_t&rc);
-      uint16_t ptp_get_property_u16_(unsigned prop_code, uint32_t&rc);
-      uint32_t ptp_get_property_u32_(unsigned prop_code, uint32_t&rc);
-      QString ptp_get_property_string_(unsigned prop_code, uint32_t&rc);
-
-      void ptp_get_device_info_(uint32_t&rc);
 
     private:
 	// The PTP standard defines a canonical way to describe
@@ -300,28 +296,7 @@ class MacPTPCameraControl  : public MacICACameraControl {
       };
       void ptp_get_property_desc_(prop_desc_t&, uint32_t&result_code);
 
-
     private:
-	// These Are various descriptive details from the
-	// GetDeviceInfo
-      uint16_t standard_version_;
-      uint32_t vendor_extension_id_;
-      uint16_t vendor_extension_vers_;
-      QString  vendor_extension_desc_;
-      uint16_t functional_mode_;
-      std::vector<uint16_t> operations_supported_;
-      std::vector<uint16_t> events_supported_;
-      std::vector<uint16_t> device_properties_supported_;
-      std::vector<uint16_t> capture_formats_;
-      std::vector<uint16_t> image_formats_;
-      QString ptp_manufacturer_;
-      QString ptp_model_;
-      QString device_version_;
-      QString serial_number_;
-
-	// Test if the operation is supported
-      bool operation_is_supported_(uint16_t) const;
-
 	// Standard camera properties
       prop_desc_t battery_level_;
       prop_desc_t image_size_;
