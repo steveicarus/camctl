@@ -446,6 +446,13 @@ string ptp_property_string(uint16_t code, uint32_t vend)
       return tmp.str();
 }
 
+string ptp_property_uint8_string(uint16_t code, uint8_t val, uint32_t vend)
+{
+      ostringstream tmp;
+      tmp << "0x" << hex << val << ends;
+      return tmp.str();
+}
+
 string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
 {
       key_pair<uint16_t,uint16_t> use_key;
@@ -465,7 +472,7 @@ string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
 
 	    } else {
 		  ostringstream tmp;
-		  tmp << "Reserved-" << hex << code << ends;
+		  tmp << "Reserved-" << hex << val << ends;
 		  return tmp.str();
 	    }
       }

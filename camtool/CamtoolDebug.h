@@ -36,6 +36,7 @@ class CamtoolDebug : public QDialog {
 
     private slots:
       void dump_generic_slot_(void);
+      void debug_ptp_refresh_slot_(void);
       void debug_ptp_get_slot_(void);
       void debug_ptp_set_slot_(void);
       void debug_ptp_describe_slot_(void);

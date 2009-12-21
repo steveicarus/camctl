@@ -104,6 +104,7 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       root->addChild(item);
 
       std::vector<QString>res;
+      std::vector<code_string_t> res2;
 
       item = new QTreeWidgetItem;
       item->setText(0, "OperationsSupported");
@@ -130,10 +131,10 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
       item = new QTreeWidgetItem;
       item->setText(0, "DevicePropertiesSupported");
 
-      res = ptp_properties_list();
-      for (size_t idx = 0 ; idx < res.size() ; idx += 1) {
+      res2 = ptp_properties_list();
+      for (size_t idx = 0 ; idx < res2.size() ; idx += 1) {
 	    QTreeWidgetItem*tmp = new QTreeWidgetItem;
-	    tmp->setText(0, res[idx]);
+	    tmp->setText(0, res2[idx].second);
 	    item->addChild(tmp);
       }
       root->addChild(item);
@@ -321,6 +322,10 @@ uint32_t MacPTPCameraControl::ptp_command(uint16_t command,
       ptp_buf->dataUsageMode = usage_mode;
       ptp_buf->dataSize = nsend + nrecv;
 
+      if (nsend > 0) {
+	    memcpy(ptp_buf->data, send, nsend);
+      }
+
       /* ICAError irc = */ ica_send_message_(ptp_buf, pb_size);
 
       uint32_t result_code = ptp_buf->resultCode;
@@ -346,104 +351,6 @@ ICAError MacICACameraControl::ica_send_message_(void*buf, size_t buf_len)
       msg.message.dataType = kICATypeData;
 
       return ICAObjectSendMessage(&msg, 0);
-}
-
-void MacPTPCameraControl::ptp_set_property_u16_(unsigned prop_code,
-						uint16_t val,
-						uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 2-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1016; // SetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruSend;
-      ptp_buf->dataSize = 2;
-      ptp_buf->data[0] = (val >> 0) & 0xff;
-      ptp_buf->data[1] = (val >> 8) & 0xff;
-
-      debug_log << "ptp_set_property_u16_: commandCode="
-		<< hex << ptp_buf->commandCode
-		<< " params[0]=" << ptp_buf->params[0]
-		<< " dataSize=" << ptp_buf->dataSize
-		<< " data=" << hex
-		<< setw(2) << (unsigned)ptp_buf->data[0]
-		<< setw(2) << (unsigned)ptp_buf->data[1]
-		<< endl << flush;
-	    
-      ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-}
-
-void MacPTPCameraControl::ptp_set_property_u32_(unsigned prop_code,
-						uint32_t val,
-						uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 4-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1016; // SetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruSend;
-      ptp_buf->dataSize = 4;
-      ptp_buf->data[0] = (val >> 0) & 0xff;
-      ptp_buf->data[1] = (val >> 8) & 0xff;
-      ptp_buf->data[2] = (val >>16) & 0xff;
-      ptp_buf->data[3] = (val >>24) & 0xff;
-
-      debug_log << "ptp_set_property_u32_: commandCode="
-		<< hex << ptp_buf->commandCode
-		<< " params[0]=" << ptp_buf->params[0]
-		<< " dataSize=" << ptp_buf->dataSize
-		<< " data=" << hex
-		<< setw(2) << (unsigned)ptp_buf->data[0]
-		<< setw(2) << (unsigned)ptp_buf->data[1]
-		<< setw(2) << (unsigned)ptp_buf->data[2]
-		<< setw(2) << (unsigned)ptp_buf->data[3]
-		<< dec << endl << flush;
-
-      ICAError err = ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-      if (err != 0) result_code = -1;
-}
-
-void MacPTPCameraControl::ptp_set_property_string_(unsigned prop_code,
-						   const QString&val,
-						   uint32_t&result_code)
-{
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 512-1];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x1016; // SetDevicePropValue
-      ptp_buf->numOfInputParams = 1;
-      ptp_buf->params[0] = prop_code;
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruSend;
-      ptp_buf->dataSize = val.size() * 2 + 2 + 1;
-
-      UInt8*dptr = ptp_buf->data;
-      *dptr++ = val.size() + 1;
-      const ushort*tmp = val.utf16();
-      for (int idx = 0 ; idx < val.size() ; idx += 1) {
-	    *dptr++ = (tmp[idx] >> 0) & 0xff;
-	    *dptr++ = (tmp[idx] >> 8) & 0xff;
-      }
-      *dptr++ = 0;
-      *dptr++ = 0;
-
-      debug_log << "ptp_set_property_string_: commandCode="
-		<< hex << ptp_buf->commandCode
-		<< " params[0]=" << ptp_buf->params[0]
-		<< " dataSize=" << ptp_buf->dataSize
-		<< dec << endl << flush;
-
-      ICAError err = ica_send_message_(ptp_buf, sizeof buf);
-      result_code = ptp_buf->resultCode;
-      if (err != 0) result_code = -1;
 }
 
 MacPTPCameraControl::prop_desc_t::prop_desc_t(uint16_t prop_code)
@@ -1037,9 +944,9 @@ void MacPTPCameraControl::set_image_size_index(int use_index)
 	    use_index = 0;
 
       uint32_t rc;
-      ptp_set_property_string_(image_size_.get_property_code(),
-			       image_size_.get_enum_index<QString>(use_index),
-			       rc);
+      ptp_set_property_string(image_size_.get_property_code(),
+			      image_size_.get_enum_index<QString>(use_index),
+			      rc);
 }
 
 bool MacPTPCameraControl::set_image_size_ok()
@@ -1089,9 +996,9 @@ void MacPTPCameraControl::set_exposure_program_index(int use_index)
 	    use_index = 0;
 
       uint32_t rc;
-      ptp_set_property_u16_(exposure_program_.get_property_code(),
-			    exposure_program_.get_enum_index<uint16_t>(use_index),
-			    rc);
+      ptp_set_property_u16(exposure_program_.get_property_code(),
+			   exposure_program_.get_enum_index<uint16_t>(use_index),
+			   rc);
       exposure_program_.set_current(exposure_program_.get_enum_index<uint16_t>(use_index));
 }
 
@@ -1152,7 +1059,7 @@ void MacPTPCameraControl::set_exposure_time_index(int use_index)
 	    return;
 
       uint32_t rc;
-      ptp_set_property_u32_(exposure_time_.get_property_code(), val, rc);
+      ptp_set_property_u32(exposure_time_.get_property_code(), val, rc);
       exposure_time_.set_current(val);
 
       debug_log << "set_exposure_time_index: index=" << use_index
@@ -1214,7 +1121,7 @@ void MacPTPCameraControl::set_fnumber_index(int use_index)
 		<< " to " << hex << use_val << endl << flush;
 
       uint32_t rc;
-      ptp_set_property_u16_(fnumber_.get_property_code(), use_val, rc);
+      ptp_set_property_u16(fnumber_.get_property_code(), use_val, rc);
       fnumber_.set_current(use_val);
 }
 
@@ -1267,7 +1174,7 @@ void MacPTPCameraControl::set_iso_index(int use_index)
 	    return;
 
       uint32_t rc;
-      ptp_set_property_u16_(iso_.get_property_code(), use_val, rc);
+      ptp_set_property_u16(iso_.get_property_code(), use_val, rc);
       iso_.set_current(use_val);
 }
 
@@ -1321,7 +1228,7 @@ void MacPTPCameraControl::set_flash_mode_index(int use_index)
 	    return;
 
       uint32_t rc;
-      ptp_set_property_u16_(flash_mode_.get_property_code(), use_val, rc);
+      ptp_set_property_u16(flash_mode_.get_property_code(), use_val, rc);
       flash_mode_.set_current(use_val);
 }
 
@@ -1376,7 +1283,7 @@ void MacPTPCameraControl::set_focus_mode_index(int use_index)
 	    return;
 
       uint32_t rc;
-      ptp_set_property_u16_(focus_mode_.get_property_code(), use_val, rc);
+      ptp_set_property_u16(focus_mode_.get_property_code(), use_val, rc);
       focus_mode_.set_current(use_val);
 }
 
@@ -1427,7 +1334,7 @@ void MacPTPCameraControl::set_white_balance_index(int use_index)
 	    use_index = 0;
 
       uint32_t rc;
-      ptp_set_property_u16_(white_balance_.get_property_code(),
+      ptp_set_property_u16(white_balance_.get_property_code(),
 			    white_balance_.get_enum_index<uint16_t>(use_index),
 			    rc);
 }
@@ -1463,10 +1370,10 @@ int MacPTPCameraControl::debug_property_set(unsigned prop,
       uint32_t rc;
       switch (dtype) {
 	  case 0x0004: // UINT16
-	    ptp_set_property_u16_(prop, value, rc);
+	    ptp_set_property_u16(prop, value, rc);
 	    break;
 	  case 0x0006: // UINT32
-	    ptp_set_property_u32_(prop, value, rc);
+	    ptp_set_property_u32(prop, value, rc);
 	  default:
 	    return -1;
       }

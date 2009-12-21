@@ -196,12 +196,6 @@ class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
 			   const unsigned char*send, size_t nsend,
 			   unsigned char*recv, size_t nrecv);
 
-
-    private:
-      void ptp_set_property_u16_(unsigned prop_code, uint16_t val, uint32_t&rc);
-      void ptp_set_property_u32_(unsigned prop_code, uint32_t val, uint32_t&rc);
-      void ptp_set_property_string_(unsigned prop_code, const QString&val, uint32_t&rc);
-
     private:
 	// The PTP standard defines a canonical way to describe
 	// properties. The prop_desc_t class encapsulates those

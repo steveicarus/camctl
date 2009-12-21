@@ -1,195 +1,356 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>DebugWindow</class>
- <widget class="QDialog" name="DebugWindow" >
-  <property name="geometry" >
+ <widget class="QDialog" name="DebugWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>473</width>
-    <height>318</height>
+    <width>361</width>
+    <height>423</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" >
-     <item>
-      <widget class="QGroupBox" name="groupBox" >
-       <property name="toolTip" >
-        <string>These buttons cause interesting dumps to be sent to the log file.</string>
-       </property>
-       <property name="title" >
-        <string>Debug Dumps</string>
-       </property>
-       <property name="flat" >
-        <bool>false</bool>
-       </property>
-       <property name="checkable" >
-        <bool>false</bool>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3" >
-        <item>
-         <widget class="QLineEdit" name="dump_generic_entry" />
-        </item>
-        <item>
-         <widget class="QPushButton" name="dump_generic_button" >
-          <property name="text" >
-           <string>...generic...</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>PTP</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QFrame" name="frame_5">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="margin">
+           <number>0</number>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_2" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title" >
-        <string>PTP Property</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_6" >
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4" >
           <item>
-           <widget class="QPushButton" name="debug_ptp_get_button" >
-            <property name="text" >
+           <widget class="QPushButton" name="debug_ptp_refresh_button">
+            <property name="text">
+             <string>Refresh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>187</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="debug_ptp_select_property">
+         <item>
+          <property name="text">
+           <string>&lt;select a property&gt;</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_3">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="debug_ptp_describe_button">
+            <property name="text">
+             <string>describe</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="debug_ptp_get_button">
+            <property name="text">
              <string>get</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="debug_ptp_set_button" >
-            <property name="text" >
-             <string>set</string>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="debug_ptp_describe_button" >
-            <property name="text" >
-             <string>describe</string>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>109</width>
+              <height>20</height>
+             </size>
             </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5" >
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_2">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="margin">
+           <number>0</number>
+          </property>
           <item>
-           <widget class="QLineEdit" name="debug_ptp_code_entry" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QCheckBox" name="debug_ptp_setable">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
-            <property name="toolTip" >
-             <string>Code for property to get/set.</string>
+            <property name="text">
+             <string>Setable</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="debug_ptp_type_box" >
-            <property name="toolTip" >
+           <widget class="QComboBox" name="debug_ptp_type_box">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
              <string>Type of property to get/set.</string>
             </property>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>INT8</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>UINT8</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>INT16</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>UINT16</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>INT32</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>UINT32</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>INT64</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>UINT64</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>INT128</string>
              </property>
             </item>
             <item>
-             <property name="text" >
+             <property name="text">
               <string>UINT128</string>
              </property>
             </item>
            </widget>
           </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>103</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="debug_ptp_value_entry" >
-          <property name="toolTip" >
-           <string>Literal value of the property.</string>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="debug_ptp_select_value"/>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="margin">
+           <number>0</number>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="debug_ptp_rc_entry" >
-          <property name="toolTip" >
-           <string>Return code from get/set.</string>
+          <item>
+           <widget class="QPushButton" name="debug_ptp_set_button">
+            <property name="text">
+             <string>set</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>219</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_4">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="margin">
+           <number>0</number>
           </property>
-          <property name="readOnly" >
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+          <item>
+           <widget class="QLineEdit" name="debug_ptp_rc_entry">
+            <property name="toolTip">
+             <string>Return code from get/set.</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>130</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Dumps</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>82</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="dump_generic_entry"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="dump_generic_button">
+         <property name="text">
+          <string>...generic...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>82</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox" >
-     <property name="orientation" >
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="standardButtons" >
+     <property name="standardButtons">
       <set>QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
   </layout>
-  <zorder>buttonBox</zorder>
-  <zorder>layoutWidget</zorder>
-  <zorder>groupBox</zorder>
  </widget>
  <resources/>
  <connections>
@@ -199,11 +360,11 @@
    <receiver>DebugWindow</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -215,11 +376,11 @@
    <receiver>DebugWindow</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>
