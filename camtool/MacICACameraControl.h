@@ -181,14 +181,6 @@ class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
       virtual void set_white_balance_index(int);
       virtual bool set_white_balance_ok();
 
-    public:
-	// Debug aids
-      virtual int debug_property_get(unsigned prop, unsigned dtype,
-				     unsigned long&value);
-      virtual int debug_property_set(unsigned prop, unsigned dtype,
-				     unsigned long value);
-      virtual std::string debug_property_describe(unsigned prop);
-
     private:
 	// Implement this for the PTPCamera base class.
       uint32_t ptp_command(uint16_t command,
@@ -292,7 +284,6 @@ class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
 
     private:
 	// Standard camera properties
-      prop_desc_t battery_level_;
       prop_desc_t image_size_;
       prop_desc_t white_balance_;
       prop_desc_t exposure_program_;
