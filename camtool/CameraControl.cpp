@@ -281,21 +281,6 @@ void CameraControl::debug_dump(std::ostream&out, const std::string&detail) const
       out << "CameraControl::debug_dump(" << detail << ")" << endl;
 }
 
-int CameraControl::debug_property_get(unsigned, unsigned, unsigned long&)
-{
-      return -1;
-}
-
-int CameraControl::debug_property_set(unsigned, unsigned, unsigned long)
-{
-      return -1;
-}
-
-string CameraControl::debug_property_describe(unsigned)
-{
-      return "N/A";
-}
-
 CameraControl::Notification::Notification()
 {
 }

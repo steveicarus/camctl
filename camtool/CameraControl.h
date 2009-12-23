@@ -216,13 +216,6 @@ class CameraControl {
 	// Debug dump informatin about this camera.
       virtual void debug_dump(std::ostream&, const std::string&) const;
 
-      virtual int debug_property_get(unsigned prop, unsigned dtype,
-				     unsigned long&value);
-      virtual int debug_property_set(unsigned prop, unsigned dtype,
-				     unsigned long value);
-
-      virtual std::string debug_property_describe(unsigned prop);
-
     protected:
 	// The derived class implements this method to fill in the
 	// image file list. The method is passed a reference to the

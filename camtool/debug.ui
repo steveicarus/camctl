@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
-    <height>423</height>
+    <width>357</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <item>
         <widget class="QFrame" name="frame_5">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -101,13 +101,20 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="debug_ptp_set_button">
+            <property name="text">
+             <string>set</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>109</width>
+              <width>42</width>
               <height>20</height>
              </size>
             </property>
@@ -149,56 +156,6 @@
             <property name="toolTip">
              <string>Type of property to get/set.</string>
             </property>
-            <item>
-             <property name="text">
-              <string>INT8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UINT8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>INT16</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UINT16</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>INT32</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UINT32</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>INT64</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UINT64</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>INT128</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UINT128</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
@@ -208,7 +165,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>103</width>
+              <width>99</width>
               <height>20</height>
              </size>
             </property>
@@ -221,44 +178,12 @@
         <widget class="QComboBox" name="debug_ptp_select_value"/>
        </item>
        <item>
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="debug_ptp_set_button">
-            <property name="text">
-             <string>set</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>219</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+        <widget class="QLineEdit" name="debug_ptp_value_entry"/>
        </item>
        <item>
         <widget class="QFrame" name="frame_4">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>

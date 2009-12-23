@@ -25,6 +25,27 @@
 
 using namespace std;
 
+static QString to_qstring(const PTPCamera::prop_value_t&val)
+{
+      switch (val.get_type()) {
+	  case PTPCamera::TYPE_STRING:
+	    return val.get_string();
+	  case PTPCamera::TYPE_INT8:
+	    return QString("%1").arg(val.get_int8());
+	  case PTPCamera::TYPE_UINT8:
+	    return QString("0x%1").arg(val.get_uint8(), 2, 16,QLatin1Char('0'));
+	  case PTPCamera::TYPE_INT16:
+	    return QString("%1").arg(val.get_int16());
+	  case PTPCamera::TYPE_UINT16:
+	    return QString("0x%1").arg(val.get_uint16(), 4, 16,QLatin1Char('0'));
+	  case PTPCamera::TYPE_INT32:
+	    return QString("%1").arg(val.get_int32());
+	  case PTPCamera::TYPE_UINT32:
+	    return QString("0x%1").arg(val.get_uint32(), 8, 16,QLatin1Char('0'));
+	  default:
+	    return QString("?type=%1?").arg(val.get_type(), 4, 16, QLatin1Char('0'));
+      }
+}
 
 CamtoolDebug::CamtoolDebug(CamtoolMain*parent)
 : QDialog(parent), main_window_(parent)
@@ -77,6 +98,9 @@ void CamtoolDebug::dump_generic_slot_(void)
       camera->debug_dump(CameraControl::debug_log, argument);
 }
 
+/*
+ * This slot re-draws the list of supported properties.
+ */
 void CamtoolDebug::debug_ptp_refresh_slot_(void)
 {
       PTPCamera*camera = dynamic_cast<PTPCamera*> (main_window_->get_selected_camera());
@@ -86,13 +110,18 @@ void CamtoolDebug::debug_ptp_refresh_slot_(void)
       vector<PTPCamera::code_string_t> properties = camera->ptp_properties_list();
 
       ui.debug_ptp_select_property->clear();
-      ui.debug_ptp_select_property->addItem(QString("<select property>"), QVariant());
+      ui.debug_ptp_select_property->addItem(QString("<select a property>"), QVariant());
       for (vector<PTPCamera::code_string_t>::const_iterator cur = properties.begin()
 		 ; cur != properties.end() ; cur ++ ) {
 	    ui.debug_ptp_select_property->addItem(cur->second, QVariant(cur->first));
       }
 }
 
+/*
+ * This slot probes the camera for the complete description of the
+ * selected property, and sets the entry boxes to reflect the
+ * description of the property.
+ */
 void CamtoolDebug::debug_ptp_describe_slot_(void)
 {
       PTPCamera*camera = dynamic_cast<PTPCamera*> (main_window_->get_selected_camera());
@@ -120,6 +149,7 @@ void CamtoolDebug::debug_ptp_describe_slot_(void)
       else
 	    ui.debug_ptp_setable->setCheckState(Qt::Unchecked);
 
+	// Fill in the enumeration of values
       vector<QString> prop_enum;
       int prop_enum_idx = camera->ptp_get_property_enum(prop_code, prop_enum);
 
@@ -130,30 +160,28 @@ void CamtoolDebug::debug_ptp_describe_slot_(void)
 	    ui.debug_ptp_select_value->addItem(*cur);
       }
       ui.debug_ptp_select_value->setCurrentIndex(prop_enum_idx);
+
+	// Display the actual current value in the value entry box
+      ui.debug_ptp_value_entry->setText(to_qstring(camera->ptp_get_property_current(prop_code)));
+      ui.debug_ptp_rc_entry->setText(PTPCamera::qresult_code(rc));
 }
 
+/*
+ * This slot re-reads the current value from the camera (without doing
+ * a full describe) and displays the returned value into the value
+ * entry box.
+ */
 void CamtoolDebug::debug_ptp_get_slot_(void)
 {
       PTPCamera*camera = dynamic_cast<PTPCamera*> (main_window_->get_selected_camera());
       if (camera == 0)
 	    return;
-#if 0
-      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
-      unsigned prop_type = ui.debug_ptp_type_box->currentIndex() + 1;
-      unsigned long value = 0;
 
-      int rc = camera->debug_property_get(prop_code,prop_type,value);
-
-      QString prop_text;
-      prop_text.setNum(value, 16);
-      ui.debug_ptp_value_entry->setText(prop_text);
-
-      QString rc_text;
-      rc_text.setNum(rc, 16);
-#else
-      QString rc_text = "----";
-#endif
-      ui.debug_ptp_rc_entry->setText(rc_text);
+      int prop_idx = ui.debug_ptp_select_property->currentIndex();
+      unsigned prop_code = ui.debug_ptp_select_property->itemData(prop_idx).toUInt();
+      uint32_t rc;
+      ui.debug_ptp_value_entry->setText(to_qstring(camera->ptp_get_property(prop_code,rc)));
+      ui.debug_ptp_rc_entry->setText(PTPCamera::qresult_code(rc));
 }
 
 void CamtoolDebug::debug_ptp_set_slot_(void)
@@ -161,33 +189,50 @@ void CamtoolDebug::debug_ptp_set_slot_(void)
       PTPCamera*camera = dynamic_cast<PTPCamera*> (main_window_->get_selected_camera());
       if (camera == 0)
 	    return;
-#if 0
-      unsigned prop_code = ui.debug_ptp_code_entry->text().toULong(0,0);
-      unsigned prop_type = ui.debug_ptp_type_box->currentIndex() + 1;
-      unsigned long value = ui.debug_ptp_value_entry->text().toULong(0,0);
 
-      int rc = camera->debug_property_get(prop_code,prop_type,value);
+	// Get the property code that the user selected...
+      int prop_idx = ui.debug_ptp_select_property->currentIndex();
+      unsigned prop_code = ui.debug_ptp_select_property->itemData(prop_idx).toUInt();
 
-      QString rc_text;
-      rc_text.setNum(rc, 16);
-      switch (rc) {
-	  case 0x2001:
-	    rc_text.append(" (OK)");
+      PTPCamera::type_code_t prop_type = camera->ptp_get_property_type(prop_code);
+
+	// Get the value that the user entered...
+      QString val_string = ui.debug_ptp_value_entry->text();
+      PTPCamera::prop_value_t val;
+
+      switch (prop_type) {
+	  case PTPCamera::TYPE_NONE:
 	    break;
-	  case 0x2002:
-	    rc_text.append(" (General Error)");
+	  case PTPCamera::TYPE_INT8:
+	    val.set_int8(val_string.toInt());
 	    break;
-	  case 0x2003:
-	    rc_text.append(" (Session Not Open)");
+	  case PTPCamera::TYPE_UINT8:
+	    val.set_uint8(val_string.toUInt());
 	    break;
-	  case 0x2005:
-	    rc_text.append(" (Operation Not Supported)");
+	  case PTPCamera::TYPE_INT16:
+	    val.set_int16(val_string.toInt());
 	    break;
+	  case PTPCamera::TYPE_UINT16:
+	    val.set_uint16(val_string.toUInt());
+	    break;
+	  case PTPCamera::TYPE_INT32:
+	    val.set_int32(val_string.toLong());
+	    break;
+	  case PTPCamera::TYPE_UINT32:
+	    val.set_uint32(val_string.toULong());
+	    break;
+	  case PTPCamera::TYPE_STRING:
+	    val.set_string(val_string);
+	    break;
+
 	  default:
-	    break;
+	    ui.debug_ptp_value_entry->setText("----");
+	    ui.debug_ptp_rc_entry->setText("----");
+	    return;
       }
-#else
-      QString rc_text = "----";
-#endif
-      ui.debug_ptp_rc_entry->setText(rc_text);
+
+      uint32_t rc;
+      camera->ptp_set_property(prop_code, val, rc);
+      ui.debug_ptp_value_entry->setText(to_qstring(val));
+      ui.debug_ptp_rc_entry->setText(PTPCamera::qresult_code(rc));
 }

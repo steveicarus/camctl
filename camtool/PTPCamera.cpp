@@ -128,6 +128,32 @@ template<> static QString val_from_bytes<QString>(unsigned char*&buf)
       return result;
 }
 
+const PTPCamera::prop_value_t PTPCamera::prop_value_nil;
+
+QString PTPCamera::qresult_code(uint32_t rc)
+{
+      QString rc_text;
+      rc_text.setNum(rc, 16);
+      switch (rc) {
+	  case 0x2001:
+	    rc_text.append(" (OK)");
+	    break;
+	  case 0x2002:
+	    rc_text.append(" (General Error)");
+	    break;
+	  case 0x2003:
+	    rc_text.append(" (Session Not Open)");
+	    break;
+	  case 0x2005:
+	    rc_text.append(" (Operation Not Supported)");
+	    break;
+	  default:
+	    break;
+      }
+
+      return rc_text;
+}
+
 PTPCamera::PTPCamera()
 {
 }
@@ -232,6 +258,49 @@ QString PTPCamera::ptp_DeviceVersion() const
 QString PTPCamera::ptp_SerialNumber() const
 {
       return serial_number_;
+}
+
+float PTPCamera::ptp_battery_level()
+{
+      uint32_t rc;
+	// Get the PTP standard BatteryLevel property value.
+      prop_value_t val = ptp_get_property(0x5001 /* PTP BatteryLevel */, rc);
+
+      if (val.get_type() == TYPE_NONE)
+	    return -1;
+
+	// The BatteryLevel is by definition (PTP) a UINT8.
+      assert(val.get_type() == TYPE_UINT8);
+
+      map<uint16_t,prop_info_t>::const_iterator cur = device_properties_supported_.find(0x5001);
+      assert(cur != device_properties_supported_.end());
+
+      uint8_t val_min, val_max;
+      if (cur->second.form_flag == 1) { // RANGE
+	    val_min = cur->second.range[0].get_uint8();
+	    val_max = cur->second.range[1].get_uint8();
+
+      } else if (cur->second.form_flag == 2) { // ENUM
+	    val_min = cur->second.range[0].get_uint8();
+	    val_max = val_min;
+	    for (size_t idx = 1 ; idx < cur->second.range.size() ; idx += 1) {
+		  uint8_t tmp = cur->second.range[idx].get_uint8();
+		  if (tmp < val_min)
+			val_min = tmp;
+		  if (tmp > val_max)
+			val_max = tmp;
+	    }
+      }
+
+      uint8_t use_val = val.get_uint8();
+      if (use_val >= val_max)
+	    return 100.0;
+      if (use_val <= val_min)
+	    return 0.0;
+
+      use_val -= val_min;
+      val_max -= val_min;
+      return (use_val*100.0) / (val_max*1.0);
 }
 
 vector<QString> PTPCamera::ptp_operations_list() const
@@ -361,20 +430,20 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) 
       table.resize(info->second.range.size());
       switch (info->second.type_code) {
 	  case TYPE_STRING:
-	    for (int idx = 0 ; idx < table.size() ; idx += 1) {
+	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
 		  table[idx] = info->second.range[idx].get_string();
 	    }
 	    break;
 	  case TYPE_UINT8:
-	    for (int idx = 0 ; idx < table.size() ; idx += 1) {
-		  uint16_t val = info->second.range[idx].get_uint8();
+	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
+		  uint8_t val = info->second.range[idx].get_uint8();
 		  string tmp = ptp_property_uint8_string(prop_code, val,
 							  ptp_extension_vendor());
 		  table[idx] = QString(tmp.c_str());
 	    }
 	    break;
 	  case TYPE_UINT16:
-	    for (int idx = 0 ; idx < table.size() ; idx += 1) {
+	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
 		  uint16_t val = info->second.range[idx].get_uint16();
 		  string tmp = ptp_property_value16_string(prop_code, val,
 							   ptp_extension_vendor());
@@ -388,7 +457,25 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) 
       return cur_idx;
 }
 
-uint8_t PTPCamera::ptp_get_property_u8(unsigned prop_code, uint32_t&result_code)
+const PTPCamera::prop_value_t& PTPCamera::ptp_get_property_current(unsigned prop_code) const
+{
+      map<uint16_t, prop_info_t>::const_iterator cur = device_properties_supported_.find(prop_code);
+      if (cur == device_properties_supported_.end())
+	    return prop_value_nil;
+
+      return cur->second.current;
+}
+
+const PTPCamera::prop_value_t& PTPCamera::ptp_get_property_factory(unsigned prop_code) const
+{
+      map<uint16_t, prop_info_t>::const_iterator cur = device_properties_supported_.find(prop_code);
+      if (cur == device_properties_supported_.end())
+	    return prop_value_nil;
+
+      return cur->second.factory;
+}
+
+int8_t PTPCamera::ptp_get_property_int8_(unsigned prop_code, uint32_t&result_code)
 {
       vector<uint32_t> params (1);
       unsigned char recv_buf [1];
@@ -399,7 +486,33 @@ uint8_t PTPCamera::ptp_get_property_u8(unsigned prop_code, uint32_t&result_code)
       return recv_buf[0];
 }
 
-uint16_t PTPCamera::ptp_get_property_u16(unsigned prop_code, uint32_t&result_code)
+uint8_t PTPCamera::ptp_get_property_uint8_(unsigned prop_code, uint32_t&result_code)
+{
+      vector<uint32_t> params (1);
+      unsigned char recv_buf [1];
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1015 /* GetDevicePropValue */, params,
+				0, 0, recv_buf, sizeof recv_buf);
+      return recv_buf[0];
+}
+
+int16_t PTPCamera::ptp_get_property_int16_(unsigned prop_code, uint32_t&result_code)
+{
+      vector<uint32_t> params (1);
+      unsigned char recv_buf [2];
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1015 /* GetDevicePropValue */, params,
+				0, 0, recv_buf, sizeof recv_buf);
+
+      int16_t val = recv_buf[1];
+      val <<= 8;
+      val |= recv_buf[0];
+      return val;
+}
+
+uint16_t PTPCamera::ptp_get_property_uint16_(unsigned prop_code, uint32_t&result_code)
 {
       vector<uint32_t> params (1);
       unsigned char recv_buf [2];
@@ -414,7 +527,7 @@ uint16_t PTPCamera::ptp_get_property_u16(unsigned prop_code, uint32_t&result_cod
       return val;
 }
 
-uint32_t PTPCamera::ptp_get_property_u32(unsigned prop_code, uint32_t&result_code)
+int32_t PTPCamera::ptp_get_property_int32_(unsigned prop_code, uint32_t&result_code)
 {
       vector<uint32_t> params (1);
       unsigned char recv_buf [4];
@@ -423,14 +536,30 @@ uint32_t PTPCamera::ptp_get_property_u32(unsigned prop_code, uint32_t&result_cod
       result_code = ptp_command(0x1015 /* GetDevicePropValue */, params,
 				0, 0, recv_buf, sizeof recv_buf);
 
-      uint16_t val = recv_buf[3];
+      uint32_t val = recv_buf[3];
       val <<= 8; val |= recv_buf[2];
       val <<= 8; val |= recv_buf[1];
       val <<= 8; val |= recv_buf[0];
       return val;
 }
 
-QString PTPCamera::ptp_get_property_string(unsigned prop_code, uint32_t&result_code)
+uint32_t PTPCamera::ptp_get_property_uint32_(unsigned prop_code, uint32_t&result_code)
+{
+      vector<uint32_t> params (1);
+      unsigned char recv_buf [4];
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1015 /* GetDevicePropValue */, params,
+				0, 0, recv_buf, sizeof recv_buf);
+
+      uint32_t val = recv_buf[3];
+      val <<= 8; val |= recv_buf[2];
+      val <<= 8; val |= recv_buf[1];
+      val <<= 8; val |= recv_buf[0];
+      return val;
+}
+
+QString PTPCamera::ptp_get_property_string_(unsigned prop_code, uint32_t&result_code)
 {
       vector<uint32_t> params (1);
       unsigned char recv_buf [512];
@@ -442,9 +571,63 @@ QString PTPCamera::ptp_get_property_string(unsigned prop_code, uint32_t&result_c
       unsigned char*dptr = recv_buf;
       return val_from_bytes<QString>(dptr);
 }
-#if 0
-void PTPCamera::ptp_set_property_u8(unsigned prop_code, uint8_t val,
-				    uint32_t&result_code)
+
+const PTPCamera::prop_value_t& PTPCamera::ptp_get_property(unsigned prop_code, uint32_t&rc)
+{
+      map<uint16_t,prop_info_t>::iterator cur = device_properties_supported_.find(prop_code);
+      if (cur == device_properties_supported_.end()) {
+	    CameraControl::debug_log << "PTPCamera::ptp_get_property("
+				     << hex << prop_code << dec
+				     << "): Property not found?" << endl << flush;
+	    rc = 0;
+	    return prop_value_nil;
+      }
+
+      if (cur->second.current.get_type() == TYPE_NONE) {
+	    CameraControl::debug_log << "PTPCamera::ptp_get_property("
+				     << hex << prop_code << dec
+				     << "): Probe property" << endl << flush;
+	    ptp_probe_property(prop_code, rc);
+      }
+
+      switch (cur->second.type_code) {
+	  case TYPE_NONE:
+	    cur->second.current = prop_value_nil;
+	    break;
+	  case TYPE_INT8:
+	    cur->second.current.set_int8( ptp_get_property_int8_(prop_code, rc) );
+	    break;
+	  case TYPE_UINT8:
+	    cur->second.current.set_uint8( ptp_get_property_uint8_(prop_code, rc) );
+	    break;
+	  case TYPE_INT16:
+	    cur->second.current.set_int16( ptp_get_property_int16_(prop_code, rc) );
+	    break;
+	  case TYPE_UINT16:
+	    cur->second.current.set_uint16( ptp_get_property_uint16_(prop_code, rc) );
+	    break;
+	  case TYPE_INT32:
+	    cur->second.current.set_int32( ptp_get_property_int32_(prop_code, rc) );
+	    break;
+	  case TYPE_UINT32:
+	    cur->second.current.set_uint32( ptp_get_property_uint32_(prop_code, rc) );
+	    break;
+	  case TYPE_STRING:
+	    cur->second.current.set_string( ptp_get_property_string_(prop_code, rc) );
+	    break;
+	  case TYPE_INT64:
+	  case TYPE_UINT64:
+	  case TYPE_INT128:
+	  case TYPE_UINT128:
+	    assert(0);
+	    break;
+      }
+
+      return cur->second.current;
+}
+
+void PTPCamera::ptp_set_property_int8_(unsigned prop_code, int8_t val,
+					uint32_t&result_code)
 {
       vector<uint32_t> params(1);
       unsigned char send_buf[1];
@@ -455,8 +638,35 @@ void PTPCamera::ptp_set_property_u8(unsigned prop_code, uint8_t val,
       result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
 				send_buf, sizeof send_buf, 0, 0);
 }
-#endif
-void PTPCamera::ptp_set_property_u16(unsigned prop_code, uint16_t val,
+
+void PTPCamera::ptp_set_property_uint8_(unsigned prop_code, uint8_t val,
+					uint32_t&result_code)
+{
+      vector<uint32_t> params(1);
+      unsigned char send_buf[1];
+
+      send_buf[0] = val;
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
+				send_buf, sizeof send_buf, 0, 0);
+}
+
+void PTPCamera::ptp_set_property_int16_(unsigned prop_code, int16_t val,
+					uint32_t&result_code)
+{
+      vector<uint32_t> params(1);
+      unsigned char send_buf[2];
+
+      send_buf[0] = (val >> 0) & 0xff;
+      send_buf[1] = (val >> 8) & 0xff;
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
+				send_buf, sizeof send_buf, 0, 0);
+}
+
+void PTPCamera::ptp_set_property_uint16_(unsigned prop_code, uint16_t val,
 				     uint32_t&result_code)
 {
       vector<uint32_t> params(1);
@@ -470,7 +680,23 @@ void PTPCamera::ptp_set_property_u16(unsigned prop_code, uint16_t val,
 				send_buf, sizeof send_buf, 0, 0);
 }
 
-void PTPCamera::ptp_set_property_u32(unsigned prop_code, uint32_t val,
+void PTPCamera::ptp_set_property_int32_(unsigned prop_code, int32_t val,
+					uint32_t&result_code)
+{
+      vector<uint32_t> params(1);
+      unsigned char send_buf[4];
+
+      send_buf[0] = (val >> 0) & 0xff;
+      send_buf[1] = (val >> 8) & 0xff;
+      send_buf[2] = (val >>16) & 0xff;
+      send_buf[3] = (val >>24) & 0xff;
+
+      params[0] = prop_code;
+      result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
+				send_buf, sizeof send_buf, 0, 0);
+}
+
+void PTPCamera::ptp_set_property_uint32_(unsigned prop_code, uint32_t val,
 				     uint32_t&result_code)
 {
       vector<uint32_t> params(1);
@@ -486,7 +712,7 @@ void PTPCamera::ptp_set_property_u32(unsigned prop_code, uint32_t val,
 				send_buf, sizeof send_buf, 0, 0);
 }
 
-void PTPCamera::ptp_set_property_string(unsigned prop_code, const QString&val,
+void PTPCamera::ptp_set_property_string_(unsigned prop_code, const QString&val,
 					uint32_t&result_code)
 {
       vector<uint32_t> params(1);
@@ -510,6 +736,35 @@ void PTPCamera::ptp_set_property_string(unsigned prop_code, const QString&val,
 				send_buf, send_siz, 0, 0);
 
       delete[]send_buf;
+}
+
+void PTPCamera::ptp_set_property(unsigned prop_code, const prop_value_t&val, uint32_t&result_code)
+{
+      switch (val.get_type()) {
+	  case TYPE_NONE:
+	    break;
+	  case TYPE_INT8:
+	    ptp_set_property_int8_(prop_code, val.get_uint8(), result_code);
+	    break;
+	  case TYPE_UINT8:
+	    ptp_set_property_uint8_(prop_code, val.get_uint8(), result_code);
+	    break;
+	  case TYPE_INT16:
+	    ptp_set_property_int16_(prop_code, val.get_uint16(), result_code);
+	    break;
+	  case TYPE_UINT16:
+	    ptp_set_property_uint16_(prop_code, val.get_uint16(), result_code);
+	    break;
+	  case TYPE_INT32:
+	    ptp_set_property_int32_(prop_code, val.get_uint32(), result_code);
+	    break;
+	  case TYPE_UINT32:
+	    ptp_set_property_uint32_(prop_code, val.get_uint32(), result_code);
+	    break;
+	  case TYPE_STRING:
+	    ptp_set_property_string_(prop_code, val.get_string(), result_code);
+	    break;
+      }
 }
 
 void PTPCamera::ptp_probe_property(unsigned prop_code, uint32_t&result_code)
@@ -554,7 +809,7 @@ void PTPCamera::ptp_probe_property(unsigned prop_code, uint32_t&result_code)
 
       CameraControl::debug_log << "    prop: 0x" << hex << prop << dec << endl;
       CameraControl::debug_log << "    type: 0x" << hex << type << dec << endl;
-      CameraControl::debug_log << "  GetSet: " << desc->second.get_set_flag << endl;
+      CameraControl::debug_log << "  GetSet: " << (int)desc->second.get_set_flag << endl;
 
 	// Starting at data[5]...
 	//   -- Factory Default value
@@ -601,7 +856,7 @@ void PTPCamera::ptp_probe_property(unsigned prop_code, uint32_t&result_code)
 	// The form flag...
       desc->second.form_flag = val_from_bytes<uint8_t>(dptr);
 
-      CameraControl::debug_log << "    form: " << desc->second.form_flag << endl;
+      CameraControl::debug_log << "    form: " << (int)desc->second.form_flag << endl;
 
       if (desc->second.form_flag == 1) { // RANGE
 	      // The range description includes 3 values: the minimum
@@ -732,16 +987,40 @@ PTPCamera::prop_value_t::~prop_value_t()
       clear();
 }
 
+int8_t PTPCamera::prop_value_t::get_int8(void) const
+{
+      assert(type_code_ == TYPE_INT8);
+      return val_int8_;
+}
+
 uint8_t PTPCamera::prop_value_t::get_uint8(void) const
 {
       assert(type_code_ == TYPE_UINT8);
       return val_uint8_;
 }
 
+int16_t PTPCamera::prop_value_t::get_int16(void) const
+{
+      assert(type_code_ == TYPE_INT16);
+      return val_int16_;
+}
+
 uint16_t PTPCamera::prop_value_t::get_uint16(void) const
 {
       assert(type_code_ == TYPE_UINT16);
       return val_uint16_;
+}
+
+int32_t PTPCamera::prop_value_t::get_int32(void) const
+{
+      assert(type_code_ == TYPE_INT32);
+      return val_int32_;
+}
+
+uint32_t PTPCamera::prop_value_t::get_uint32(void) const
+{
+      assert(type_code_ == TYPE_UINT32);
+      return val_uint32_;
 }
 
 QString PTPCamera::prop_value_t::get_string(void) const

@@ -39,94 +39,6 @@ class PTPCamera {
 			 TYPE_INT128 = 0x0009,
 			 TYPE_UINT128= 0x000a,
 			 TYPE_STRING = 0xffff };
-
-    public:
-      PTPCamera();
-      virtual ~PTPCamera() =0;
-
-	// Actively get device information from the camera by sending
-	// a command to the device and processing the response.
-      uint32_t ptp_get_device_info(void);
-
-	// Version of the PTP standard that the device supports.
-      uint16_t ptp_standard_version() const;
-	// Description of the vendor extensions that the device supports.
-      uint32_t ptp_extension_vendor(bool raw_id =false) const;
-      uint16_t ptp_extension_version() const;
-      QString  ptp_extension_desc() const; 
-
-	// Return TRUE if the operation code is supported.
-      bool ptp_operation_is_supported(uint16_t code) const;
-
-	// Some standard PTP properties
-      uint16_t ptp_FunctionalMode() const;
-      QString ptp_Manufacturer() const;
-      QString ptp_Model() const;
-      QString ptp_DeviceVersion() const;
-      QString ptp_SerialNumber() const;
-
-	// Map a PTP code to a descriptive string. The PTP code may be
-	// any of a variety of codes, and the QString is a human
-	// readable description.
-      typedef std::pair<uint16_t,QString> code_string_t;
-
-	// Return a list of supported operations, by name. (This is
-	// used for debugging or display purposes.)
-      std::vector<QString> ptp_operations_list() const;
-      std::vector<QString> ptp_events_list() const;
-      std::vector<code_string_t> ptp_properties_list() const;
-      std::vector<QString> ptp_capture_formats_list() const;
-      std::vector<QString> ptp_image_formats_list() const;
-
-	// Probe the device to get a description for the
-	// property. This will use the GetDevicePropDesc command to
-	// get all the property details.
-      void ptp_probe_property(unsigned prop_code, uint32_t&rc);
-
-	// Get the property for the type.
-      type_code_t ptp_get_property_type(unsigned prop_code) const;
-	// Return true if the property can be set.
-      bool ptp_get_property_is_setable(unsigned prop_code) const;
-	// Get the ordered list of enumerated property values, and
-	// return the current value.
-      int ptp_get_property_enum(unsigned prop_code, std::vector<QString>&table) const;
-
-	// Get the current value of the given property.
-      uint8_t  ptp_get_property_u8(unsigned prop_code, uint32_t&rc);
-      uint16_t ptp_get_property_u16(unsigned prop_code, uint32_t&rc);
-      uint32_t ptp_get_property_u32(unsigned prop_code, uint32_t&rc);
-      QString ptp_get_property_string(unsigned prop_code, uint32_t&rc);
-
-
-	// Set the value to the given property.
-      void ptp_set_property_u8(unsigned prop_code, uint8_t val, uint32_t&rc);
-      void ptp_set_property_u16(unsigned prop_code, uint16_t val, uint32_t&rc);
-      void ptp_set_property_u32(unsigned prop_code, uint32_t val, uint32_t&rc);
-      void ptp_set_property_string(unsigned prop_code, const QString&val, uint32_t&rc);
-
-    protected:
-	// The derived class implements this method to pass commands
-	// (and responses) between this instance and the actual device.
-      virtual uint32_t ptp_command(uint16_t command,
-				   const std::vector<uint32_t>&parms,
-				   const unsigned char*send, size_t nsend,
-				   unsigned char*recv, size_t nrecv) =0;
-
-    private:
-      uint16_t standard_version_;
-      uint32_t vendor_extension_id_;
-      uint16_t vendor_extension_vers_;
-      QString  vendor_extension_desc_;
-      uint16_t functional_mode_;
-      std::vector<uint16_t> operations_supported_;
-      std::vector<uint16_t> events_supported_;
-      std::vector<uint16_t> capture_formats_;
-      std::vector<uint16_t> image_formats_;
-      QString ptp_manufacturer_;
-      QString ptp_model_;
-      QString device_version_;
-      QString serial_number_;
-
 	// PTP defines some collection of property value types. This
 	// class organizes (and unifies) the handling of PTP typed values.
       class prop_value_t {
@@ -174,6 +86,104 @@ class PTPCamera {
 	    void copy_(const prop_value_t&that);
       };
 
+      static const prop_value_t prop_value_nil;
+
+	// Return a pretty string for the given result code.
+      static QString qresult_code(uint32_t result_code);
+
+    public:
+      PTPCamera();
+      virtual ~PTPCamera() =0;
+
+	// Actively get device information from the camera by sending
+	// a command to the device and processing the response.
+      uint32_t ptp_get_device_info(void);
+
+	// Version of the PTP standard that the device supports.
+      uint16_t ptp_standard_version() const;
+	// Description of the vendor extensions that the device supports.
+      uint32_t ptp_extension_vendor(bool raw_id =false) const;
+      uint16_t ptp_extension_version() const;
+      QString  ptp_extension_desc() const; 
+
+	// Return TRUE if the operation code is supported.
+      bool ptp_operation_is_supported(uint16_t code) const;
+
+	// Some standard PTP properties
+      uint16_t ptp_FunctionalMode() const;
+      QString ptp_Manufacturer() const;
+      QString ptp_Model() const;
+      QString ptp_DeviceVersion() const;
+      QString ptp_SerialNumber() const;
+
+	// Get the battery level, and process it so that it is a
+	// floating value from 0-100.0.
+      float ptp_battery_level();
+
+	// Map a PTP code to a descriptive string. The PTP code may be
+	// any of a variety of codes, and the QString is a human
+	// readable description.
+      typedef std::pair<uint16_t,QString> code_string_t;
+
+	// Return a list of supported operations, by name. (This is
+	// used for debugging or display purposes.)
+      std::vector<QString> ptp_operations_list() const;
+      std::vector<QString> ptp_events_list() const;
+      std::vector<code_string_t> ptp_properties_list() const;
+      std::vector<QString> ptp_capture_formats_list() const;
+      std::vector<QString> ptp_image_formats_list() const;
+
+	// Probe the device to get a description for the
+	// property. This will use the GetDevicePropDesc command to
+	// get all the property details, and refresh the current and
+	// factory values.
+      void ptp_probe_property(unsigned prop_code, uint32_t&rc);
+
+	// Get the property for the type.
+      type_code_t ptp_get_property_type(unsigned prop_code) const;
+	// Return true if the property can be set.
+      bool ptp_get_property_is_setable(unsigned prop_code) const;
+	// Get the ordered list of enumerated property values, and
+	// return the current value.
+      int ptp_get_property_enum(unsigned prop_code, std::vector<QString>&table) const;
+
+	// Get the property current or factory default values. The
+	// values are cached from the last ptp_probe_property.
+      const prop_value_t& ptp_get_property_current(unsigned prop_code) const;
+      const prop_value_t& ptp_get_property_factory(unsigned prop_code) const;
+
+	// Get the property directly from the camera, and save the
+	// result as the current value for the property. This command
+	// goes directly to the camera.
+      const prop_value_t& ptp_get_property(unsigned prop_code, uint32_t&rc);
+
+	// Set the property. The type of the property must match the
+	// type that the camera expects.
+      void ptp_set_property(unsigned prop_code, const prop_value_t&val, uint32_t&rc);
+    protected:
+	// The derived class implements this method to pass commands
+	// (and responses) between this instance and the actual device.
+      virtual uint32_t ptp_command(uint16_t command,
+				   const std::vector<uint32_t>&parms,
+				   const unsigned char*send, size_t nsend,
+				   unsigned char*recv, size_t nrecv) =0;
+
+    private:
+      uint16_t standard_version_;
+      uint32_t vendor_extension_id_;
+      uint16_t vendor_extension_vers_;
+      QString  vendor_extension_desc_;
+      uint16_t functional_mode_;
+      std::vector<uint16_t> operations_supported_;
+      std::vector<uint16_t> events_supported_;
+      std::vector<uint16_t> capture_formats_;
+      std::vector<uint16_t> image_formats_;
+      QString ptp_manufacturer_;
+      QString ptp_model_;
+      QString device_version_;
+      QString serial_number_;
+
+
       struct prop_info_t {
 	    PTPCamera::type_code_t type_code : 16;
 	    uint8_t  get_set_flag;
@@ -191,6 +201,26 @@ class PTPCamera {
       std::map<uint16_t, prop_info_t> device_properties_supported_;
 
       static std::map<uint16_t,type_code_t> ptp_type_to_type_code_;
+
+	// Get (raw) the current value of the given property directly
+	// from the camera.
+      uint8_t  ptp_get_property_uint8_(unsigned prop_code, uint32_t&rc);
+      uint16_t ptp_get_property_uint16_(unsigned prop_code, uint32_t&rc);
+      uint32_t ptp_get_property_uint32_(unsigned prop_code, uint32_t&rc);
+      int8_t  ptp_get_property_int8_(unsigned prop_code, uint32_t&rc);
+      int16_t ptp_get_property_int16_(unsigned prop_code, uint32_t&rc);
+      int32_t ptp_get_property_int32_(unsigned prop_code, uint32_t&rc);
+      QString ptp_get_property_string_(unsigned prop_code, uint32_t&rc);
+
+	// Set the value to the given property.
+      void ptp_set_property_uint8_(unsigned prop_code, uint8_t val, uint32_t&rc);
+      void ptp_set_property_uint16_(unsigned prop_code, uint16_t val, uint32_t&rc);
+      void ptp_set_property_uint32_(unsigned prop_code, uint32_t val, uint32_t&rc);
+      void ptp_set_property_int8_(unsigned prop_code, int8_t val, uint32_t&rc);
+      void ptp_set_property_int16_(unsigned prop_code, int16_t val, uint32_t&rc);
+      void ptp_set_property_int32_(unsigned prop_code, int32_t val, uint32_t&rc);
+      void ptp_set_property_string_(unsigned prop_code, const QString&val, uint32_t&rc);
+
 
     private: // Not implemented
       PTPCamera(const PTPCamera&);
