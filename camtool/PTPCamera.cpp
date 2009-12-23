@@ -764,6 +764,9 @@ void PTPCamera::ptp_set_property(unsigned prop_code, const prop_value_t&val, uin
 	  case TYPE_STRING:
 	    ptp_set_property_string_(prop_code, val.get_string(), result_code);
 	    break;
+
+	  default:
+	    assert(0);
       }
 }
 
@@ -922,8 +925,21 @@ void PTPCamera::ptp_probe_property(unsigned prop_code, uint32_t&result_code)
       }
 }
 
+bool PTPCamera::ptp_InitiateCapture(uint32_t&rc)
+{
+      if (!ptp_operation_is_supported(0x100e))
+	    return false;
+
+      vector<uint32_t>params (2);
+      params[0] = 0x00000000; // StorageId
+      params[1] = 0x00000000; // ObjectFormatCode
+      rc = ptp_command(0x100e /* InitiateCapture */, params, 0, 0, 0, 0);
+
+      return true;
+}
+
 PTPCamera::prop_value_t::prop_value_t()
-      : type_code_(PTPCamera::TYPE_NONE)
+: type_code_(PTPCamera::TYPE_NONE)
 {
 }
 

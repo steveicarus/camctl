@@ -186,27 +186,15 @@ QTreeWidgetItem*MacPTPCameraControl::describe_camera(void)
 
 CameraControl::capture_resp_t MacPTPCameraControl::capture_image(void)
 {
-      if (!ptp_operation_is_supported(0x100e))
+      uint32_t result_code;
+      if (! ptp_InitiateCapture(result_code))
 	    return CAP_NOT_SUPPORTED;
-
-      unsigned char buf[sizeof(ICAPTPPassThroughPB) + 0];
-      ICAPTPPassThroughPB*ptp_buf = (ICAPTPPassThroughPB*)buf;
-
-      ptp_buf->commandCode = 0x100e; // InitiateCapture
-      ptp_buf->numOfInputParams = 2;
-      ptp_buf->params[0] = 0x00000000; // StorageID
-      ptp_buf->params[1] = 0x00000000; // ObjectformatCode
-      ptp_buf->numOfOutputParams = 0;
-      ptp_buf->dataUsageMode = kICACameraPassThruNotUsed;
-      ptp_buf->dataSize = 0;
-
-      ica_send_message_(ptp_buf, sizeof buf);
-      uint32_t result_code = ptp_buf->resultCode;
 
       debug_log << TIMESTAMP << ": InitiateCapture (result_code="
 		<< hex << result_code << dec << ")" << endl << flush;
 
       return CAP_OK;
+
 }
 
 template <class T> static T val_from_bytes(UInt8*&buf);

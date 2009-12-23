@@ -120,6 +120,12 @@ class PTPCamera {
 	// floating value from 0-100.0.
       float ptp_battery_level();
 
+	// Some standard PTP operatins. These will return true if the
+	// operation is supported, and will set rc to the result code
+	// from the device. If the operation is not supported, return
+	// false, and the result code is untouched.
+      bool ptp_InitiateCapture(uint32_t&rc);
+
 	// Map a PTP code to a descriptive string. The PTP code may be
 	// any of a variety of codes, and the QString is a human
 	// readable description.
