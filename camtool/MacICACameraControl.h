@@ -141,47 +141,47 @@ class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
 
       virtual float battery_level(void);
 
-      virtual void get_image_size_index(std::vector<std::string>&values);
-      virtual int  get_image_size_index();
+      virtual int get_image_size_index(std::vector<QString>&values);
       virtual void set_image_size_index(int);
       virtual bool set_image_size_ok();
 
-      virtual void get_exposure_program_index(std::vector<std::string>&values);
-      virtual int  get_exposure_program_index();
+      virtual int get_exposure_program_index(std::vector<QString>&values);
       virtual void set_exposure_program_index(int);
       virtual bool set_exposure_program_ok();
 
-      virtual void get_exposure_time_index(std::vector<std::string>&values);
-      virtual int  get_exposure_time_index();
+      virtual int get_exposure_time_index(std::vector<QString>&values);
       virtual void set_exposure_time_index(int);
       virtual bool set_exposure_time_ok();
 
-      virtual void get_fnumber_index(std::vector<std::string>&values);
-      virtual int  get_fnumber_index();
+      virtual int get_fnumber_index(std::vector<QString>&values);
       virtual void set_fnumber_index(int);
       virtual bool set_fnumber_ok();
 
-      virtual void get_iso_index(std::vector<std::string>&values);
-      virtual int  get_iso_index();
+      virtual int get_iso_index(std::vector<QString>&values);
       virtual void set_iso_index(int);
       virtual bool set_iso_ok();
 
-      virtual void get_flash_mode_index(std::vector<std::string>&values);
-      virtual int  get_flash_mode_index();
+      virtual int get_flash_mode_index(std::vector<QString>&values);
       virtual void set_flash_mode_index(int);
       virtual bool set_flash_mode_ok();
 
-      virtual void get_focus_mode_index(std::vector<std::string>&values);
-      virtual int  get_focus_mode_index();
+      virtual int get_focus_mode_index(std::vector<QString>&values);
       virtual void set_focus_mode_index(int);
       virtual bool set_focus_mode_ok();
 
-      virtual void get_white_balance_index(std::vector<std::string>&values);
-      virtual int  get_white_balance_index();
+      virtual int get_white_balance_index(std::vector<QString>&values);
       virtual void set_white_balance_index(int);
       virtual bool set_white_balance_ok();
 
     private:
+      int get_property_index_(unsigned prop_code,
+			      std::vector<PTPCamera::labeled_value_t>&table,
+			      std::vector<QString>&values);
+
+      void set_property_index_(unsigned prop_code,
+			       std::vector<PTPCamera::labeled_value_t>&table,
+			       int use_index);
+
 	// Implement this for the PTPCamera base class.
       uint32_t ptp_command(uint16_t command,
 			   const std::vector<uint32_t>&parms,
@@ -189,111 +189,17 @@ class MacPTPCameraControl  : public PTPCamera, public MacICACameraControl {
 			   unsigned char*recv, size_t nrecv);
 
     private:
-	// The PTP standard defines a canonical way to describe
-	// properties. The prop_desc_t class encapsulates those
-	// descriptions and allows me to work with them in a more
-	// donvenient form. The ptp_get_property_desc_() method is a
-	// convenient way to refresh a property description from the
-	// device.
-      class prop_desc_t {
-	  public:
-	    prop_desc_t(uint16_t prop_code);
-	    ~prop_desc_t();
-
-	    uint16_t get_property_code() const { return prop_code_; }
-
-	      // This method causes the property to be marked as
-	      // unsupported by the device.
-	    void clear_property_support();
-
-	      // Return if this property is supported.
-	    bool test_property_support() const { return support_flag_; }
-
-	      // Set the PTP defined type code.
-	    void set_type_code(uint16_t val);
-	    uint16_t get_type_code() const { return type_code_; }
-
-	      // Set the flag indicating whether this property is can
-	      // be set. TRUE means it can be set, and FALSE means not.
-	    void set_flag(bool flag);
-	    bool set_ok(void) const { return support_flag_ && set_flag_; }
-
-	      // properties generally have a factory default value.
-	      //template <class T> T get_factory_default();
-
-	      // Get the current value and the number for the enum. If
-	      // the current value is not in the enum, or this is not
-	      // and enum, then return -1;
-	    template <class T> T get_current(void);
-
-	      // Properties may come as enum values. In that case, the
-	      // get_enum_count returns a value >0 that is the number
-	      // of enum values that the property supports. The
-	      // get_enum_index() gets specific enum values.
-	    int get_enum_count() const;
-	    template <class T> T get_enum_index(int idx);
-
-	    bool is_range() const { return range_flag_; }
-	    template <class T> void get_range(T&val_min, T&val_max, T&step);
-
-	  public:
-	      // These are some methods for filling in the property description.
-	    template <class T> void set_factory_default(T val);
-	    template <class T> void set_current(T val);
-
-	    template <class T> void set_enum_vector(const std::vector<T>&vec);
-	    template <class T> void set_range(T val_min, T val_max, T step);
-
-	  private:
-	    uint16_t prop_code_;
-	    uint16_t type_code_;
-	    bool support_flag_;
-	    bool range_flag_;
-	    bool set_flag_;
-	    union {
-		  int8_t fact_int8_;
-		  uint8_t fact_uint8_;
-		  int16_t fact_int16_;
-		  uint16_t fact_uint16_;
-		  int32_t fact_int32_;
-		  uint32_t fact_uint32_;
-		  QString* fact_string_;
-	    };
-
-	    union {
-		  int8_t current_int8_;
-		  uint8_t current_uint8_;
-		  int16_t current_int16_;
-		  uint16_t current_uint16_;
-		  int32_t current_int32_;
-		  uint32_t current_uint32_;
-		  QString* current_string_;
-	    };
-
-	    union {
-		  std::vector<int8_t>* enum_int8_;
-		  std::vector<uint8_t>* enum_uint8_;
-		  std::vector<int16_t>* enum_int16_;
-		  std::vector<uint16_t>* enum_uint16_;
-		  std::vector<int32_t>* enum_int32_;
-		  std::vector<uint32_t>* enum_uint32_;
-		  std::vector<QString>* enum_string_;
-	    };
-      };
-      void ptp_get_property_desc_(prop_desc_t&, uint32_t&result_code);
-
-    private:
 	// Standard camera properties
-      prop_desc_t image_size_;
-      prop_desc_t white_balance_;
-      prop_desc_t exposure_program_;
-      prop_desc_t exposure_time_;
-      prop_desc_t fnumber_;
-      prop_desc_t iso_;
+      std::vector<PTPCamera::labeled_value_t> image_size_;
+      std::vector<PTPCamera::labeled_value_t> white_balance_;
+      std::vector<PTPCamera::labeled_value_t> exposure_program_;
+      std::vector<PTPCamera::labeled_value_t> exposure_time_;
+      std::vector<PTPCamera::labeled_value_t> fnumber_;
+      std::vector<PTPCamera::labeled_value_t> iso_;
 	// Flash properties
-      prop_desc_t flash_mode_;
+      std::vector<PTPCamera::labeled_value_t> flash_mode_;
 	// Focus properties
-      prop_desc_t focus_mode_;
+      std::vector<PTPCamera::labeled_value_t> focus_mode_;
 };
 
 #endif

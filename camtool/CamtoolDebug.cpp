@@ -150,14 +150,14 @@ void CamtoolDebug::debug_ptp_describe_slot_(void)
 	    ui.debug_ptp_setable->setCheckState(Qt::Unchecked);
 
 	// Fill in the enumeration of values
-      vector<QString> prop_enum;
+      vector<PTPCamera::labeled_value_t> prop_enum;
       int prop_enum_idx = camera->ptp_get_property_enum(prop_code, prop_enum);
 
       ui.debug_ptp_select_value->clear();
-      for (vector<QString>::const_iterator cur = prop_enum.begin()
+      for (vector<PTPCamera::labeled_value_t>::const_iterator cur = prop_enum.begin()
 		 ; cur != prop_enum.end() ; cur ++) {
 
-	    ui.debug_ptp_select_value->addItem(*cur);
+	    ui.debug_ptp_select_value->addItem(cur->label);
       }
       ui.debug_ptp_select_value->setCurrentIndex(prop_enum_idx);
 

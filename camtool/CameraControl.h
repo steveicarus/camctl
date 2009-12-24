@@ -25,6 +25,7 @@
 # include  <string>
 # include  <utility>
 # include  <QByteArray>
+# include  <QString>
 # include  <ostream>
 # include  <fstream>
 # include  <inttypes.h>
@@ -80,13 +81,11 @@ class CameraControl {
 	// Return the battery level 0-100, or -1 if unavailable or N/A
       virtual float battery_level(void);
 
-      virtual void get_image_size_index(std::vector<std::string>&values);
-      virtual int  get_image_size_index();
+      virtual int get_image_size_index(std::vector<QString>&values);
       virtual void set_image_size_index(int);
       virtual bool set_image_size_ok();
 
-      virtual void get_exposure_program_index(std::vector<std::string>&values);
-      virtual int  get_exposure_program_index();
+      virtual int get_exposure_program_index(std::vector<QString>&values);
       virtual void set_exposure_program_index(int);
       virtual bool set_exposure_program_ok();
 
@@ -98,33 +97,27 @@ class CameraControl {
 	// supported settings. The other set_ and
 	// set_exposure_time_index methods work with indices into that
 	// vector.
-      virtual void get_exposure_time_index(std::vector<std::string>&values);
-      virtual int  get_exposure_time_index();
+      virtual int get_exposure_time_index(std::vector<QString>&values);
       virtual void set_exposure_time_index(int);
       virtual bool set_exposure_time_ok();
 
-      virtual void get_fnumber_index(std::vector<std::string>&values);
-      virtual int  get_fnumber_index();
+      virtual int get_fnumber_index(std::vector<QString>&values);
       virtual void set_fnumber_index(int);
       virtual bool set_fnumber_ok();
 
-      virtual void get_iso_index(std::vector<std::string>&values);
-      virtual int  get_iso_index();
+      virtual int get_iso_index(std::vector<QString>&values);
       virtual void set_iso_index(int);
       virtual bool set_iso_ok();
 
-      virtual void get_flash_mode_index(std::vector<std::string>&values);
-      virtual int  get_flash_mode_index();
+      virtual int get_flash_mode_index(std::vector<QString>&values);
       virtual void set_flash_mode_index(int);
       virtual bool set_flash_mode_ok();
 
-      virtual void get_focus_mode_index(std::vector<std::string>&values);
-      virtual int  get_focus_mode_index();
+      virtual int get_focus_mode_index(std::vector<QString>&values);
       virtual void set_focus_mode_index(int);
       virtual bool set_focus_mode_ok();
 
-      virtual void get_white_balance_index(std::vector<std::string>&values);
-      virtual int  get_white_balance_index();
+      virtual int get_white_balance_index(std::vector<QString>&values);
       virtual void set_white_balance_index(int);
       virtual bool set_white_balance_ok();
 

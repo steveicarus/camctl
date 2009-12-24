@@ -39,6 +39,19 @@ class PTPCamera {
 			 TYPE_INT128 = 0x0009,
 			 TYPE_UINT128= 0x000a,
 			 TYPE_STRING = 0xffff };
+
+      enum type_form_t { FORM_NONE = 0, FORM_RANGE = 1, FORM_ENUM = 2 };
+
+      enum prop_code_t { PROP_NONE  = 0x0000,
+			 PROP_ImageSize = 0x5003,
+                         PROP_WhiteBalance = 0x5005,
+			 PROP_FNumber = 0x5007,
+			 PROP_FocusMode = 0x500a,
+			 PROP_FlashMode = 0x500c,
+			 PROP_ExposureTime = 0x500d,
+			 PROP_ExposureProgramMode = 0x500e,
+			 PROP_ExposureIndex = 0x500f };
+
 	// PTP defines some collection of property value types. This
 	// class organizes (and unifies) the handling of PTP typed values.
       class prop_value_t {
@@ -149,9 +162,18 @@ class PTPCamera {
       type_code_t ptp_get_property_type(unsigned prop_code) const;
 	// Return true if the property can be set.
       bool ptp_get_property_is_setable(unsigned prop_code) const;
+	// Get the form of the property (ENUM or RANGE) or FORM_NONE
+	// if the property is not present.
+      type_form_t ptp_get_property_form(unsigned prop_code) const;
+
 	// Get the ordered list of enumerated property values, and
-	// return the current value.
-      int ptp_get_property_enum(unsigned prop_code, std::vector<QString>&table) const;
+	// return the current value as an index. Return -1 if this is
+	// not an enumerated type.
+      struct labeled_value_t { QString label; prop_value_t value; };
+      int ptp_get_property_enum(unsigned prop_code, std::vector<labeled_value_t>&table) const;
+	// Get the range for the type and return true. If this is not
+	// a range type, then return false.
+      bool ptp_get_property_range(unsigned prop_code, prop_value_t&min, prop_value_t&max, prop_value_t&step) const;
 
 	// Get the property current or factory default values. The
 	// values are cached from the last ptp_probe_property.
@@ -199,6 +221,8 @@ class PTPCamera {
 	    prop_value_t factory;
 	      // The current value for this value
 	    prop_value_t current;
+	      // The range is the list of possible values if this is
+	      // an enum, or is the range in 3 values: min, max, step.
 	    std::vector<prop_value_t> range;
       };
 

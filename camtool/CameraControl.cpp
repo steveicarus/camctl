@@ -100,13 +100,9 @@ float CameraControl::battery_level(void)
       return -1;
 }
 
-void CameraControl::get_image_size_index(vector<string>&values)
+int CameraControl::get_image_size_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int CameraControl::get_image_size_index()
-{
       return -1;
 }
 
@@ -119,13 +115,9 @@ bool CameraControl::set_image_size_ok()
       return false;
 }
 
-void CameraControl::get_exposure_program_index(vector<string>&values)
+int CameraControl::get_exposure_program_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_exposure_program_index()
-{
       return -1;
 }
 
@@ -138,13 +130,9 @@ bool CameraControl::set_exposure_program_ok()
       return false;
 }
 
-void CameraControl::get_exposure_time_index(vector<string>&values)
+int CameraControl::get_exposure_time_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_exposure_time_index()
-{
       return -1;
 }
 
@@ -157,13 +145,9 @@ bool CameraControl::set_exposure_time_ok()
       return false;
 }
 
-void CameraControl::get_fnumber_index(vector<string>&values)
+int CameraControl::get_fnumber_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_fnumber_index()
-{
       return -1;
 }
 
@@ -176,13 +160,9 @@ bool CameraControl::set_fnumber_ok()
       return false;
 }
 
-void CameraControl::get_iso_index(vector<string>&values)
+int CameraControl::get_iso_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_iso_index()
-{
       return -1;
 }
 
@@ -195,13 +175,9 @@ bool CameraControl::set_iso_ok()
       return false;
 }
 
-void CameraControl::get_flash_mode_index(vector<string>&values)
+int CameraControl::get_flash_mode_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_flash_mode_index()
-{
       return -1;
 }
 
@@ -214,13 +190,9 @@ bool CameraControl::set_flash_mode_ok()
       return false;
 }
 
-void CameraControl::get_focus_mode_index(vector<string>&values)
+int CameraControl::get_focus_mode_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_focus_mode_index()
-{
       return -1;
 }
 
@@ -233,13 +205,9 @@ bool CameraControl::set_focus_mode_ok()
       return false;
 }
 
-void CameraControl::get_white_balance_index(vector<string>&values)
+int CameraControl::get_white_balance_index(vector<QString>&values)
 {
       values.clear();
-}
-
-int32_t CameraControl::get_white_balance_index()
-{
       return -1;
 }
 

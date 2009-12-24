@@ -416,7 +416,19 @@ bool PTPCamera::ptp_get_property_is_setable(unsigned prop_code) const
 	    return false;
 }
 
-int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) const
+PTPCamera::type_form_t PTPCamera::ptp_get_property_form(unsigned prop_code) const
+{
+      std::map<uint16_t, prop_info_t>::const_iterator cur = device_properties_supported_.find(prop_code);
+      if (cur == device_properties_supported_.end())
+	    return FORM_NONE;
+
+      if (cur->second.form_flag == FORM_ENUM)
+	    return FORM_ENUM;
+      else
+	    return FORM_RANGE;
+}
+
+int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<labeled_value_t>&table) const
 {
       table.clear();
       map<uint16_t,prop_info_t>::const_iterator info = device_properties_supported_.find(prop_code);
@@ -431,7 +443,8 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) 
       switch (info->second.type_code) {
 	  case TYPE_STRING:
 	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
-		  table[idx] = info->second.range[idx].get_string();
+		  table[idx].label = info->second.range[idx].get_string();
+		  table[idx].value = info->second.range[idx];
 	    }
 	    break;
 	  case TYPE_UINT8:
@@ -439,7 +452,8 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) 
 		  uint8_t val = info->second.range[idx].get_uint8();
 		  string tmp = ptp_property_uint8_string(prop_code, val,
 							  ptp_extension_vendor());
-		  table[idx] = QString(tmp.c_str());
+		  table[idx].label = QString(tmp.c_str());
+		  table[idx].value = info->second.range[idx];
 	    }
 	    break;
 	  case TYPE_UINT16:
@@ -447,14 +461,35 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<QString>&table) 
 		  uint16_t val = info->second.range[idx].get_uint16();
 		  string tmp = ptp_property_value16_string(prop_code, val,
 							   ptp_extension_vendor());
-		  table[idx] = QString(tmp.c_str());
+		  table[idx].label = QString(tmp.c_str());
+		  table[idx].value = info->second.range[idx];
 	    }
 	    break;
 	  default:
+	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
+		  table[idx].value = info->second.range[idx];
+	    }
 	    break;
       }
 
       return cur_idx;
+}
+
+bool PTPCamera::ptp_get_property_range(unsigned prop_code, prop_value_t&min, prop_value_t&max, prop_value_t&step) const
+{
+      map<uint16_t,prop_info_t>::const_iterator info = device_properties_supported_.find(prop_code);
+      if (info == device_properties_supported_.end())
+	    return false;
+
+      if (info->second.form_flag != 1) // This method only works with RANGE types
+	    return false;
+
+      assert(info->second.range.size() == 3);
+
+      min = info->second.range[0];
+      max = info->second.range[1];
+      step = info->second.range[2];
+      return true;
 }
 
 const PTPCamera::prop_value_t& PTPCamera::ptp_get_property_current(unsigned prop_code) const
