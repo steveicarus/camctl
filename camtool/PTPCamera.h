@@ -24,6 +24,8 @@
 # include  <map>
 # include  <QString>
 
+class QTreeWidgetItem;
+
 class PTPCamera {
 
     public:
@@ -188,6 +190,9 @@ class PTPCamera {
 	// Set the property. The type of the property must match the
 	// type that the camera expects.
       void ptp_set_property(unsigned prop_code, const prop_value_t&val, uint32_t&rc);
+
+      QTreeWidgetItem*ptp_describe_camera(void);
+
     protected:
 	// The derived class implements this method to pass commands
 	// (and responses) between this instance and the actual device.
