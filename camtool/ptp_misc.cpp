@@ -162,6 +162,59 @@ static key_value<uint16_t,string> ptp_nikon_operation_codes[] = {
       { 0x9805, "MTP GetObjPropList" }
 };
 
+static key_value<uint16_t,string> ptp_canon_operation_codes[] = {
+      { 0x9001, "CANON GetPartialObjectInfo" },
+      { 0x9002, "CANON SetObjectArchive" },
+      { 0x9003, "CANON KeepDeviceOn" },
+      { 0x9004, "CANON LockDeviceUI" },
+      { 0x9005, "CANON UnlockDeviceUI" },
+      { 0x9006, "CANON GetObjectHandleByName" },
+      { 0x9008, "CANON InitiateReleaseControl" },
+      { 0x9009, "CANON TerminateReleaseControl" },
+      { 0x900a, "CANON TerminatePlaybackMode" },
+      { 0x900b, "CANON ViewfinderOn" },
+      { 0x900c, "CANON ViewfinderOff" },
+      { 0x900d, "CANON DoAeAfAwb" },
+      { 0x900e, "CANON GetCustomizeSpec" },
+      { 0x900f, "CANON GetCustomizeItemInfo" },
+      { 0x9010, "CANON GetCustomizeData" },
+      { 0x9011, "CANON SetCustomizeData" },
+      { 0x9012, "CANON GetCaptureStatus" },
+      { 0x9013, "CANON CheckEvent" },
+      { 0x9014, "CANON FocusLock" },
+      { 0x9015, "CANON FocusUnlock" },
+      { 0x9016, "CANON GetLocalReleaseParam" },
+      { 0x9017, "CANON SetLocalReleaseParam" },
+      { 0x9018, "CANON AskAboutPcEvf" },
+      { 0x9019, "CANON SendPartialObject" },
+      { 0x901a, "CANON InitiateCaptureInMemory" },
+      { 0x901b, "CANON GetPartialObjectEx" },
+      { 0x901c, "CANON SetObjectTime" },
+      { 0x901d, "CANON GetViewfinderImage" },
+      { 0x901e, "CANON GetObjectAttributes" },
+      { 0x901f, "CANON ChangeUSBProtocol" },
+      { 0x9020, "CANON GetChanges" },
+      { 0x9021, "CANON GetObjectInfoEx" },
+      { 0x9022, "CANON InitiateDirectTransfer" },
+      { 0x9023, "CANON TerminateDirectTransfer" },
+      { 0x9024, "CANON SendObjectInfoByPath" },
+      { 0x9025, "CANON SendObjectByPath" },
+      { 0x9026, "CANON InitiateDirectTransferEx" },
+      { 0x9027, "CANON GetAncillaryObjectHandles" },
+      { 0x9028, "CANON GetTreeInfo" },
+      { 0x9029, "CANON GetTreeSize" },
+      { 0x902a, "CANON NotifyProgress" },
+      { 0x902b, "CANON NotifyCancelAccepted" },
+      { 0x902d, "CANON GetDirectory" },
+      { 0x9030, "CANON SetPairingInfo" },
+      { 0x9031, "CANON GetPairingInfo" },
+      { 0x9032, "CANON DeletePairingInfo" },
+      { 0x9033, "CANON GetMACAddress" },
+      { 0x9034, "CANON SetDisplayMonitor" },
+      { 0x9035, "CANON PairingComplete" },
+      { 0x9036, "CANON GetWirelessMAXChannel" }
+};
+
 static string ptp_standard_events[] = {
       "Undefined",         // 0x4000
       "CancelTransaction", // 0x4001
@@ -178,6 +231,29 @@ static string ptp_standard_events[] = {
       "StoreInfoChanged",  // 0x400c
       "CaptureComplete",   // 0x400d
       "UnreportedStatus"  // 0x400e
+};
+
+static string ptp_vendor_canon_events[] = {
+      "CANON 0xc000",    // 0xc000
+      "CANON 0xc001",    // 0xc001
+      "CANON 0xc002",    // 0xc002
+      "CANON 0xc003",    // 0xc003
+      "CANON 0xc004",    // 0xc004
+      "CANON ExtendedErrorcode",    // 0xc005
+      "CANON 0xc006",    // 0xc006
+      "CANON 0xc007",    // 0xc007
+      "CANON ObjectInfoChanged",     // 0xc008
+      "CANON RequestObjectTransfer", // 0xc009
+      "CANON 0xc00a",    // 0xc00a
+      "CANON 0xc00b",    // 0xc00b
+      "CANON CameraModeChanged",     // 0xc00c
+      "CANON 0xc00d",    // 0xc00d
+      "CANON 0xc00e",    // 0xc00e
+      "CANON 0xc00f",    // 0xc00f
+      "CANON 0xc010",    // 0xc010
+      "CANON StartDirectTransfer",   // 0xc011
+      "CANON 0xc012",    // 0xc012
+      "CANON StopDirectTransfer"     // 0xc013
 };
 
 static string ptp_standard_properties[] = {
@@ -368,11 +444,15 @@ string ptp_opcode_string(uint16_t code, uint32_t extension_id)
 	    key_value<uint16_t,string>*table;
 	    size_t table_size = 0;
 	    switch (extension_id) {
-		case 0x00a:
+		case 0x00a: // Nikon
 		  table = ptp_nikon_operation_codes;
 		  table_size = array_count(ptp_nikon_operation_codes);
 		  break;
-		default:
+		case 0x00b: // Canon
+		  table = ptp_canon_operation_codes;
+		  table_size = array_count(ptp_canon_operation_codes);
+		  break;
+		default: 
 		  table = ptp_novendor_operation_codes;
 		  table_size = array_count(ptp_novendor_operation_codes);
 		  break;
@@ -394,7 +474,7 @@ string ptp_opcode_string(uint16_t code, uint32_t extension_id)
       return tmp.str();
 }
 
-string ptp_event_string(uint16_t code, uint32_t extension_id)
+string ptp_event_string(uint16_t code, uint32_t vend)
 {
       if ( (code&0xf000) == 0x4000 ) { // PTP Standard Events
 	    if ((code&0x0fff) <= 0x000f)
@@ -405,10 +485,15 @@ string ptp_event_string(uint16_t code, uint32_t extension_id)
 	    return tmp.str();
       }
 
+      if ( (code&0xf000) == 0xc000 && vend==0x0000000b
+	   && (code&0x0fff) < array_count(ptp_vendor_canon_properties)) {
+	    return ptp_vendor_canon_events[code&0x0fff];
+      }
+
       if ( (code&0xf000) == 0xc000 ) { // Vendor Opcodes
 
 	    ostringstream tmp;
-	    tmp << "Vendor[" << hex << extension_id << "]-" << hex << code << ends;
+	    tmp << "Vendor[" << hex << vend << "]-" << hex << code << ends;
 	    return tmp.str();
       }
 
