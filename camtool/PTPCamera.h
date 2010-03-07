@@ -26,6 +26,26 @@
 
 class QTreeWidgetItem;
 
+class PTP_INT128_t {
+    public:
+
+      bool operator == (const PTP_INT128_t&that) const
+      { return h_ == that.h_ && l_ == that.l_; }
+
+    private:
+      uint64_t h_, l_;
+};
+
+class PTP_UINT128_t {
+    public:
+
+      bool operator == (const PTP_UINT128_t&that) const
+      { return h_ == that.h_ && l_ == that.l_; }
+
+    private:
+      uint64_t h_, l_;
+};
+
 class PTPCamera {
 
     public:
@@ -64,6 +84,9 @@ class PTPCamera {
 	    prop_value_t(const prop_value_t&);
 	    prop_value_t& operator= (const prop_value_t&);
 
+	    bool operator == (const prop_value_t&that) const;
+	    bool operator != (const prop_value_t&that) const { return ! (*this == that); }
+
 	      // Clear the value to a nil.
 	    void clear();
 
@@ -84,6 +107,10 @@ class PTPCamera {
 	    uint16_t get_uint16() const;
 	    int32_t  get_int32 () const;
 	    uint32_t get_uint32() const;
+	    int64_t  get_int64 () const;
+	    uint64_t get_uint64() const;
+	    PTP_INT128_t  get_int128 () const;
+	    PTP_UINT128_t get_uint128() const;
 	    QString  get_string() const;
 
 	  private:
@@ -95,6 +122,10 @@ class PTPCamera {
 		  uint16_t val_uint16_;
 		  int32_t val_int32_;
 		  uint32_t val_uint32_;
+		  int64_t val_int64_;
+		  uint64_t val_uint64_;
+		  PTP_INT128_t val_int128_;
+		  PTP_UINT128_t val_uint128_;
 		  QString* val_string_;
 	    };
 

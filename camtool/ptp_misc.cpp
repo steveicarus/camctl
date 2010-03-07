@@ -405,6 +405,7 @@ static key_value<key_pair<uint16_t,uint16_t>,string> ptp_standard_property16_val
       { { 0x500e, 0x0005 }, "Program Creative" },
       { { 0x500e, 0x0006 }, "Program Action" },
       { { 0x500e, 0x0007 }, "Portait" }
+	// ExposureIndex (0x500f) is handled like a range
 };
 
 static key_value<key_pair<uint16_t,uint16_t>,string> ptp_nikon_property16_values[] = {
@@ -426,6 +427,12 @@ static key_value<key_pair<uint16_t,uint16_t>,string> ptp_nikon_property16_values
       { { 0x500e, 0x8014 }, "NIKON Sports" },
       { { 0x500e, 0x8015 }, "NIKON Night portrait" },
       { { 0x500e, 0x8016 }, "NIKON Night Landscape" }
+};
+
+static key_value<key_pair<uint16_t,uint32_t>,string> ptp_standard_property32_values[] = {
+};
+
+static key_value<key_pair<uint16_t,uint32_t>,string> ptp_nikon_property32_values[] = {
 };
 
 string ptp_opcode_string(uint16_t code, uint32_t extension_id)
@@ -538,7 +545,7 @@ string ptp_property_uint8_string(uint16_t code, uint8_t val, uint32_t vend)
       return tmp.str();
 }
 
-string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
+string ptp_property_uint16_string(uint16_t code, uint16_t val, uint32_t vend)
 {
       key_pair<uint16_t,uint16_t> use_key;
       use_key.key1 = code;
@@ -546,6 +553,19 @@ string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
 
       key_value<key_pair<uint16_t,uint16_t>,string>*table = 0;
       size_t table_size = 0;
+
+      if (code == 0x5007) { // FNumber
+	    ostringstream tmp;
+	    tmp << "f/" << (val/100.0);
+	    return tmp.str();
+      }
+
+      if (code == 0x500f) { // ExposureIndex
+	    if (val == 0xffff) return "Auto ISO";
+	    ostringstream tmp;
+	    tmp << "ISO " << val;
+	    return tmp.str();
+      }
 
       if ((val & 0x8000) == 0) {
 	    table = ptp_standard_property16_values;
@@ -566,6 +586,64 @@ string ptp_property_value16_string(uint16_t code, uint16_t val, uint32_t vend)
 	  case 0x0a: // Nikon
 	    table = ptp_nikon_property16_values;
 	    table_size = array_count(ptp_nikon_property16_values);
+	    break;
+	  default:
+	    table = 0;
+	    table_size = 0;
+	    break;
+      }
+
+      size_t key = table? binary_search(use_key, table, table_size) : 0;
+
+      if (key < table_size) {
+	    return table[key].value;
+
+      } else {
+	    ostringstream tmp;
+	    tmp << "Vendor[" << hex << vend << "]-" << hex << val << ends;
+	    return tmp.str();
+      }
+}
+
+string ptp_property_uint32_string(uint16_t code, uint32_t val, uint32_t vend)
+{
+      key_pair<uint16_t,uint32_t> use_key;
+      use_key.key1 = code;
+      use_key.key2 = val;
+
+      key_value<key_pair<uint16_t,uint32_t>,string>*table = 0;
+      size_t table_size = 0;
+
+      if (code == 0x500d && val==0xffffffff) { // ExposureTime
+	    return "Bulb";
+      }
+
+      if (code == 0x500d) { // ExposureTime
+	      // Exposure time is defined by PTP to be in units of 0.1ms.
+	    ostringstream tmp;
+	    tmp << (val/10.0) << " ms" << ends;
+	    return tmp.str();
+      }
+
+      if ((code & 0x8000) == 0) {
+	    table = ptp_standard_property32_values;
+	    table_size = array_count(ptp_standard_property32_values);
+	    size_t key = binary_search(use_key, table, table_size);
+
+	    if (key < table_size) {
+		  return table[key].value;
+
+	    } else {
+		  ostringstream tmp;
+		  tmp << "Reserved-" << hex << val << ends;
+		  return tmp.str();
+	    }
+      }
+
+      switch (vend) {
+	  case 0x0a: // Nikon
+	    table = ptp_nikon_property32_values;
+	    table_size = array_count(ptp_nikon_property32_values);
 	    break;
 	  default:
 	    table = 0;

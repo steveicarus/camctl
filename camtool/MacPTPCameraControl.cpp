@@ -156,6 +156,8 @@ void MacPTPCameraControl::set_property_index_(unsigned prop_code,
 {
       if (use_index < 0)
 	    return;
+      if (table.size() == 0)
+	    return;
       if (use_index >= table.size())
 	    use_index = 0;
 

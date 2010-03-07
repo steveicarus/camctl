@@ -439,7 +439,6 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<labeled_value_t>
       if (info->second.form_flag != 2) // ENUM
 	    return -1;
 
-      int cur_idx = 0; // XXXX
       table.resize(info->second.range.size());
       switch (info->second.type_code) {
 	  case TYPE_STRING:
@@ -460,7 +459,16 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<labeled_value_t>
 	  case TYPE_UINT16:
 	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
 		  uint16_t val = info->second.range[idx].get_uint16();
-		  string tmp = ptp_property_value16_string(prop_code, val,
+		  string tmp = ptp_property_uint16_string(prop_code, val,
+							   ptp_extension_vendor());
+		  table[idx].label = QString(tmp.c_str());
+		  table[idx].value = info->second.range[idx];
+	    }
+	    break;
+	  case TYPE_UINT32:
+	    for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
+		  uint32_t val = info->second.range[idx].get_uint32();
+		  string tmp = ptp_property_uint32_string(prop_code, val,
 							   ptp_extension_vendor());
 		  table[idx].label = QString(tmp.c_str());
 		  table[idx].value = info->second.range[idx];
@@ -471,6 +479,14 @@ int PTPCamera::ptp_get_property_enum(unsigned prop_code, vector<labeled_value_t>
 		  table[idx].value = info->second.range[idx];
 	    }
 	    break;
+      }
+
+      int cur_idx = 0;
+      for (size_t idx = 0 ; idx < table.size() ; idx += 1) {
+	    if (info->second.current == table[idx].value) {
+		  cur_idx = idx;
+		  break;
+	    }
       }
 
       return cur_idx;
@@ -1149,6 +1165,41 @@ void PTPCamera::prop_value_t::copy_(const prop_value_t&that)
       }
 }
 
+bool PTPCamera::prop_value_t::operator == (const PTPCamera::prop_value_t&that) const
+{
+      if (type_code_ != that.type_code_)
+	    return false;
+
+      switch (type_code_) {
+	  case TYPE_NONE:
+	    return true;
+	  case TYPE_INT8:
+	    return get_int8() == that.get_int8();
+	  case TYPE_UINT8:
+	    return get_uint8() == that.get_uint8();
+	  case TYPE_INT16:
+	    return get_int16() == that.get_int16();
+	  case TYPE_UINT16:
+	    return get_uint16() == that.get_uint16();
+	  case TYPE_INT32:
+	    return get_int32() == that.get_int32();
+	  case TYPE_UINT32:
+	    return get_uint32() == that.get_uint32();
+	  case TYPE_INT64:
+	    return get_int64() == that.get_int64();
+	  case TYPE_UINT64:
+	    return get_uint64() == that.get_uint64();
+	  case TYPE_INT128:
+	    return get_int128() == that.get_int128();
+	  case TYPE_UINT128:
+	    return get_uint128() == that.get_uint128();
+	  case TYPE_STRING:
+	    return get_string() == that.get_string();
+      }
+
+      return false;
+}
+
 void PTPCamera::prop_value_t::clear()
 {
       switch (type_code_) {
@@ -1200,6 +1251,30 @@ uint32_t PTPCamera::prop_value_t::get_uint32(void) const
 {
       assert(type_code_ == TYPE_UINT32);
       return val_uint32_;
+}
+
+int64_t PTPCamera::prop_value_t::get_int64(void) const
+{
+      assert(type_code_ == TYPE_INT64);
+      return val_int64_;
+}
+
+uint64_t PTPCamera::prop_value_t::get_uint64(void) const
+{
+      assert(type_code_ == TYPE_UINT64);
+      return val_uint64_;
+}
+
+PTP_INT128_t PTPCamera::prop_value_t::get_int128(void) const
+{
+      assert(type_code_ == TYPE_INT128);
+      return val_int128_;
+}
+
+PTP_UINT128_t PTPCamera::prop_value_t::get_uint128(void) const
+{
+      assert(type_code_ == TYPE_UINT128);
+      return val_uint128_;
 }
 
 QString PTPCamera::prop_value_t::get_string(void) const

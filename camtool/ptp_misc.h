@@ -43,7 +43,9 @@ extern std::string ptp_property_string(uint16_t code, uint32_t vendorid);
  */
 extern std::string ptp_property_uint8_string(uint16_t code, uint8_t value,
 					     uint32_t vendorid);
-extern std::string ptp_property_value16_string(uint16_t code, uint16_t value,
+extern std::string ptp_property_uint16_string(uint16_t code, uint16_t value,
+					       uint32_t vendorid);
+extern std::string ptp_property_uint32_string(uint16_t code, uint32_t value,
 					       uint32_t vendorid);
 
 #endif
