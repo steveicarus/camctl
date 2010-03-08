@@ -22,6 +22,7 @@
 # include  <inttypes.h>
 # include  <vector>
 # include  <map>
+# include  <ostream>
 # include  <QString>
 
 class QTreeWidgetItem;
@@ -292,5 +293,7 @@ class PTPCamera {
       PTPCamera(const PTPCamera&);
       PTPCamera& operator= (const PTPCamera&);
 };
+
+extern std::ostream& operator << (std::ostream&out, const PTPCamera::prop_value_t&val);
 
 #endif

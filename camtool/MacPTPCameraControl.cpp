@@ -140,7 +140,7 @@ int MacPTPCameraControl::get_property_index_(unsigned prop_code,
 
       debug_log << "MacPTPCameraControl::get_property_index_ "
 		<< "prop=" << hex << prop_code << dec
-		<< "count=" << values.size() << endl;
+		<< " count=" << values.size() << endl;
       for (unsigned idx = 0 ; idx < table.size() ; idx += 1) {
 	    values[idx] = table[idx].label;
 	    debug_log << "   " << idx << ": " << values[idx].toStdString() << endl;
@@ -242,7 +242,7 @@ bool MacPTPCameraControl::set_iso_ok()
 
 int MacPTPCameraControl::get_flash_mode_index(vector<QString>&values)
 {
-      return get_property_index_(PROP_FlashMode, iso_, values);
+      return get_property_index_(PROP_FlashMode, flash_mode_, values);
 }
 
 void MacPTPCameraControl::set_flash_mode_index(int use_index)
@@ -258,7 +258,7 @@ bool MacPTPCameraControl::set_flash_mode_ok()
 
 int MacPTPCameraControl::get_focus_mode_index(vector<QString>&values)
 {
-      return get_property_index_(PROP_FocusMode, iso_, values);
+      return get_property_index_(PROP_FocusMode, focus_mode_, values);
 }
 
 void MacPTPCameraControl::set_focus_mode_index(int use_index)
