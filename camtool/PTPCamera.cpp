@@ -713,9 +713,15 @@ void PTPCamera::ptp_set_property_int16_(unsigned prop_code, int16_t val,
       send_buf[0] = (val >> 0) & 0xff;
       send_buf[1] = (val >> 8) & 0xff;
 
+      CameraControl::debug_log << "PTPCamera::ptp_set_property_int16_("
+			       << "prop=0x" << hex << prop_code
+			       << ", val=0x" << hex << val << dec << ")";
+
       params[0] = prop_code;
       result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
 				send_buf, sizeof send_buf, 0, 0);
+
+      CameraControl::debug_log << " --> 0x" << hex << result_code << dec << endl;
 }
 
 void PTPCamera::ptp_set_property_uint16_(unsigned prop_code, uint16_t val,
@@ -727,9 +733,15 @@ void PTPCamera::ptp_set_property_uint16_(unsigned prop_code, uint16_t val,
       send_buf[0] = (val >> 0) & 0xff;
       send_buf[1] = (val >> 8) & 0xff;
 
+      CameraControl::debug_log << "PTPCamera::ptp_set_property_uint16_("
+			       << "prop=0x" << hex << prop_code
+			       << ", val=0x" << hex << val << dec << ")";
+
       params[0] = prop_code;
       result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
 				send_buf, sizeof send_buf, 0, 0);
+
+      CameraControl::debug_log << " --> 0x" << hex << result_code << dec << endl;
 }
 
 void PTPCamera::ptp_set_property_int32_(unsigned prop_code, int32_t val,
@@ -743,9 +755,15 @@ void PTPCamera::ptp_set_property_int32_(unsigned prop_code, int32_t val,
       send_buf[2] = (val >>16) & 0xff;
       send_buf[3] = (val >>24) & 0xff;
 
+      CameraControl::debug_log << "PTPCamera::ptp_set_property_int32_("
+			       << "prop=0x" << hex << prop_code
+			       << ", val=0x" << hex << val << dec << ")";
+
       params[0] = prop_code;
       result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
 				send_buf, sizeof send_buf, 0, 0);
+
+      CameraControl::debug_log << " --> 0x" << hex << result_code << dec << endl;
 }
 
 void PTPCamera::ptp_set_property_uint32_(unsigned prop_code, uint32_t val,
@@ -759,9 +777,15 @@ void PTPCamera::ptp_set_property_uint32_(unsigned prop_code, uint32_t val,
       send_buf[2] = (val >>16) & 0xff;
       send_buf[3] = (val >>24) & 0xff;
 
+      CameraControl::debug_log << "PTPCamera::ptp_set_property_uint32_("
+			       << "prop=0x" << hex << prop_code
+			       << ", val=0x" << hex << val << dec << ")";
+
       params[0] = prop_code;
       result_code = ptp_command(0x1016 /* SetDevicePropValue */, params,
 				send_buf, sizeof send_buf, 0, 0);
+
+      CameraControl::debug_log << " --> 0x" << hex << result_code << dec << endl;
 }
 
 void PTPCamera::ptp_set_property_string_(unsigned prop_code, const QString&val,

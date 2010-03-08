@@ -2,7 +2,7 @@
 #define __CamtoolDebug_H
 
 /*
- * Copyright (c) 2009 Stephen Williams (steve@icarus.com)
+ * Copyright (c) 2009-2010 Stephen Williams (steve@icarus.com)
  *
  *    This source code is free software; you can redistribute it
  *    and/or modify it in source code form under the terms of the GNU
@@ -39,6 +39,7 @@ class CamtoolDebug : public QDialog {
       void debug_ptp_refresh_slot_(void);
       void debug_ptp_get_slot_(void);
       void debug_ptp_set_slot_(void);
+      void debug_ptp_select_value_slot_(int);
       void debug_ptp_describe_slot_(void);
 
     private:
