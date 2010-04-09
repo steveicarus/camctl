@@ -1,6 +1,6 @@
 all: library all_samples 
 
-CFLAGS=-O4  -I. -w
+CFLAGS=-O4  -I. -w -arch i386 -arch ppc
 
 # OpenMP support
 #CFLAGS=-O4  -I. -w -fopenmp
